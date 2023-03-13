@@ -1,18 +1,12 @@
 package de.thb.webbaki.controller;
 
 import de.thb.webbaki.configuration.HelpPathReader;
-import de.thb.webbaki.controller.form.ScenarioFormModel;
 import de.thb.webbaki.controller.form.UserToRoleFormModel;
-import de.thb.webbaki.entity.MasterScenario;
-import de.thb.webbaki.entity.questionnaire.Questionnaire;
-import de.thb.webbaki.entity.snapshot.Report;
-import de.thb.webbaki.entity.snapshot.Snapshot;
+import de.thb.webbaki.entity.Snapshot;
 import de.thb.webbaki.entity.User;
-import de.thb.webbaki.service.MasterScenarioService;
 import de.thb.webbaki.service.RoleService;
 import de.thb.webbaki.service.ScenarioService;
-import de.thb.webbaki.service.snapshot.ReportService;
-import de.thb.webbaki.service.snapshot.SnapshotService;
+import de.thb.webbaki.service.SnapshotService;
 import de.thb.webbaki.service.UserService;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,7 +14,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import javax.validation.Valid;
 import java.io.IOException;
@@ -36,8 +29,6 @@ public class SuperAdminController implements Comparable {
     private final UserService userService;
     private final RoleService roleService;
     private final SnapshotService snapshotService;
-    private final MasterScenarioService masterScenarioService;
-    private final ScenarioService scenarioService;
 
     @Autowired
     HelpPathReader helpPathReader;
@@ -104,20 +95,6 @@ public class SuperAdminController implements Comparable {
         model.addAttribute("snapshot", snapshot);
 
         return "snap/details";
-    }
-
-    @GetMapping("/scenarios")
-    public String showScenarios(Model model){
-        List<MasterScenario> masterScenarios = masterScenarioService.getAllByActiveTrueOrderByPositionInRow();
-        ScenarioFormModel scenarioFormModel = new ScenarioFormModel(masterScenarios);
-        model.addAttribute("form", scenarioFormModel);
-        return "scenarios";
-    }
-
-    @PostMapping("/scenarios")
-    public String changeScenarios(ScenarioFormModel scenarioFormModel){
-        scenarioService.saveAndDeleteScenariosFromForm(scenarioFormModel);
-        return "redirect:/scenarios";
     }
 
     @GetMapping("/adjustHelp")

@@ -1,6 +1,6 @@
-package de.thb.webbaki.repository.snapshot;
+package de.thb.webbaki.repository;
 
-import de.thb.webbaki.entity.snapshot.Snapshot;
+import de.thb.webbaki.entity.Snapshot;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.RepositoryDefinition;
 

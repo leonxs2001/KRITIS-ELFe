@@ -1,6 +1,5 @@
 package de.thb.webbaki.security;
 
-import de.thb.webbaki.entity.Privilege;
 import de.thb.webbaki.entity.Role;
 import de.thb.webbaki.entity.User;
 import de.thb.webbaki.repository.RoleRepository;
@@ -52,21 +51,16 @@ public class MyUserDetailsService implements UserDetailsService {
     }
 
     private Collection<? extends GrantedAuthority> getAuthorities(final Collection<Role> roles) {
-        return getGrantedAuthorities(getPrivileges(roles));
+        return getGrantedAuthorities(getRoleNames(roles));
     }
 
-    private List<String> getPrivileges(Collection<Role> roles) {
+    private List<String> getRoleNames(Collection<Role> roles) {
 
-        List<String> privileges = new ArrayList<>();
-        List<Privilege> collection = new ArrayList<>();
+        List<String> roleNames = new ArrayList<>();
         for (Role role : roles) {
-            privileges.add(role.getName());
-            collection.addAll(role.getPrivileges());
+            roleNames.add(role.getName());
         }
-        for (Privilege item : collection) {
-            privileges.add(item.getName());
-        }
-        return privileges;
+        return roleNames;
     }
 
     private List<GrantedAuthority> getGrantedAuthorities(List<String> privileges) {

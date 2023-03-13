@@ -3,6 +3,7 @@
       layout:decorate="~{layout.html}">
 <head>
     <title>Registrieren</title>
+    <script type="text/javascript" th:src="@{/js/user_registration_script.js}"></script>
 </head>
 <body>
 <div layout:fragment="content">
@@ -35,23 +36,35 @@
                                 <input type="email" name="email" class="form-control"/>
                             </div>
                             <div class="mb-3 col-md-6">
-                                <label>Branche</label>
-                                <select th:id="selectBranch" type="branche" name="branche" class="form-select">
-                                    <option value="none" selected disabled hidden>Branche wählen...</option>
-                                    <optgroup th:each="sector : ${sectorList}" th:label="${sector.getName()}">
-                                        <option th:each="branch : ${sector.getBranches()}"
-                                                th:value="${branch.getName()}"
-                                                th:text="${branch.getName()}"/>
-                                    </optgroup>
+                                <label>Nutzername</label>
+                                <input type="us" name="username" class="form-control"/>
+                            </div>
+                            <div class="mb-3 col-md-6">
+                                <label>Rolle</label>
+                                <select onchange="onRoleChange(this)" class="form-select">
+                                    <option value="land">Land</option>
+                                    <option value="ressort">Ressort</option>
+                                    <option value="beobachter" selected>Beobachter</option>
+                                    <option value="admin">Admin</option>
                                 </select>
                             </div>
                             <div class="mb-3 col-md-6">
-                                <label>Unternehmen</label>
-                                <input type="text" name="company" class="form-control"/>
-                            </div>
-                            <div class="mb-3 col-md-6">
-                                <label>Nutzername</label>
-                                <input type="us" name="username" class="form-control"/>
+                                <div id="land" style="display: none;">
+                                    <label>Landeszugehörigkeit</label>
+                                    <select class="form-select">
+                                        <th:block th:each="federalState: ${federalStates}">
+                                            <option th:text="${federalState.getName()}" th:value="${federalState.getShortcut()}"></option>
+                                        </th:block>
+                                    </select>
+                                </div>
+                                <div id="ressort" style="display: none;">
+                                    <label>Ressortzugehörigkeit</label>
+                                    <select class="form-select">
+                                        <th:block th:each="ressort: ${ressorts}">
+                                            <option th:text="${ressort.getName()}" th:value="${ressort.getShortcut()}"></option>
+                                        </th:block>
+                                    </select>
+                                </div>
                             </div>
                             <div class="mb-3 col-md-6">
                                 <label>Passwort</label>

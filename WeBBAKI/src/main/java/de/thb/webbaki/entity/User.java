@@ -1,7 +1,6 @@
 package de.thb.webbaki.entity;
 
 import de.thb.webbaki.entity.questionnaire.Questionnaire;
-import de.thb.webbaki.entity.snapshot.Report;
 import lombok.*;
 
 import javax.persistence.*;
@@ -48,9 +47,6 @@ public class User {
             inverseJoinColumns = @JoinColumn(
                     name = "role_id", referencedColumnName = "id"))
     private Collection<Role> roles;
-
-    @OneToMany(mappedBy = "user")
-    private List<Report> reports;
 
     @OneToMany(mappedBy = "user")
     private List<Questionnaire> questionnaires;

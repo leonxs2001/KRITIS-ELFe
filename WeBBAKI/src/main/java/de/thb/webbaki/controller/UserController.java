@@ -7,6 +7,8 @@ import de.thb.webbaki.entity.User;
 import de.thb.webbaki.service.Exceptions.EmailNotMatchingException;
 import de.thb.webbaki.service.Exceptions.PasswordNotMatchingException;
 import de.thb.webbaki.service.Exceptions.UserAlreadyExistsException;
+import de.thb.webbaki.service.FederalStateService;
+import de.thb.webbaki.service.RessortService;
 import de.thb.webbaki.service.SectorService;
 import de.thb.webbaki.service.UserService;
 import lombok.AllArgsConstructor;
@@ -36,12 +38,17 @@ public class UserController {
     SectorService sectorService;
     @Autowired
     HelpPathReader helpPathReader;
+    @Autowired
+    FederalStateService federalStateService;
+    @Autowired
+    RessortService ressortService;
 
     @GetMapping("/register/user")
     public String showRegisterForm(Model model) {
         UserRegisterFormModel formModel = new UserRegisterFormModel();
         model.addAttribute("user", formModel);
-        model.addAttribute("sectorList", sectorService.getAllSectors());
+        model.addAttribute("federalStates", federalStateService.getAllFederalStates());
+        model.addAttribute("ressorts", ressortService.getAllRessorts());
         return "register/user_registration";
     }
 

@@ -1,5 +1,6 @@
 package de.thb.webbaki.entity.questionnaire;
 
+import de.thb.webbaki.entity.Snapshot;
 import de.thb.webbaki.entity.User;
 import lombok.*;
 import org.hibernate.Hibernate;
@@ -23,11 +24,11 @@ public class Questionnaire {
     @Setter(AccessLevel.NONE)
     private long id;
 
-    @Column(length = 1000)
-    @Size(max = 1000)
-    private String comment;
-
     private LocalDateTime date;
+
+    @ManyToOne
+    @JoinColumn(name="snapshot_id")
+    private Snapshot snapshot;
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)

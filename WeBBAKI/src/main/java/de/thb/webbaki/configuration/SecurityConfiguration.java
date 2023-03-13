@@ -25,26 +25,6 @@ public class SecurityConfiguration {
     }
 
     @Bean
-    public RoleHierarchy roleHierarchy(){
-        RoleHierarchyImpl roleHierarchy = new RoleHierarchyImpl();
-        String hierarchy = """
-                SUPERADMIN > BUNDESADMIN\s
-                 BUNDESADMIN > SEKTORENADMIN\s
-                 SEKTORENADMIN > BRANCHENADMIN\s
-                 BRANCHENADMIN > GESCHÄFTSSTELLE\s
-                 GESCHÄFTSSTELLE > KRITIS_BETREIBER\s
-                 KRITIS_BETREIBER > DEFAULT_USER""";
-        roleHierarchy.setHierarchy(hierarchy);
-        return roleHierarchy;
-    }
-    @Bean
-    public DefaultWebSecurityExpressionHandler customSecurityExpressionHandler(){
-        DefaultWebSecurityExpressionHandler expressionHandler = new DefaultWebSecurityExpressionHandler();
-        expressionHandler.setRoleHierarchy(roleHierarchy());
-        return expressionHandler;
-    }
-
-    @Bean
     public PasswordEncoder passwordEncoder() {
         return PasswordEncoderFactories.createDelegatingPasswordEncoder();
     }

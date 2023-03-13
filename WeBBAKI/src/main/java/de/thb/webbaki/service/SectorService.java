@@ -13,4 +13,6 @@ public class SectorService {
     private SectorRepository sectorRepository;
 
     public List<Sector> getAllSectors(){return sectorRepository.findAll();}
+    public Sector getSectorByName(String name){return sectorRepository.findByName(name);}
+    public Sector createSector(Sector sector){return sectorRepository.save(sector);}
 }

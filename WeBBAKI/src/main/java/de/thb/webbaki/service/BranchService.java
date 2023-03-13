@@ -15,6 +15,8 @@ public class BranchService {
     public List<Branch> getAllBranches(){return branchRepository.findAll();}
 
     public Branch getBranchByName(String name){
-        return branchRepository.getBranchByName(name);
+        return branchRepository.findByName(name);
     }
+
+    public Branch createBranch(Branch branch){return branchRepository.save(branch);}
 }

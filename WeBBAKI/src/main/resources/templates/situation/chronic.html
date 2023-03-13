@@ -30,7 +30,7 @@
                 <td th:text="${questList[i].date.toLocalDate()}"></td>
                 <td th:text="${questList[i].date.toLocalTime().toString().substring(0,5)}"></td>
                 <td>
-                    <a class="btn btn-outline-primary" th:href="@{/threatmatrix/open/{questID}(questID=${questList[i].id})}">
+                    <a class="btn btn-outline-primary" th:href="@{/templates/situation/open/{questID}(questID=${questList[i].id})}">
                         Details
                     </a>
                     <!-- Button trigger modal -->
@@ -58,7 +58,7 @@
                             </div>
                             <div class="modal-footer">
                                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Abbrechen</button>
-                                <a th:href="@{/threatmatrix/chronic/{questID}(questID=${questList[i].id})}">
+                                <a th:href="@{/templates/situation/chronic/{questID}(questID=${questList[i].id})}">
                                     <button type="button" class="btn btn-outline-danger">Bestätigen</button>
                                 </a>
                             </div>

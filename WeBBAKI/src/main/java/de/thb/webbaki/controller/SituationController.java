@@ -4,7 +4,6 @@ import de.thb.webbaki.controller.form.ThreatMatrixFormModel;
 import de.thb.webbaki.entity.questionnaire.Questionnaire;
 import de.thb.webbaki.entity.User;
 import de.thb.webbaki.service.Exceptions.NotAuthorizedException;
-import de.thb.webbaki.service.MasterScenarioService;
 import de.thb.webbaki.service.questionnaire.QuestionnaireService;
 import de.thb.webbaki.service.ScenarioService;
 import de.thb.webbaki.service.UserService;
@@ -20,33 +19,30 @@ import javax.validation.Valid;
 
 @Controller
 @AllArgsConstructor
-public class ThreatMatrixController {
+public class SituationController {
 
     private final QuestionnaireService questionnaireService;
-    private final MasterScenarioService masterScenarioService;
     private final ScenarioService scenarioService;
     private final UserService userService;
 
 
 
-    @GetMapping("/threatmatrix")
+    @GetMapping("/situation")
     public String showQuestionnaireForm(Authentication authentication) {
         Long newestQuestionnaireId = questionnaireService.getNewestQuestionnaireByUserId(userService.getUserByUsername(authentication.getName()).getId()).getId();
         return "redirect:/threatmatrix/open/" + newestQuestionnaireId;
     }
 
-    @PostMapping("/threatmatrix")
+    @PostMapping("/situation")
     public String submitQuestionnaire(@ModelAttribute("threatmatrix") @Valid ThreatMatrixFormModel questionnaireFormModel,
                                       Authentication authentication) {
         questionnaireService.saveQuestionnaireFromThreatMatrixFormModel(questionnaireFormModel, userService.getUserByUsername(authentication.getName()));
-        return "redirect:/threatmatrix/chronic";
+        return "redirect:/situation/chronic";
     }
 
-    @GetMapping("/threatmatrix/open/{questID}")
+    @GetMapping("/situation/open/{questID}")
     public String showThreatMatrixByID(@PathVariable("questID") long questID, Model model, Authentication authentication) throws NotAuthorizedException{
         if(questionnaireService.existsByIdAndUserId(questID,userService.getUserByUsername(authentication.getName()).getId() )){
-            final var masterScenarioList = masterScenarioService.getAllByActiveTrueOrderByPositionInRow();
-            model.addAttribute("masterScenarioList",masterScenarioList);
 
             Questionnaire quest = questionnaireService.getQuestionnaire(questID);
 
@@ -58,7 +54,7 @@ public class ThreatMatrixController {
 
             model.addAttribute("counter", new Counter());
 
-            return "threatmatrix/create_threatmatrix";
+            return "situation/create_threatmatrix";
         }else{
             throw new NotAuthorizedException("This user could not access this questionnaire.");
         }
@@ -66,14 +62,14 @@ public class ThreatMatrixController {
 
 
     @Transactional
-    @GetMapping(path = "/threatmatrix/chronic/{questID}")
+    @GetMapping(path = "/situation/chronic/{questID}")
     public String deleteQuestionnaireByID(@PathVariable("questID") long questID){
         questionnaireService.deleteQuestionnaireById(questID);
 
-        return "redirect:/threatmatrix/chronic";
+        return "redirect:/situation/chronic";
     }
 
-    @GetMapping("/threatmatrix/chronic")
+    @GetMapping("/situation/chronic")
     public String showQuestChronic(Authentication authentication,Model model) {
 
         if (userService.getUserByUsername(authentication.getName()) != null) {
@@ -82,7 +78,7 @@ public class ThreatMatrixController {
             model.addAttribute("questList", questList);
 
         }
-        return "threatmatrix/chronic";
+        return "situation/chronic";
     }
 
 

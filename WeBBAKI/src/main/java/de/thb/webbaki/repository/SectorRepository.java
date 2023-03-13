@@ -9,6 +9,7 @@ import java.util.List;
 @RepositoryDefinition(domainClass = Sector.class, idClass = Long.class)
 public interface SectorRepository extends CrudRepository<Sector, Long> {
     Sector findByBranches_name(String name);
+    Sector findByName(String name);
     @Override
     List<Sector> findAll();
 }

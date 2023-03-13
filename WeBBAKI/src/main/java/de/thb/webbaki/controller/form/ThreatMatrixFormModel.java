@@ -26,7 +26,6 @@ public class ThreatMatrixFormModel {
     public ThreatMatrixFormModel(Questionnaire questionnaire){
 
         scenarioIdToIndex = new HashMap<>();
-        comment = questionnaire.getComment();
         userScenarios = new ArrayList<>();
 
         userScenarios = questionnaire.getUserScenarios();

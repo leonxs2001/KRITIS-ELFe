@@ -87,6 +87,10 @@ public class UserService {
         return userRepository.existsByIdAndRoles_Name(id, roleName);
     }
 
+    public User createUser(User user){
+        return userRepository.save(user);
+    }
+
     /**
      * @param user is used to create new user -> forwarded to registerNewUser
      * @return newly created token
@@ -112,20 +116,10 @@ public class UserService {
         } else {
 
             final User user = new User();
-            Branch userBranch = branchService.getBranchByName(form.getBranche());
             user.setLastName(form.getLastname());
             user.setFirstName(form.getFirstname());
-            user.setBranch(userBranch);
-            user.setCompany(form.getCompany());
             user.setPassword(passwordEncoder.encode(form.getPassword()));
             user.setEmail(form.getEmail());
-
-            //set the role to "Geschäftsstelle" if this Branche is choosen
-            if (userBranch.getName().equals("Geschäftsstelle")) {
-                user.setRoles(Arrays.asList(roleRepository.findByName("ROLE_GESCHÄFTSSTELLE")));
-            } else {
-                user.setRoles(Arrays.asList(roleRepository.findByName("ROLE_KRITIS_BETREIBER")));
-            }
             user.setUsername(form.getUsername());
             user.setEnabled(false);
 
@@ -135,11 +129,6 @@ public class UserService {
             String userLink = "https://webbaki.th-brandenburg.de/confirmation/confirmByUser?token=" + token;
 
             userRepository.save(user);
-
-            //create questionnaire if user is kritis_betreiber
-            if(!userBranch.getName().equals("Geschäftsstelle")){
-                questionnaireService.createQuestionnaireForUser(user);
-            }
 
             /*Outsourcing Mail to thread for speed purposes*/
             new Thread(() -> {

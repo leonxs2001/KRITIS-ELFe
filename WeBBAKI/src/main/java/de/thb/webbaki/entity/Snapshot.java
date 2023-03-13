@@ -1,5 +1,6 @@
-package de.thb.webbaki.entity.snapshot;
+package de.thb.webbaki.entity;
 
+import de.thb.webbaki.entity.questionnaire.Questionnaire;
 import lombok.*;
 
 import javax.persistence.*;
@@ -25,7 +26,7 @@ public class Snapshot {
     private LocalDateTime date;
 
     @OneToMany(mappedBy = "snapshot")
-    private List<Report> reports;
+    private List<Questionnaire> questionnaires;
 
     public String getDateAsString(){
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");

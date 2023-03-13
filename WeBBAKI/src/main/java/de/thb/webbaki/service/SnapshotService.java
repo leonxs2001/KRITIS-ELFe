@@ -1,7 +1,7 @@
-package de.thb.webbaki.service.snapshot;
+package de.thb.webbaki.service;
 
-import de.thb.webbaki.entity.snapshot.Snapshot;
-import de.thb.webbaki.repository.snapshot.SnapshotRepository;
+import de.thb.webbaki.entity.Snapshot;
+import de.thb.webbaki.repository.SnapshotRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -16,25 +16,6 @@ public class SnapshotService {
 
     @Autowired
     private SnapshotRepository snapshotRepository;
-    @Autowired
-    private ReportService reportService;
-
-    /**
-     * Checks every 3th month on day 1, 5 and 10 in hour 0 and 12
-     * if there already is the right quarter Snapshot. If not
-     * it creates the right one.
-     */
-    @Scheduled(cron = "0 0 0,12 1,5,10,15 1/3 *", zone="CET")
-    @Transactional
-    public void createSnapshotBySchedule(){
-        LocalDate today = LocalDate.now();
-        String snapshotName = today.getYear() + " Quartal " + (int)((today.getMonthValue() / 4) + 1);
-        if(!ExistsByName(snapshotName)){
-            Snapshot snapshot = new Snapshot();
-            snapshot.setName(snapshotName);
-            createSnap(snapshot);
-        }
-    }
 
     public List<Snapshot> getAllSnapshots(){return snapshotRepository.findAll();}
 
@@ -51,6 +32,5 @@ public class SnapshotService {
         // Perist Snapshot
         snap.setDate(LocalDateTime.now());
         snapshotRepository.save(snap);
-        reportService.createReports(snap);
     }
 }

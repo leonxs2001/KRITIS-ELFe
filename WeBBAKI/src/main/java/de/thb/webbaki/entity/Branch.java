@@ -34,6 +34,10 @@ public class Branch {
         return Objects.equals(name, branch.name);
     }
 
+    public Branch(String name, Sector sector){
+        this.name = name;
+        this.sector = sector;
+    }
     @Override
     public int hashCode() {
         return Objects.hash(name);

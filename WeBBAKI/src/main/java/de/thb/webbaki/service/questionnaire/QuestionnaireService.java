@@ -114,7 +114,6 @@ public class QuestionnaireService {
         Questionnaire questionnaire = new Questionnaire();
         questionnaire.setDate(LocalDateTime.now());
         questionnaire.setUser(user);
-        questionnaire.setComment(form.getComment());
         questionnaireRepository.save(questionnaire);
 
         List<UserScenario> userScenarios = form.getUserScenarios();

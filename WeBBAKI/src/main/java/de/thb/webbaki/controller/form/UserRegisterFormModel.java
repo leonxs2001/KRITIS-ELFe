@@ -26,13 +26,6 @@ public class UserRegisterFormModel {
     @NotEmpty(message = "Vorname darf nicht leer sein")
     private String firstname;
 
-    @NotNull(message = "Branche darf nicht leer sein")
-    private String branche;
-
-    @NotNull(message = "company not null")
-    @NotEmpty(message = "Firma darf nicht leer sein")
-    private String company;
-
     @NotNull(message = "password not null")
     @NotEmpty(message = "Passwort darf nicht leer sein")
     private String password;

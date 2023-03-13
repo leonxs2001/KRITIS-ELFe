@@ -11,8 +11,8 @@
         <div class="alert alert-primary" role="alert" th:text="${success}" th:if="${success}"></div>
 
         <a class="btn btn-bd-primary" th:href="@{/account/user_details}">Nutzerdaten</a>
-        <a class="btn btn-bd-primary" th:href="@{threatmatrix}">aktuelle Bedrohungsmatrix</a>
-        <a class="btn btn-bd-primary" th:href="@{/threatmatrix/chronic}">Verlauf Bedrohungsmatrix</a>
+        <a class="btn btn-bd-primary" th:href="@{../situation}">aktuelle Bedrohungsmatrix</a>
+        <a class="btn btn-bd-primary" th:href="@{/templates/situation/chronic}">Verlauf Bedrohungsmatrix</a>
     </div>
 </div>
 </body>

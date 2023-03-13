@@ -1,8 +1,6 @@
 package de.thb.webbaki.service;
 
 
-import de.thb.webbaki.controller.form.ScenarioFormModel;
-import de.thb.webbaki.entity.MasterScenario;
 import de.thb.webbaki.entity.Scenario;
 import de.thb.webbaki.repository.ScenarioRepository;
 import lombok.AllArgsConstructor;
@@ -17,8 +15,6 @@ import java.util.List;
 @AllArgsConstructor
 public class ScenarioService {
     private final ScenarioRepository scenarioRepository;
-    @Autowired
-    private MasterScenarioService masterScenarioService;
 
     public List<Scenario> getAllScenarios(){return (List<Scenario>) scenarioRepository.findAll();}
 
@@ -33,7 +29,7 @@ public class ScenarioService {
      * -1 as id means it is a new element
      * 0 means there was a deleted one
      */
-    public void saveAndDeleteScenariosFromForm(ScenarioFormModel form){
+    /*public void saveAndDeleteScenariosFromForm(ScenarioFormModel form){
         //list of all active masterScenarios
         List<MasterScenario> masterScenarioUpdateList = masterScenarioService.getAllByActiveTrue();
         //list of all active scenarios
@@ -133,5 +129,5 @@ public class ScenarioService {
         scenarioRepository.saveAll(scenarioUpdateList);
 
 
-    }
+    }*/
 }

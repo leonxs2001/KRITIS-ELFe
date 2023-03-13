@@ -24,6 +24,8 @@ public class RoleService {
 
     public Role getRoleByName(String rolename){return roleRepository.findByName(rolename);}
 
+    public Role createRole(Role role){return roleRepository.save(role);}
+
     public Collection<Role> getRolesByUser(String email) {
         User user = userRepository.findByEmail(email);
 

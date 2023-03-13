@@ -26,10 +26,6 @@ public class Scenario {
     @Size(max = 1024)
     private String description;
 
-    @ManyToOne
-    @JoinColumn(name = "master_scenario_id", nullable = false)
-    private MasterScenario masterScenario;
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
