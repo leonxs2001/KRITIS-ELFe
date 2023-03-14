@@ -11,7 +11,7 @@
         <div class="row">
             <div class="col-md-6 offset-md-3">
                 <div class="signup-form">
-                    <form th:object="${user}" th:action="@{/register/user}" method="post"
+                    <form th:object="${form}" th:action="@{/register/user}" method="post"
                           class="mt-5 border p-4 bg-light shadow">
                         <div th:if="${#fields.hasAnyErrors()}" class="alert alert-danger alert-dismissible">
                             <ul>
@@ -25,54 +25,52 @@
                         <div class="row">
                             <div class="mb-3 col-md-6">
                                 <label>Vorname</label>
-                                <input type="text" name="firstname" class="form-control"/>
+                                <input type="text" th:field="*{firstname}" class="form-control"/>
                             </div>
                             <div class="mb-3 col-md-6">
                                 <label>Nachname</label>
-                                <input type="text" name="lastname" class="form-control"/>
+                                <input type="text" th:field="*{lastname}" class="form-control"/>
                             </div>
                             <div class="mb-3 col-md-6">
                                 <label>Email</label>
-                                <input type="email" name="email" class="form-control"/>
+                                <input type="email" th:field="*{email}" class="form-control"/>
                             </div>
                             <div class="mb-3 col-md-6">
                                 <label>Nutzername</label>
-                                <input type="us" name="username" class="form-control"/>
+                                <input type="text" th:field="*{username}" class="form-control"/>
                             </div>
                             <div class="mb-3 col-md-6">
                                 <label>Rolle</label>
-                                <select onchange="onRoleChange(this)" class="form-select">
-                                    <option value="land">Land</option>
-                                    <option value="ressort">Ressort</option>
-                                    <option value="beobachter" selected>Beobachter</option>
-                                    <option value="admin">Admin</option>
+                                <select onchange="onRoleChange(this)" th:field="*{role}" class="form-select">
+
+                                    <option th:each="role: ${roles}" th:attr="data-role=${role.name}" th:value="${role.id}" th:text="${role}"></option>
                                 </select>
                             </div>
                             <div class="mb-3 col-md-6">
                                 <div id="land" style="display: none;">
                                     <label>Landeszugehörigkeit</label>
-                                    <select class="form-select">
+                                    <select th:field="*{federalState}" class="form-select">
                                         <th:block th:each="federalState: ${federalStates}">
-                                            <option th:text="${federalState.getName()}" th:value="${federalState.getShortcut()}"></option>
+                                            <option th:text="${federalState.getName()}" th:value="${federalState.id}"></option>
                                         </th:block>
                                     </select>
                                 </div>
                                 <div id="ressort" style="display: none;">
                                     <label>Ressortzugehörigkeit</label>
-                                    <select class="form-select">
+                                    <select th:field="*{ressort}" class="form-select">
                                         <th:block th:each="ressort: ${ressorts}">
-                                            <option th:text="${ressort.getName()}" th:value="${ressort.getShortcut()}"></option>
+                                            <option th:text="${ressort.getName()}" th:value="${ressort.id}"></option>
                                         </th:block>
                                     </select>
                                 </div>
                             </div>
                             <div class="mb-3 col-md-6">
                                 <label>Passwort</label>
-                                <input type="password" name="password" class="form-control" minlength="12"/>
+                                <input th:field="*{password}" type="password"class="form-control" minlength="12"/>
                             </div>
                             <div class="mb-3 col-md-6">
                                 <label>Passwort bestätigen</label>
-                                <input type="password" name="confirmPassword" class="form-control" minlength="12"/>
+                                <input type="password" th:field="*{confirmPassword}" class="form-control" minlength="12"/>
                             </div>
                             <div class="form-check">
                                 <input class="form-check-input" type="checkbox" value="" id="flexCheckDefault" required>

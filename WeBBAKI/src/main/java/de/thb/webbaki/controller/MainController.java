@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import javax.validation.Valid;
+import java.util.List;
 
 @Controller
 public class MainController {
@@ -27,6 +28,7 @@ public class MainController {
 
     @GetMapping("/")
     public String home() {
+        List<User> user = userService.getAllUsers();
         return "home";
     }
 

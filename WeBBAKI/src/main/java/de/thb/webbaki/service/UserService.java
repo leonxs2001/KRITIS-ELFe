@@ -4,7 +4,6 @@ import de.thb.webbaki.controller.form.ChangeCredentialsForm;
 import de.thb.webbaki.controller.form.UserFormModel;
 import de.thb.webbaki.controller.form.UserRegisterFormModel;
 import de.thb.webbaki.controller.form.UserToRoleFormModel;
-import de.thb.webbaki.entity.Branch;
 import de.thb.webbaki.entity.Role;
 import de.thb.webbaki.entity.User;
 import de.thb.webbaki.mail.EmailSender;
@@ -59,32 +58,16 @@ public class UserService {
         return userRepository.findByUsername(username);
     }
 
-    public List<User> getUsersByBranch(String branche) {
-        return userRepository.findAllByBranch_Name(branche);
-    }
-
-    public List<User> getUsersBySectorName(String sector) {
-        return userRepository.findAllByBranch_Sector_Name(sector);
-    }
-
     public Boolean usernameExists(String username) {
         return userRepository.findByUsername(username) != null;
-    }
-
-    public List<User> getUserByAdminrole() {
-        return userRepository.findByRoles_Name("ROLE_SUPERADMIN");
     }
 
     public User saveUser(User user) {
         return userRepository.save(user);
     }
 
-    public List<User> getUserByOfficeRole() {
-        return userRepository.findByRoles_Name("ROLE_GESCHÄFTSSTELLE");
-    }
-
-    public boolean existsUserByIdAndRoleName(long id, String roleName) {
-        return userRepository.existsByIdAndRoles_Name(id, roleName);
+    public List<User> getUserByAdminRole() {
+        return userRepository.findByRoles_Name("ROLE_BBK_ADMIN");
     }
 
     public User createUser(User user){
@@ -115,13 +98,20 @@ public class UserService {
             throw new UserAlreadyExistsException("Es existiert bereits ein Account mit folgender Email-Adresse: " + form.getEmail());
         } else {
 
-            final User user = new User();
-            user.setLastName(form.getLastname());
-            user.setFirstName(form.getFirstname());
-            user.setPassword(passwordEncoder.encode(form.getPassword()));
-            user.setEmail(form.getEmail());
-            user.setUsername(form.getUsername());
-            user.setEnabled(false);
+            User user = User.builder().
+                    lastName(form.getLastname()).
+                    firstName(form.getFirstname()).
+                    username(form.getUsername()).
+                    email(form.getEmail()).
+                    enabled(false).
+                    password(passwordEncoder.encode(form.getPassword())).
+                    roles(Collections.singletonList(form.getRole())).build();
+
+            if(form.getRole().getName() == "ROLE_LAND"){
+                user.setFederalState(form.getFederalState());
+            }else if(form.getRole().getName() == "ROLE_RESSORT"){
+                user.setRessort(form.getRessort());
+            }
 
             String token = createToken(user); // To create the token of the user
 
@@ -146,7 +136,8 @@ public class UserService {
      * @throws IllegalStateException
      */
     @Transactional
-    public String confirmToken(String token) throws IllegalStateException {
+    public void confirmTokenByAdmin(String token) throws IllegalStateException {
+
         ConfirmationToken confirmationToken = confirmationTokenService.getConfirmationToken(token);
         User user = confirmationToken.getUser();
 
@@ -154,29 +145,18 @@ public class UserService {
         if (expiredAt.isBefore(LocalDateTime.now())) {
             throw new IllegalStateException("token expired");
         } else {
-            confirmationTokenService.setConfirmedAt(token);
-            confirmAdmin(token);
+            confirmationToken.setConfirmedAt(LocalDateTime.now());
+            confirmationToken.setAdminConfirmation(true);
+            confirmationTokenService.saveConfirmationToken(confirmationToken);
         }
-        enableUser(user.getUsername(), token);
+        if (confirmationToken.getUserConfirmation()) {
+            user.setEnabled(true);
+            userRepository.save(user);
+        }
+        new Thread(() -> {
+            emailSender.send(user.getEmail(), UserEnabledNotification.finalEnabledConfirmation(user.getFirstName(), user.getLastName()));
+        }).start();
 
-        emailSender.send(user.getEmail(), UserEnabledNotification.finalEnabledConfirmation(user.getFirstName(), user.getLastName()));
-
-        return "confirmation/confirm";
-    }
-
-    /**
-     * Using USERDETAILS -> Enabling User in Spring security
-     * User is enabled if user_confirmation && admin_confirmation == TRUE
-     *
-     * @param username to get the user
-     * @param token    to get the according token
-     * @return value TRUE or FALSE based on INTEGER value (0 = false, 1 = true)
-     */
-    public int enableUser(String username, String token) {
-
-        if (confirmationTokenService.getConfirmationToken(token).accessGranted(token)) {
-            return userRepository.enableUser(username);
-        } else return -1;
     }
 
     /**
@@ -190,23 +170,12 @@ public class UserService {
     }
 
     /**
-     * Setting admin_confirmation TRUE or False
-     *
-     * @param token to get matching ConfirmationToken
-     * @return value TRUE or FALSE based on bit value (0 = false, 1 = true)
-     */
-    public int adminConfirmation(String token) {
-        return confirmationTokenService.setConfirmedByAdmin(token);
-    }
-
-    /**
      * Setting user_confirmation TRUE or False and getting HTML Page with confirmation Details
      * using method public int userConfirmation(String token)
      *
      * @param token to get matching ConfirmationToken
-     * @return value TRUE or FALSE based on bit value (0 = false, 1 = true)
      */
-    public String confirmUser(String token) {
+    public void confirmUser(String token) {
         ConfirmationToken confirmationToken = confirmationTokenService.getConfirmationToken(token);
         LocalDateTime expiredAt = confirmationToken.getExpiresAt();
         if (expiredAt.isBefore(LocalDateTime.now())) {
@@ -225,31 +194,20 @@ public class UserService {
 
                     emailSender.send(user.getEmail(), UserNotificationAfterUserConfirmation.mailAfterUserConfirm(user.getFirstName(), user.getLastName()));
 
-                    for (User officeAdmin : getUserByOfficeRole()) {
+                    for (User adminUser : getUserByAdminRole()) {
                         //only send it to enabled users
-                        if(officeAdmin.isEnabled()) {
-                            emailSender.send(officeAdmin.getEmail(), AdminRegisterNotification.buildAdminEmail(officeAdmin.getFirstName(), adminLink,
+                        if(adminUser.isEnabled()) {
+                            emailSender.send(adminUser.getEmail(), AdminRegisterNotification.buildAdminEmail(adminUser.getFirstName(), adminLink,
                                     user.getFirstName(), user.getLastName(),
-                                    user.getEmail(), user.getBranch().getName(), user.getCompany()));
+                                    user.getEmail(), user.getRoles()));
                         }
                     }
                 }).start();
             }
         }
-        return "confirmation/confirmedByUser";
     }
 
-    /**
-     * Setting admin_confirmation TRUE or False and getting HTML Page with confirmation Details
-     * using method public int adminConfirmation(String token)
-     *
-     * @param token to get matching ConfirmationToken
-     * @return value TRUE or FALSE based on bit value (0 = false, 1 = true)
-     */
-    public String confirmAdmin(String token) {
-        adminConfirmation(token);
-        return "confirmation/confirm";
-    }
+
 
     public void setCurrentLogin(User u) {
         u.setLastLogin(LocalDateTime.now());
@@ -284,14 +242,14 @@ public class UserService {
 
                     /*Outsourcing Mail to thread for speed purposes*/
                     new Thread(() -> {
-                        for (User superAdmin : getUserByAdminrole()) {
+                        /*for (User superAdmin : getUserByAdminrole()) {
                             //only send it to enabled users
                             if(superAdmin.isEnabled()) {
                                 emailSender.send(superAdmin.getEmail(), AdminAddRoleNotification.changeRole(superAdmin.getFirstName(),
                                         superAdmin.getLastName(),
                                         role, user.getUsername()));
                             }
-                        }
+                        }*/
                         emailSender.send(user.getEmail(), UserAddRoleNotification.changeRoleMail(user.getFirstName(),
                                 user.getLastName(),
                                 role));
@@ -309,7 +267,7 @@ public class UserService {
                             user.getLastName(),
                             roleDel));
 
-                    for (User superAdmin : getUserByAdminrole()) {
+                    /*for (User superAdmin : getUserByAdminrole()) {
                         //only send it to enabled users
                         if(superAdmin.isEnabled()) {
                             emailSender.send(superAdmin.getEmail(), AdminRemoveRoleNotification.removeRole(superAdmin.getFirstName(),
@@ -317,7 +275,7 @@ public class UserService {
                                     roleDel,
                                     user.getUsername()));
                         }
-                    }
+                    }*/
                 }).start();
             }
 
@@ -348,7 +306,7 @@ public class UserService {
 
                     emailSender.send(users.get(i).getEmail(), UserChangeEnabledStatusNotification.changeBrancheMail(users.get(i).getFirstName(), users.get(i).getLastName()));
 
-                    for (User officeAdmin : getUserByOfficeRole()) {
+                    for (User officeAdmin : getUserByAdminRole()) {
                         //only send it to enabled users
                         if(officeAdmin.isEnabled()) {
                             emailSender.send(officeAdmin.getEmail(), AdminDeactivateUserSubmit.changeEnabledStatus(officeAdmin.getFirstName(),
@@ -360,49 +318,6 @@ public class UserService {
                 }
             }
         }).start();
-    }
-
-    /**
-     * Change Branche of User
-     *
-     * @param form to get Branche
-     */
-    public void changeBranch(UserFormModel form) {
-
-        for (int i = 0; i < form.getUsers().size(); i++) {
-
-            User user = getUserByUsername(form.getUsers().get(i).getUsername());
-
-            if (user.getBranch().getName().equals("GESCHÄFTSSTELLE")) {
-                System.err.println("Die Branche Geschäftsstelle kann nicht verändert werden.");
-            }
-
-            if (!user.getBranch().getName().equals(form.getBranchesAsString().get(i)) && !user.getBranch().getName().equals("GESCHÄFTSSTELLE")) {
-                //only the branchname was changed!!! not the id. SO we have to get the new one
-                user.setBranch(branchService.getBranchByName(form.getBranchesAsString().get(i)));
-                userRepository.save(user);
-
-                /*
-                 * Outsourcing Email sending cause of speed
-                 */
-                new Thread(() -> {
-                    emailSender.send(user.getEmail(), UserChangeBrancheNotification.changeBrancheMail(user.getFirstName(),
-                            user.getLastName(),
-                            user.getBranch().getName()));
-
-                    for (User officeAdmin : getUserByOfficeRole()) {
-                        //only send it to enabled users
-                        if(officeAdmin.isEnabled()) {
-                            emailSender.send(officeAdmin.getEmail(), AdminChangeBrancheSubmit.changeBrancheMail(officeAdmin.getFirstName(),
-                                    officeAdmin.getLastName(),
-                                    user.getBranch().getName(),
-                                    user.getUsername()));
-                        }
-                    }
-                }).start();
-
-            }
-        }
     }
 
     /**

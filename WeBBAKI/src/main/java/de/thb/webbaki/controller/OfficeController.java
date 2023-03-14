@@ -33,7 +33,7 @@ public class OfficeController {
         List<String> branchesAsString = new LinkedList<>();
 
         for(User user : users){
-            branchesAsString.add(user.getBranch().getName());
+            //branchesAsString.add(user.getBranch().getName());
         }
 
         UserFormModel form = new UserFormModel();
@@ -52,7 +52,7 @@ public class OfficeController {
         System.out.println(form.getUsers());
 
         userService.changeEnabledStatus(form);
-        userService.changeBranch(form);
+        //userService.changeBranch(form);
 
         return "redirect:office";
     }

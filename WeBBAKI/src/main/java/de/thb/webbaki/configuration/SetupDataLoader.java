@@ -53,8 +53,8 @@ public class SetupDataLoader implements
         Role land = createRoleIfNotFound("ROLE_LAND", "Länder Repräsentant");
         Role ressort = createRoleIfNotFound("ROLE_RESSORT", "Ressort Repräsentant");
 
-        createUserIfNotFound("admin", "leonschoenberg@gmx.de", "admin1234", bbkAdmin);
         createUserIfNotFound("viewer", "leonschoenberg@gmx.de", "viewer1234", bbkViewer);
+        createUserIfNotFound("admin", "leonschoenberg@gmx.de", "admin1234", bbkAdmin);
         createUserIfNotFound("land", "leonschoenberg@gmx.de", "land1234", land);
         createUserIfNotFound("ressort", "leonschoenberg@gmx.de", "ressort1234", ressort);
 

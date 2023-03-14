@@ -1,9 +1,14 @@
 package de.thb.webbaki.mail.Templates.AdminNotifications;
 
+import de.thb.webbaki.entity.Role;
+
+import java.util.Collection;
+import java.util.List;
+
 public class AdminRegisterNotification {
 
     public static String buildAdminEmail(String name, String link, String userFirstname, String userLastname,
-                                   String userEmail, String userBranche, String userCompany) {
+                                         String userEmail, Collection<Role> roles) {
         return "<!DOCTYPE html>\n" +
                 "<html lang=\"de\" dir=\"ltr\">\n" +
                 "  <head>\n" +
@@ -71,24 +76,18 @@ public class AdminRegisterNotification {
                 "            <td>" + userLastname + "</td>\n" +
                 "          </tr>\n" +
                 "          <tr>\n" +
-                "            <td>Firma</td>\n" +
-                "            <td>" + userCompany + "</td>\n" +
-                "          </tr>\n" +
-                "          <tr>\n" +
                 "            <td>Email</td>\n" +
                 "            <td>" + userEmail + "</td>\n" +
                 "          </tr>\n" +
                 "          <tr>\n" +
-                "            <td>Branche</td>\n" +
-                "            <td>" + userBranche + "</td>\n" +
+                "            <td>Rollen</td>\n" +
+                "            <td>" + roles + "</td>\n" +
                 "          </tr>\n" +
                 "      </table>\n" +
                 "    </div>\n" +
-                "    <p>Der Account kann unter folgendem Link aktiviert oder abgelehnt werden:</p>\n" +
+                "    <p>Der Account kann unter folgendem Link aktiviert werden:</p>\n" +
                 "      <p>\n" +
                 "        <a href=" + link + ">Nutzer verifizieren</a>\n" +
-                "        <span></span>\n" +
-                "        <a href=\"http://localhost:8080/confirmation/userDenied\">Nutzer ablehnen</a>\n" +
                 "      </p>\n" +
                 "    <p>Der Link bleibt 3 Tage gültig.</p>\n" +
                 "  </body>\n" +

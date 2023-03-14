@@ -4,18 +4,13 @@ import de.thb.webbaki.configuration.HelpPathReader;
 import de.thb.webbaki.controller.form.ChangeCredentialsForm;
 import de.thb.webbaki.controller.form.UserRegisterFormModel;
 import de.thb.webbaki.entity.User;
+import de.thb.webbaki.service.*;
 import de.thb.webbaki.service.Exceptions.EmailNotMatchingException;
 import de.thb.webbaki.service.Exceptions.PasswordNotMatchingException;
 import de.thb.webbaki.service.Exceptions.UserAlreadyExistsException;
-import de.thb.webbaki.service.FederalStateService;
-import de.thb.webbaki.service.RessortService;
-import de.thb.webbaki.service.SectorService;
-import de.thb.webbaki.service.UserService;
 import lombok.AllArgsConstructor;
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.ClassPathResource;
-import org.springframework.core.io.Resource;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
@@ -27,7 +22,6 @@ import javax.validation.Valid;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.security.Principal;
 
 @Controller
@@ -42,13 +36,16 @@ public class UserController {
     FederalStateService federalStateService;
     @Autowired
     RessortService ressortService;
+    @Autowired
+    RoleService roleService;
 
     @GetMapping("/register/user")
     public String showRegisterForm(Model model) {
         UserRegisterFormModel formModel = new UserRegisterFormModel();
-        model.addAttribute("user", formModel);
+        model.addAttribute("form", formModel);
         model.addAttribute("federalStates", federalStateService.getAllFederalStates());
         model.addAttribute("ressorts", ressortService.getAllRessorts());
+        model.addAttribute("roles", roleService.getAllRoles());
         return "register/user_registration";
     }
 
@@ -57,17 +54,11 @@ public class UserController {
             @ModelAttribute("user") @Valid UserRegisterFormModel formModel, BindingResult result,
             Model model) {
 
-        if (result.hasErrors()) {
-            model.addAttribute("sectorList", sectorService.getAllSectors());
-            return "register/user_registration";
-        }
-
         try {
             userService.registerNewUser(formModel);
 
         } catch (UserAlreadyExistsException uaeEx) {
             model.addAttribute("usernameError", "Es existiert bereits ein Account mit diesem Nutzernamen.");
-            model.addAttribute("sectorList", sectorService.getAllSectors());
             return "register/user_registration";
         }
 
@@ -87,13 +78,14 @@ public class UserController {
 
     @GetMapping(path = "/confirmation/confirmByUser")
     public String userConfirmation(@RequestParam("token") String token) {
-        return userService.confirmUser(token);
+        userService.confirmUser(token);
+        return "confirmation/confirmedByUser";
     }
 
     @GetMapping(path = "/confirmation/confirm")
     public String confirm(@RequestParam("token") String token) {
-        userService.confirmAdmin(token);
-        return userService.confirmToken(token);
+        userService.confirmTokenByAdmin(token);
+        return "confirmation/confirm";
     }
 
     @GetMapping(path = "/account/changeCredentials")

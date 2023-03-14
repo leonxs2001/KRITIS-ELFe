@@ -1,6 +1,7 @@
 package de.thb.webbaki.entity;
 
 import de.thb.webbaki.entity.questionnaire.Questionnaire;
+import de.thb.webbaki.service.FederalStateService;
 import lombok.*;
 
 import javax.persistence.*;
@@ -22,7 +23,6 @@ public class User {
     private long id;
     private String lastName;
     private String firstName;
-    private String company;
 
     // authentication
     private String username;
@@ -32,12 +32,11 @@ public class User {
     private boolean tokenExpired;
     private LocalDateTime lastLogin;
 
-    @OneToMany(mappedBy = "user")
-    @ToString.Exclude
-    private Set<Questionnaire> questionnaire;
+    @ManyToOne
+    private FederalState federalState;
 
     @ManyToOne
-    private Branch branch;
+    private Ressort ressort;
 
     @ManyToMany(fetch = FetchType.EAGER) //Fetching roles at the same time users get loaded
     @JoinTable(

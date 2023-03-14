@@ -1,5 +1,8 @@
 package de.thb.webbaki.controller.form;
 
+import de.thb.webbaki.entity.FederalState;
+import de.thb.webbaki.entity.Ressort;
+import de.thb.webbaki.entity.Role;
 import de.thb.webbaki.enums.*;
 import de.thb.webbaki.security.passwordValidation.PasswordMatches;
 import lombok.AllArgsConstructor;
@@ -39,6 +42,12 @@ public class UserRegisterFormModel {
     @NotNull(message = "username not null")
     @NotEmpty(message = "Username darf nicht leer sein")
     private String username;
+
+    private Role role;
+
+    private FederalState federalState;
+
+    private Ressort ressort;
 
 
 }

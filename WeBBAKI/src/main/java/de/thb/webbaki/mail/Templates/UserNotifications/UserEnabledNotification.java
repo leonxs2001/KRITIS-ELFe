@@ -61,7 +61,7 @@ public class UserEnabledNotification {
                 "  <body>\n"+
                 "    <h2 style=\"background-color:black; color: white; padding: 20px 0; margin: 0 auto;\">Ihr Profil wurde freigeschaltet</h2>\n"+
                 "    <p>Hallo "+userFirstname +" "+userLastname +",</p>\n"+
-            "    <p>Die Geschäftsstelle hat Ihr Profil soeben bestätigt.</p>\n"+
+            "    <p>Ein Admin hat Ihr Profil soeben bestätigt.</p>\n"+
             "    <div class=\"tabledata\" style=\"display:flex;align-items:center; justify-content:center\">\n"+
             "    <p>Sie können sich ab sofort auf WebBakI einloggen und die Anwendung nutzen.</p>\n"+
             "    </div>\n"+
