@@ -16,11 +16,21 @@ import java.util.List;
 public class ScenarioService {
     private final ScenarioRepository scenarioRepository;
 
+    public Scenario getScenarioByDescriptionAndActive(String description){
+        return scenarioRepository.findByDescriptionAndActive(description, true);
+    }
+
     public List<Scenario> getAllScenarios(){return (List<Scenario>) scenarioRepository.findAll();}
 
     public Scenario getById(long id){return scenarioRepository.findById(id);}
 
     public List<Scenario> getAllScenariosByActiveTrue(){return scenarioRepository.findByActive(true);}
+
+    public Scenario createScenario(Scenario scenario){return scenarioRepository.save(scenario);}
+
+    public Scenario getScenarioById(long id){
+        return scenarioRepository.findById(id);
+    }
 
 
     /**

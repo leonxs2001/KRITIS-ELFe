@@ -9,6 +9,11 @@ import de.thb.webbaki.service.ScenarioService;
 import de.thb.webbaki.service.SnapshotService;
 import de.thb.webbaki.service.UserService;
 import lombok.AllArgsConstructor;
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.text.PDFTextStripper;
+import org.apache.pdfbox.text.PDFTextStripperByArea;
+import org.apache.poi.xwpf.extractor.XWPFWordExtractor;
+import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -16,6 +21,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Valid;
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -32,6 +38,43 @@ public class SuperAdminController implements Comparable {
 
     @Autowired
     HelpPathReader helpPathReader;
+
+    @GetMapping("/test")
+    public String test() throws IOException {
+        String fileName = "C:\\Users\\Leon\\Desktop\\Test.docx";
+
+        try (XWPFDocument doc = new XWPFDocument(
+                Files.newInputStream(Paths.get(fileName)))) {
+
+            XWPFWordExtractor xwpfWordExtractor = new XWPFWordExtractor(doc);
+            String docText = xwpfWordExtractor.getText();
+            System.out.println(docText);
+
+            // find number of words in the document
+            long count = Arrays.stream(docText.split("\\s+")).count();
+            System.out.println("Total words: " + count);
+
+        }
+        /*try (PDDocument document = PDDocument.load(new File(fileName))) {
+
+            document.getClass();
+
+            if (!document.isEncrypted()) {
+
+                PDFTextStripperByArea stripper = new PDFTextStripperByArea();
+                stripper.setSortByPosition(true);
+
+                PDFTextStripper tStripper = new PDFTextStripper();
+
+                String pdfFileInText = tStripper.getText(document);
+                System.out.println(pdfFileInText);
+
+            }
+
+        }*/
+
+        return "redirect:home";
+    }
 
     @GetMapping("/admin")
     public String showAllUsers(Model model) {

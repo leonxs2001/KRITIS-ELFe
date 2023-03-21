@@ -12,4 +12,5 @@ public interface BranchRepository extends CrudRepository<Branch, Long> {
     @Override
     List<Branch> findAll();
     Branch findByName(String name);
+    Branch findById(long id);
 }

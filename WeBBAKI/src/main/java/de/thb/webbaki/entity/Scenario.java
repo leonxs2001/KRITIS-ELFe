@@ -1,6 +1,6 @@
 package de.thb.webbaki.entity;
 
-import de.thb.webbaki.enums.SzenarioType;
+import de.thb.webbaki.enums.ScenarioType;
 import lombok.*;
 
 import javax.persistence.*;
@@ -18,13 +18,22 @@ public class Scenario {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
-    private String name;
     boolean active;
     short positionInRow;
+
+    @Enumerated(EnumType.ORDINAL)
+    ScenarioType scenarioType;
 
     @Column(length = 1024)
     @Size(max = 1024)
     private String description;
+
+    public Scenario(String description, ScenarioType scenarioType, short positionInRow){
+        active = true;
+        this.positionInRow = positionInRow;
+        this.description = description;
+        this.scenarioType = scenarioType;
+    }
 
     @Override
     public boolean equals(Object o) {

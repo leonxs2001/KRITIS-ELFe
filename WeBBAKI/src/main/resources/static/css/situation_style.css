@@ -1,0 +1,44 @@
+.input-div{
+    display: flex;
+}
+
+.sector-h2{
+    margin-top: 2em;
+    margin-bottom: 1em;
+    border-bottom: dashed lightgrey;
+    padding-bottom: 0.5em;
+}
+
+form{
+    margin: 2em 0;
+}
+
+.branch-div{
+    margin-bottom: 1.5em;
+    margin-left: 1em;
+}
+
+.description-div{
+    margin-top: 0.8em;
+}
+
+.comment-textarea{
+    width: 100%;
+    align-self: center;
+    height: 50%;
+}
+
+.value-select{
+    align-self: center;
+    margin-right: 1em;
+    height: 50%;
+}
+
+.description-p{
+    width: 40%;
+}
+
+.without-description-div{
+    margin-left: 1em;
+    width: 60%;
+}

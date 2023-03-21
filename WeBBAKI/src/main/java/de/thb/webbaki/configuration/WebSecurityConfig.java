@@ -49,7 +49,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers("/situation/**").access("hasAnyAuthority('ROLE_LAND', 'ROLE_RESSORT')")
                 .antMatchers("/report/**").access("hasAnyAuthority('ROLE_BBK_ADMIN','ROLE_BBK_VIEWER')")
                 .antMatchers("/snap/**").access("hasAuthority('ROLE_BBK_ADMIN')")
-                .antMatchers("/scenarios").access("hasAuthority('ROLE_SUPERADMIN')")
+                .antMatchers("/scenarios").access("hasAuthority('ROLE_BBK_ADMIN')")
                 .antMatchers("/adjustHelp").access("hasAuthority('ROLE_BBK_ADMIN')")
                 .antMatchers("/help").access("isAuthenticated()")
                 .antMatchers("/account/user_details").access("isAuthenticated()")
@@ -59,7 +59,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .loginPage("/login")
                 .failureHandler((request, response, exception) -> {
                     String redirectURL = "/login?";
-                    if (exception.getCause().getCause() instanceof UserNotEnabledException){
+                    boolean has2Causes = exception.getCause() != null && exception.getCause().getCause() != null;
+                    if (has2Causes && exception.getCause().getCause() instanceof UserNotEnabledException){
                         redirectURL += "notEnabled";
                     }
                     else{

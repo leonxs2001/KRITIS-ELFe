@@ -1,6 +1,7 @@
 package de.thb.webbaki.configuration;
 
 import de.thb.webbaki.entity.*;
+import de.thb.webbaki.enums.ScenarioType;
 import de.thb.webbaki.repository.RoleRepository;
 import de.thb.webbaki.repository.UserRepository;
 import de.thb.webbaki.service.*;
@@ -40,6 +41,9 @@ public class SetupDataLoader implements
     @Autowired
     private SectorService sectorService;
 
+    @Autowired
+    private ScenarioService scenarioService;
+
     @Override
     @Transactional
     public void onApplicationEvent(final ContextRefreshedEvent event) {
@@ -58,6 +62,33 @@ public class SetupDataLoader implements
         createUserIfNotFound("land", "leonschoenberg@gmx.de", "land1234", land);
         createUserIfNotFound("ressort", "leonschoenberg@gmx.de", "ressort1234", ressort);
 
+        createFederalStates();
+        createRessorts();
+        createAllSectorsAndBranches();
+        createScenarios();
+
+        alreadySetup = true;
+
+    }
+
+    @Transactional
+    void createScenarios(){
+        createScenarioIfNotFound("1. Inwieweit ist die Bereitstellung der Dienstleistungen in der benannten Branche aktuell eingeschränkt? \n" +
+                "(Gibt es Einschränkungen und wie sind sie zu bewerten?)\n", ScenarioType.AUSWAHL, (short)1);
+        createScenarioIfNotFound("5. Inwieweit erwarten Sie mittel- und langfristig Einschränkungen bei der Bereitstellung der Dienstleistungen in der benannten Branche? ", ScenarioType.AUSWAHL, (short)2);
+        createScenarioIfNotFound("4. Besteht weiterer Bedarf an staatlicher Unterstützung, um den o. g. aktuellen zu erwartenden Einschränkungen vorzubeugen oder ihnen entgegenzuwirken? ", ScenarioType.TEXT, (short)1);
+
+    }
+
+    @Transactional
+    void createRessorts() {
+        createRessortIfNotFound("Test1", "T1");
+        createRessortIfNotFound("Test2", "T2");
+        createRessortIfNotFound("Test3", "T3");
+    }
+
+    @Transactional
+    void createFederalStates() {
         createFederalStateIfNotFound("Brandenburg", "BB");
         createFederalStateIfNotFound("Baden-Württemberg", "BW");
         createFederalStateIfNotFound("Bayern", "BY");
@@ -74,16 +105,6 @@ public class SetupDataLoader implements
         createFederalStateIfNotFound("Sachsen-Anhalt", "ST");
         createFederalStateIfNotFound("Schleswig-Holstein", "SH");
         createFederalStateIfNotFound("Thüringen", "TH");
-
-        createRessortIfNotFound("Test1", "T1");
-        createRessortIfNotFound("Test2", "T2");
-        createRessortIfNotFound("Test3", "T3");
-
-
-        createAllSectorsAndBranches();
-
-        alreadySetup = true;
-
     }
 
     @Transactional
@@ -131,6 +152,15 @@ public class SetupDataLoader implements
             ressort = ressortService.createRessort(new Ressort(name, shortcut));
         }
         return ressort;
+    }
+
+    @Transactional
+    Scenario createScenarioIfNotFound(String description, ScenarioType scenarioType, short positionInRow){
+        Scenario scenario = scenarioService.getScenarioByDescriptionAndActive(description);
+        if(scenario == null){
+            scenario = scenarioService.createScenario(new Scenario(description, scenarioType, positionInRow));
+        }
+        return scenario;
     }
 
     @Transactional
@@ -200,7 +230,7 @@ public class SetupDataLoader implements
     @Transactional
     Branch createBranchIfNotFound(String name, Sector sector){
         Branch branch = branchService.getBranchByName(name);
-        if(sector == null){
+        if(branch == null){
             branch = branchService.createBranch(new Branch(name, sector));
         }
 

@@ -1,5 +1,6 @@
 package de.thb.webbaki.entity.questionnaire;
 
+import de.thb.webbaki.entity.Branch;
 import de.thb.webbaki.entity.Scenario;
 import lombok.*;
 
@@ -22,19 +23,17 @@ public class UserScenario{
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
-    private float probability;
-
-    private float impact;
+    private short value;
 
     @Column(length = 1000)
     @Size(max = 10000)
-    private String smallComment;
+    private String comment;
 
     @ManyToOne
     private Scenario scenario;
 
     @ManyToOne
-    @JoinColumn(name="questionnaire_id", nullable=false)
-    private Questionnaire questionnaire;
+    @JoinColumn(name = "branchQuestionnaire_id", nullable = false)
+    private BranchQuestionnaire branchQuestionnaire;
 
 }

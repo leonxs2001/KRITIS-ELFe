@@ -28,7 +28,6 @@ public class MainController {
 
     @GetMapping("/")
     public String home() {
-        List<User> user = userService.getAllUsers();
         return "home";
     }
 

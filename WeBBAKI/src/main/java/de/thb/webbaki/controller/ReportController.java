@@ -2,7 +2,6 @@ package de.thb.webbaki.controller;
 
 import com.lowagie.text.DocumentException;
 import de.thb.webbaki.entity.Snapshot;
-import de.thb.webbaki.enums.ReportFocus;
 import de.thb.webbaki.service.Exceptions.UnknownReportFocusException;
 import de.thb.webbaki.service.ReportService;
 import de.thb.webbaki.service.helper.Counter;
@@ -42,8 +41,8 @@ public class ReportController {
     @GetMapping("report/{reportFocus}/{snapId}")
     public String showReport(@PathVariable("reportFocus") String reportFocusString, @PathVariable("snapId") long snapId,
                              Model model, Authentication authentication) throws UnknownReportFocusException {
-        ReportFocus reportFocus = ReportFocus.getReportFocusByEnglishRepresentation(reportFocusString);
-        model.addAttribute("reportFocus", reportFocus);
+        //ReportFocus reportFocus = ReportFocus.getReportFocusByEnglishRepresentation(reportFocusString);
+        //model.addAttribute("reportFocus", reportFocus);
 
         Snapshot currentSnapshot = snapshotService.getSnapshotByID(snapId).get();
         model.addAttribute("currentSnapshot", currentSnapshot);
@@ -66,8 +65,8 @@ public class ReportController {
         response.setHeader(headerKey, headerValue);
         Context context = new Context();
 
-        ReportFocus reportFocus = ReportFocus.getReportFocusByEnglishRepresentation(reportFocusString);
-        context.setVariable("reportFocus", reportFocus);
+        /*ReportFocus reportFocus = ReportFocus.getReportFocusByEnglishRepresentation(reportFocusString);
+        context.setVariable("reportFocus", reportFocus);*/
 
         Snapshot currentSnapshot = snapshotService.getSnapshotByID(snapId).get();
         context.setVariable("currentSnapshot", currentSnapshot);

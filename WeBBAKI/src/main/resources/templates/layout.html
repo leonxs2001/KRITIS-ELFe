@@ -52,18 +52,7 @@
                         <a class="nav-link" href="/">Home</a>
                     </li>
                     <li class="nav-item" sec:authorize="hasAnyAuthority('ROLE_LAND', 'ROLE_RESSORT')">
-                        <div  class="dropdown" id="dropdown-div-situation" >
-                            <a class="dropdown-toggle nav-link" id="dropdown-a-matrix" type="button" aria-expanded="false" data-toggle="dropdown">Lagebericht</a>
-
-                            <ul class="dropdown-menu" id="dropdown-ul-matrix">
-                                <li class="dropdown-li">
-                                    <a th:href="@{/situation}" class="nav-link">Aktuellster</a>
-                                </li>
-                                <li class="dropdown-li">
-                                    <a th:href="@{/situation/chronic}" class="nav-link">Chronik</a>
-                                </li>
-                            </ul>
-                        </div>
+                        <a th:href="@{/situation}" class="nav-link">Lagebericht</a>
                     </li>
                     <li class="nav-item" sec:authorize="hasAnyAuthority('ROLE_BBK_ADMIN','ROLE_BBK_VIEWER')">
                         <a class="nav-link" href="/report">Lagebericht</a>
@@ -89,7 +78,7 @@
                                     <a th:href="@{/admin}" class="nav-link">Rollenzuweisung</a>
                                 </li>
                                 <li class="dropdown-li">
-                                    <a th:href="@{/situation/description}" class="nav-link">Lagebeschreibung</a>
+                                    <a th:href="@{/scenarios}" class="nav-link">Lagebeschreibung</a>
                                 </li>
                                 <li class="dropdown-li">
                                     <a th:href="@{/adjustHelp}" class="nav-link">Hilfeverwaltung</a>

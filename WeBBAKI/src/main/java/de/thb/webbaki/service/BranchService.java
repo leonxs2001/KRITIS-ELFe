@@ -19,4 +19,8 @@ public class BranchService {
     }
 
     public Branch createBranch(Branch branch){return branchRepository.save(branch);}
+
+    public Branch getBranchById(long id){
+        return branchRepository.findById(id);
+    }
 }

@@ -12,10 +12,11 @@ public interface ScenarioRepository extends CrudRepository<Scenario, Long> {
 
     Scenario findById(long id);
 
-    Optional<Scenario> findByName(String name);
+    Scenario findByDescriptionAndActive(String description, boolean active);
 
     List<Scenario> findAll();
 
     List<Scenario> findByActive(boolean active);
+
 
 }
