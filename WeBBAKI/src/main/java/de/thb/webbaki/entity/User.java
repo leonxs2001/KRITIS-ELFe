@@ -47,9 +47,6 @@ public class User {
                     name = "role_id", referencedColumnName = "id"))
     private Collection<Role> roles;
 
-    @OneToMany(mappedBy = "user")
-    private List<Questionnaire> questionnaires;
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

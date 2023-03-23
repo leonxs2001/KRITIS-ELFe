@@ -12,6 +12,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -26,6 +27,7 @@ public class SituationController {
 
     @GetMapping("/situation")
     public String showQuestionnaireForm(Authentication authentication, Model model) {
+        //TODO Check which Role (Ressort or FederalState)
         Questionnaire questionnaire = questionnaireService.getQuestionnaireForUser(userService.getUserByUsername(authentication.getName()));
 
         model.addAttribute("questionnaire", questionnaire);
@@ -43,6 +45,12 @@ public class SituationController {
                                       Authentication authentication) {
         questionnaireService.saveQuestionnaireFromForm(questionnaire, userService.getUserByUsername(authentication.getName()));
         return "redirect:situation";
+    }
+
+    @PostMapping("/situation/files")
+    public String submitFilesFromForm(@RequestParam("files") MultipartFile[] files, Authentication authentication){
+        questionnaireService.saveQuestionnaireFromFiles(files, userService.getUserByUsername(authentication.getName()));
+        return "redirect:/situation";
     }
 
 }

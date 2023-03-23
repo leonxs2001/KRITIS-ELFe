@@ -1,5 +1,6 @@
 package de.thb.webbaki.entity.questionnaire;
 
+import de.thb.webbaki.entity.FederalState;
 import de.thb.webbaki.entity.Snapshot;
 import de.thb.webbaki.entity.User;
 import lombok.*;
@@ -29,8 +30,7 @@ public class Questionnaire {
     private Snapshot snapshot;
 
     @ManyToOne
-    @JoinColumn(name = "user_id", nullable = false)
-    private User user;
+    private FederalState federalState;
 
     @OneToMany(mappedBy = "questionnaire")
     @OrderBy("branch.id ASC")

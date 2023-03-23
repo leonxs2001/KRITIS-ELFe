@@ -22,6 +22,9 @@ public class UserScenarioService {
 
     public void saveAllUserScenario(List<UserScenario> userScenarios){userScenarioRepository.saveAll(userScenarios);}
 
+    public void updateUserScenarioValueAndCommentById(short value, String comment, long id){
+        userScenarioRepository.updateUserScenarioValueAndCommentDateFromId(value, comment ,id);
+    }
     public UserScenario saveUserScenario(UserScenario userScenario){
         return userScenarioRepository.save(userScenario);
     }

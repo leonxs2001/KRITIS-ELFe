@@ -4,7 +4,7 @@ $(document).ready(function (){
     //go through all select-elements and set right color
     let selectList = $(".value-select");
     for(let i = 0; i < selectList.length; i++){
-        setSelectColorByValue(selectList[i]);
+        noticeSelectValueChange(selectList[i]);
     }
 
     let branchDivList = $(".branch-div");
@@ -19,14 +19,22 @@ $(document).ready(function (){
 });
 
 function onSelectionChange(select){
-    setSelectColorByValue(select);
+    noticeSelectValueChange(select);
     let branchDiv = select.closest(".branch-div")
     setBranchColorByScenarios(branchDiv);
     setSectorColorByScenarios(document.querySelector("#" + branchDiv.dataset.sector_h2_id))
 }
 
-function setSelectColorByValue(select){
+function noticeSelectValueChange(select){
     select.style.backgroundColor = colorArray[parseInt(select.value)];
+    let textArea = select.parentElement.querySelector(".comment-textarea");
+    //Todo usefull?
+    if(select.value <= "1"){
+        textArea.style.display = "none";
+    }else{
+        textArea.style.display = "block";
+    }
+
 }
 
 function  getMaxValueFromBranchDiv(branchDiv){

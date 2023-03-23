@@ -14,11 +14,11 @@ import java.util.List;
 public class BranchQuestionnaireService {
     private final BranchQuestionnaireRepository branchQuestionnaireRepository;
 
-    public BranchQuestionnaire createBranchQuestionnaire(BranchQuestionnaire branchQuestionnaire){
+    public BranchQuestionnaire saveBranchQuestionnaire(BranchQuestionnaire branchQuestionnaire){
         return branchQuestionnaireRepository.save(branchQuestionnaire);
     }
 
-    public void createBranchQuestionnaires(List<BranchQuestionnaire> branchQuestionnaires){
+    public void saveBranchQuestionnaires(List<BranchQuestionnaire> branchQuestionnaires){
         branchQuestionnaireRepository.saveAll(branchQuestionnaires);
     }
 }

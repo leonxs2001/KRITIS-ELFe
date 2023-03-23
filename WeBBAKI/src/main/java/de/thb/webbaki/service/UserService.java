@@ -236,7 +236,7 @@ public class UserService {
                     user.getRoles().add(role);
 
                     //create new questionnaires for the user if he is now KRITIS_BETREIBER and hasnt already one
-                    if (role.getName().equals("ROLE_KRITIS_BETREIBER") && !questionnaireService.existsByUserId(user.getId())) {
+                    if (role.getName().equals("ROLE_KRITIS_BETREIBER") /*&& !questionnaireService.existsByUserId(user.getId())*/) {
                         questionnaireService.createQuestionnaireForUser(user);
                     }
 

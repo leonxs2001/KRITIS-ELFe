@@ -217,8 +217,6 @@ footer {
 
 /* HOME SEITE */
 .startseite {
-    display: flex;
-    flex: 0 0 auto;
     margin-top: 40px;
 }
 

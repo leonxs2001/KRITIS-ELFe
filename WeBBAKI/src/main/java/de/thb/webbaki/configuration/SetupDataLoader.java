@@ -52,17 +52,19 @@ public class SetupDataLoader implements
             return;
         }
 
+        FederalState brandenburg = createFederalStates();
+
         Role bbkAdmin = createRoleIfNotFound("ROLE_BBK_ADMIN", "BBK Admin");
         Role bbkViewer = createRoleIfNotFound("ROLE_BBK_VIEWER", "BBK Viewer");
         Role land = createRoleIfNotFound("ROLE_LAND", "Länder Repräsentant");
         Role ressort = createRoleIfNotFound("ROLE_RESSORT", "Ressort Repräsentant");
 
-        createUserIfNotFound("viewer", "leonschoenberg@gmx.de", "viewer1234", bbkViewer);
-        createUserIfNotFound("admin", "leonschoenberg@gmx.de", "admin1234", bbkAdmin);
-        createUserIfNotFound("land", "leonschoenberg@gmx.de", "land1234", land);
-        createUserIfNotFound("ressort", "leonschoenberg@gmx.de", "ressort1234", ressort);
+        createUserIfNotFound("viewer", "leonschoenberg@gmx.de", "viewer1234", bbkViewer, null);
+        createUserIfNotFound("admin", "leonschoenberg@gmx.de", "admin1234", bbkAdmin, null);
+        createUserIfNotFound("land", "leonschoenberg@gmx.de", "land1234", land, brandenburg);
+        createUserIfNotFound("ressort", "leonschoenberg@gmx.de", "ressort1234", ressort, null);
 
-        createFederalStates();
+
         createRessorts();
         createAllSectorsAndBranches();
         createScenarios();
@@ -76,7 +78,7 @@ public class SetupDataLoader implements
         createScenarioIfNotFound("1. Inwieweit ist die Bereitstellung der Dienstleistungen in der benannten Branche aktuell eingeschränkt? \n" +
                 "(Gibt es Einschränkungen und wie sind sie zu bewerten?)\n", ScenarioType.AUSWAHL, (short)1);
         createScenarioIfNotFound("5. Inwieweit erwarten Sie mittel- und langfristig Einschränkungen bei der Bereitstellung der Dienstleistungen in der benannten Branche? ", ScenarioType.AUSWAHL, (short)2);
-        createScenarioIfNotFound("4. Besteht weiterer Bedarf an staatlicher Unterstützung, um den o. g. aktuellen zu erwartenden Einschränkungen vorzubeugen oder ihnen entgegenzuwirken? ", ScenarioType.TEXT, (short)1);
+        createScenarioIfNotFound("4. Besteht weiterer Bedarf an staatlicher Unterstützung, um den o. g. aktuellen / kurzfristig zu erwartenden Einschränkungen vorzubeugen oder ihnen entgegenzuwirken?", ScenarioType.TEXT, (short)1);
 
     }
 
@@ -88,8 +90,8 @@ public class SetupDataLoader implements
     }
 
     @Transactional
-    void createFederalStates() {
-        createFederalStateIfNotFound("Brandenburg", "BB");
+    FederalState createFederalStates() {
+        FederalState result = createFederalStateIfNotFound("Brandenburg", "BB");
         createFederalStateIfNotFound("Baden-Württemberg", "BW");
         createFederalStateIfNotFound("Bayern", "BY");
         createFederalStateIfNotFound("Berlin", "BE");
@@ -105,6 +107,8 @@ public class SetupDataLoader implements
         createFederalStateIfNotFound("Sachsen-Anhalt", "ST");
         createFederalStateIfNotFound("Schleswig-Holstein", "SH");
         createFederalStateIfNotFound("Thüringen", "TH");
+
+        return result;
     }
 
     @Transactional
@@ -119,7 +123,7 @@ public class SetupDataLoader implements
     }
 
     @Transactional
-    User createUserIfNotFound(final String username, String email, String password, Role role) {
+    User createUserIfNotFound(final String username, String email, String password, Role role, FederalState federalState) {
         User user = userService.getUserByUsername(username);
         if (user == null) {
             user = new User();
@@ -129,6 +133,7 @@ public class SetupDataLoader implements
             user.setEnabled(true);
             user.setUsername(username);
             user.setEmail(email);
+            user.setFederalState(federalState);
         }
 
         user = userService.createUser(user);

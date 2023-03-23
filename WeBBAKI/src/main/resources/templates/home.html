@@ -5,13 +5,12 @@
 <head>
     <meta charset="UTF-8">
     <title>Home</title>
-    <link th:href="@{/css/layout_style.css}" href="/css/layout_style.css" rel="stylesheet">
 
 </head>
 <body>
 <div layout:fragment="content">
     <div class="container-home">
-        <h2>WebBaKI - Webbasierte Bedrohungsanalyse Kritischer Infrastrukturen</h2>
+        <h2>KRITIS-ELFe</h2>
 
         <p>Herzlich Willkommen!</p>
 
@@ -30,11 +29,9 @@
         <div sec:authorize="isAuthenticated()">
             <a class="btn btn-outline-info" th:href="@{/account/user_details}">Mein Konto</a>
             <div class="startseite-frame">
-                <div class="startseite row-cols-2">
+                <div class="startseite">
                     <div class="homeParagraph">
-                        <p>Cyber- und
-                            Informationssicherheit betrifft Staat, Wirtschaft, Wissenschaft und Gesellschaft
-                            gleichermaßen.</p>
+                        <p>Hier könnte das stehen, was als wichtig und erklärend wahrgenommen wird.</p>
 
                         <p>Diese Akteure
                             müssen
@@ -66,8 +63,6 @@
                             gegliedert. </p>
                     </div>
 
-                    <img class="schalenmodell" style=""
-                         th:src="@{/images/Schalenmodell.png}">
                 </div>
             </div>
         </div>

@@ -39,43 +39,6 @@ public class SuperAdminController implements Comparable {
     @Autowired
     HelpPathReader helpPathReader;
 
-    @GetMapping("/test")
-    public String test() throws IOException {
-        String fileName = "C:\\Users\\Leon\\Desktop\\Test.docx";
-
-        try (XWPFDocument doc = new XWPFDocument(
-                Files.newInputStream(Paths.get(fileName)))) {
-
-            XWPFWordExtractor xwpfWordExtractor = new XWPFWordExtractor(doc);
-            String docText = xwpfWordExtractor.getText();
-            System.out.println(docText);
-
-            // find number of words in the document
-            long count = Arrays.stream(docText.split("\\s+")).count();
-            System.out.println("Total words: " + count);
-
-        }
-        /*try (PDDocument document = PDDocument.load(new File(fileName))) {
-
-            document.getClass();
-
-            if (!document.isEncrypted()) {
-
-                PDFTextStripperByArea stripper = new PDFTextStripperByArea();
-                stripper.setSortByPosition(true);
-
-                PDFTextStripper tStripper = new PDFTextStripper();
-
-                String pdfFileInText = tStripper.getText(document);
-                System.out.println(pdfFileInText);
-
-            }
-
-        }*/
-
-        return "redirect:home";
-    }
-
     @GetMapping("/admin")
     public String showAllUsers(Model model) {
         final var users = userService.getAllUsers();

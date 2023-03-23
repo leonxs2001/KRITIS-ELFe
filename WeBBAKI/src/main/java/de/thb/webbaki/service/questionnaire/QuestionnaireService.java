@@ -6,14 +6,23 @@ import de.thb.webbaki.entity.questionnaire.Questionnaire;
 import de.thb.webbaki.entity.Scenario;
 import de.thb.webbaki.entity.User;
 import de.thb.webbaki.entity.questionnaire.UserScenario;
+import de.thb.webbaki.enums.ScenarioType;
 import de.thb.webbaki.repository.questionnaire.QuestionnaireRepository;
 import de.thb.webbaki.repository.UserRepository;
 import de.thb.webbaki.service.BranchService;
 import de.thb.webbaki.service.ScenarioService;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.text.PDFTextStripper;
+import org.apache.pdfbox.text.PDFTextStripperByArea;
+import org.apache.poi.xwpf.extractor.XWPFWordExtractor;
+import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import javax.transaction.Transactional;
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -29,26 +38,23 @@ public class QuestionnaireService {
     private final BranchService branchService;
     private final BranchQuestionnaireService branchQuestionnaireService;
 
-    public boolean existsByUserId(long id){return questionnaireRepository.existsByUser_id(id);}
-    public boolean existsByIdAndUserId(long questId, long userId){return questionnaireRepository.existsByIdAndUser_Id(questId, userId);}
     public void save(Questionnaire questionnaire){questionnaireRepository.save(questionnaire);}
     public Questionnaire getQuestionnaire(long id) {return questionnaireRepository.findById(id);}
-    public Questionnaire getNewestQuestionnaireByUserId(long id) {return questionnaireRepository.findFirstByUser_IdOrderByIdDesc(id);}
-    public List<Questionnaire> getAllQuestByUser(long id) {return questionnaireRepository.findAllByUser(userRepository.findById(id).get());}
     public List<Questionnaire> getAllQuestionnaires(){
         return questionnaireRepository.findAll();
     }
 
     public Questionnaire getQuestionnaireForUser(User user) {
-        Questionnaire questionnaire = questionnaireRepository.findFirstByUser_UsernameOrderByIdDesc(user.getUsername());
+        Questionnaire questionnaire = questionnaireRepository.findFirstByFederalStateOrderByIdDesc(user.getFederalState());
 
         if (questionnaire == null){
             // TODO change from usr to federal state
-            questionnaire = Questionnaire.builder().user(user).build();
+            questionnaire = Questionnaire.builder().federalState(user.getFederalState()).build();
 
             List<Branch> branches = branchService.getAllBranches();
             List<Scenario> scenarios = scenarioService.getAllScenariosByActiveTrue();
             List<BranchQuestionnaire> branchQuestionnaires = new ArrayList<>();
+            List<UserScenario> allUserScenarios = new ArrayList<>();
 
             for(Branch branch: branches){
                 BranchQuestionnaire branchQuestionnaire = BranchQuestionnaire.builder().
@@ -60,16 +66,21 @@ public class QuestionnaireService {
                 for(Scenario scenario: scenarios){
                     UserScenario userScenario = UserScenario.builder()
                             .scenario(scenario)
+                            .branchQuestionnaire(branchQuestionnaire)
                             .comment("").build();
                     userScenarios.add(userScenario);
                 }
-
+                allUserScenarios.addAll(userScenarios);
                 branchQuestionnaire.setUserScenarios(userScenarios);
                 branchQuestionnaires.add(branchQuestionnaire);
 
             }
 
             questionnaire.setBranchQuestionnaires(branchQuestionnaires);
+
+            questionnaireRepository.save(questionnaire);
+            branchQuestionnaireService.saveBranchQuestionnaires(branchQuestionnaires);
+            userScenarioService.saveAllUserScenario(allUserScenarios);
         }
 
         return questionnaire;
@@ -82,7 +93,7 @@ public class QuestionnaireService {
     public Questionnaire createQuestionnaireForUser(User user){
         Questionnaire questionnaire = new Questionnaire();
         questionnaire.setDate(LocalDateTime.now());
-        questionnaire.setUser(user);
+        questionnaire.setFederalState(user.getFederalState());
         questionnaireRepository.save(questionnaire);
 
         //create a UserScenario for every active Scenario
@@ -142,28 +153,116 @@ public class QuestionnaireService {
      * Create a new Questionnaire with the UserScenarios from inside the form and save it
      * @param user
      */
+    @Transactional
     public void saveQuestionnaireFromForm(Questionnaire questionnaire, User user) {
 
-        questionnaire.setDate(LocalDateTime.now());
-        questionnaire.setUser(user);
-
-        questionnaireRepository.save(questionnaire);
+        questionnaireRepository.updateQuestionnaireDateFromId(LocalDateTime.now(), questionnaire.getId());
 
         for(BranchQuestionnaire branchQuestionnaire: questionnaire.getBranchQuestionnaires()){
-            branchQuestionnaire.setQuestionnaire(questionnaire);
-            branchQuestionnaire.setBranch(branchService.getBranchById(branchQuestionnaire.getBranch().getId()));
-            branchQuestionnaireService.createBranchQuestionnaire(branchQuestionnaire);
-
             for(UserScenario userScenario: branchQuestionnaire.getUserScenarios()){
-                userScenario.setBranchQuestionnaire(branchQuestionnaire);
-                userScenario.setScenario(scenarioService.getScenarioById(userScenario.getScenario().getId()));
-                userScenarioService.saveUserScenario(userScenario);
+                userScenarioService.updateUserScenarioValueAndCommentById(userScenario.getValue(), userScenario.getComment(), userScenario.getId());
             }
         }
+    }
+
+    @Transactional
+    public void saveQuestionnaireFromFiles(MultipartFile[] files, User user){
+        Questionnaire questionnaire = getQuestionnaireForUser(user);
+        questionnaireRepository.updateQuestionnaireDateFromId(LocalDateTime.now(), questionnaire.getId());
+
+        for(MultipartFile file: files){
+            saveUserScenariosFromFile(questionnaire, file);
+        }
+    }
+
+    @Transactional
+    protected void saveUserScenariosFromFile(Questionnaire questionnaire, MultipartFile file) {
+        String text = getTextFromFile(file);
+        //Branch is behind this combination
+        String combination = "Branche    ";
+        int indexOfAppearance = text.indexOf(combination);
 
 
+        if(indexOfAppearance >= 0) {
+            //slice everything before the Brand
+            text = text.substring(indexOfAppearance).replaceAll("\r", "");
+            indexOfAppearance = text.indexOf("\n");
+            String branchNameFromFile = text.substring(combination.length(), indexOfAppearance);
+            branchNameFromFile = branchNameFromFile.replaceAll("\\s", "").toLowerCase();
 
+            //TODO EXCEPTION FOr bad input (after all indexOfAppearance >= 0)
+            for (BranchQuestionnaire branchQuestionnaire : questionnaire.getBranchQuestionnaires()) {
+                String branchName = branchQuestionnaire.getBranch().getName().replaceAll("\\s", "").toLowerCase();
+                if (branchNameFromFile.contains(branchName)) {
+                    text = text.substring(indexOfAppearance + 1);
+                    text = text.replaceAll("\\s{2,3}", " ");
 
+                    for (UserScenario userScenario : branchQuestionnaire.getUserScenarios()) {
+                        boolean somethingChanged = false;
+                        String scenarioDescription = userScenario.getScenario().getDescription().replaceAll("\r", "").replaceAll("\\s{2,3}", " ");
+                        //cut last line break if exists
+                        if(scenarioDescription.charAt(scenarioDescription.length() - 1) == '\n' || scenarioDescription.charAt(scenarioDescription.length() - 1) == ' '){
+                            scenarioDescription = scenarioDescription.substring(0, scenarioDescription.length() - 1);
+                        }
+                        indexOfAppearance = text.indexOf(scenarioDescription);
+                        if (indexOfAppearance >= 0) {
+                            if(userScenario.getScenario().getScenarioType() == ScenarioType.AUSWAHL) {
+                                int valueStartIndex = indexOfAppearance + scenarioDescription.length();
+                                String values = text.substring(valueStartIndex, valueStartIndex + 8).replaceAll("\\s", "");
+                                for(int i = values.length() - 1; i >= 0 ; i--){
+                                    if(values.charAt(i) == '☒'){
+                                        somethingChanged = true;
+                                        userScenario.setValue((short)(i + 1));
+                                        break;
+                                    }
+                                }
+                            }else{
+                                //TODO check text
+                                System.out.println("alles andere später");
+                            }
+                        }
+
+                        if(somethingChanged){
+                            userScenarioService.saveUserScenario(userScenario);
+                        }
+
+                    }
+                    break;
+                }
+            }
+        }
+    }
+
+    private String getTextFromFile(MultipartFile file) {
+        String extractedText = null;
+        try{
+            if(file.getContentType().equals("application/pdf")){
+                PDDocument document = PDDocument.load(file.getInputStream());
+                document.getClass();
+
+                if (!document.isEncrypted()) {
+
+                    PDFTextStripperByArea stripper = new PDFTextStripperByArea();
+                    stripper.setSortByPosition(true);
+
+                    PDFTextStripper tStripper = new PDFTextStripper();
+
+                    extractedText = tStripper.getText(document);
+
+                }
+                document.close();
+            }else if(file.getContentType().equals("application/vnd.openxmlformats-officedocument.wordprocessingml.document")){
+                XWPFDocument doc = new XWPFDocument(file.getInputStream());
+                XWPFWordExtractor xwpfWordExtractor = new XWPFWordExtractor(doc);
+                extractedText = xwpfWordExtractor.getText();
+                doc.close();
+            }
+
+        } catch (IOException ioException){
+            System.err.println(ioException);
+        }
+
+        return extractedText.replaceAll(Character.toString((char)160), " ");
     }
 
 }
