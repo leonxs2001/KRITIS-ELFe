@@ -32,25 +32,24 @@ public class SituationController {
 
         model.addAttribute("questionnaire", questionnaire);
 
-        List<Sector> sectors = sectorService.getAllSectors();
-        model.addAttribute("sectors", sectors);
         model.addAttribute("sectorChangeDetector", new SectorChangeDetector());
-
 
         return "situation/situation";
     }
 
-    @PostMapping("/situation")
+    @PostMapping("/situation/form")
     public String submitQuestionnaire(@ModelAttribute("questionnaire") Questionnaire questionnaire,
                                       Authentication authentication) {
         questionnaireService.saveQuestionnaireFromForm(questionnaire, userService.getUserByUsername(authentication.getName()));
-        return "redirect:situation";
+        return "redirect:/situation";
     }
 
-    @PostMapping("/situation/files")
-    public String submitFilesFromForm(@RequestParam("files") MultipartFile[] files, Authentication authentication){
-        questionnaireService.saveQuestionnaireFromFiles(files, userService.getUserByUsername(authentication.getName()));
-        return "redirect:/situation";
+    @PostMapping("/situation")
+    public String submitFilesFromForm(@RequestParam("files") MultipartFile[] files, Authentication authentication, Model model){
+        Questionnaire questionnaire = questionnaireService.saveQuestionnaireFromFiles(files, userService.getUserByUsername(authentication.getName()), model);
+        model.addAttribute("questionnaire", questionnaire);
+        model.addAttribute("sectorChangeDetector", new SectorChangeDetector());
+        return "situation/situation";
     }
 
 }

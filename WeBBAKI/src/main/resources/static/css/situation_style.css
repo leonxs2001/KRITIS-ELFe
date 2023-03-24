@@ -21,6 +21,9 @@ form{
     margin-bottom: 1em;
     width: auto;
 }
+.success-error-message{
+    width: fit-content;
+}
 
 .branch-div{
     margin-bottom: 1.5em;

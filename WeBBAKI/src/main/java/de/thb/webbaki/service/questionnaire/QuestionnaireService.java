@@ -19,12 +19,15 @@ import org.apache.pdfbox.text.PDFTextStripperByArea;
 import org.apache.poi.xwpf.extractor.XWPFWordExtractor;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.springframework.stereotype.Service;
+import org.springframework.ui.Model;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.transaction.Transactional;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Service
 @AllArgsConstructor
@@ -166,17 +169,19 @@ public class QuestionnaireService {
     }
 
     @Transactional
-    public void saveQuestionnaireFromFiles(MultipartFile[] files, User user){
+    public Questionnaire saveQuestionnaireFromFiles(MultipartFile[] files, User user, Model model){
+        model.addAttribute("success", true);
         Questionnaire questionnaire = getQuestionnaireForUser(user);
         questionnaireRepository.updateQuestionnaireDateFromId(LocalDateTime.now(), questionnaire.getId());
 
         for(MultipartFile file: files){
-            saveUserScenariosFromFile(questionnaire, file);
+            saveUserScenariosFromFile(questionnaire, file, model);
         }
+        return questionnaire;
     }
 
     @Transactional
-    protected void saveUserScenariosFromFile(Questionnaire questionnaire, MultipartFile file) {
+    protected void saveUserScenariosFromFile(Questionnaire questionnaire, MultipartFile file, Model model) {
         String text = getTextFromFile(file);
         //Branch is behind this combination
         String combination = "Branche    ";
@@ -184,53 +189,91 @@ public class QuestionnaireService {
 
 
         if(indexOfAppearance >= 0) {
-            //slice everything before the Brand
+            //slice everything before the Branch
             text = text.substring(indexOfAppearance).replaceAll("\r", "");
             indexOfAppearance = text.indexOf("\n");
             String branchNameFromFile = text.substring(combination.length(), indexOfAppearance);
             branchNameFromFile = branchNameFromFile.replaceAll("\\s", "").toLowerCase();
-
+            boolean branchFound = false;
             //TODO EXCEPTION FOr bad input (after all indexOfAppearance >= 0)
             for (BranchQuestionnaire branchQuestionnaire : questionnaire.getBranchQuestionnaires()) {
                 String branchName = branchQuestionnaire.getBranch().getName().replaceAll("\\s", "").toLowerCase();
                 if (branchNameFromFile.contains(branchName)) {
+                    branchFound = true;
                     text = text.substring(indexOfAppearance + 1);
                     text = text.replaceAll("\\s{2,3}", " ");
 
                     for (UserScenario userScenario : branchQuestionnaire.getUserScenarios()) {
-                        boolean somethingChanged = false;
                         String scenarioDescription = userScenario.getScenario().getDescription().replaceAll("\r", "").replaceAll("\\s{2,3}", " ");
-                        //cut last line break if exists
-                        if(scenarioDescription.charAt(scenarioDescription.length() - 1) == '\n' || scenarioDescription.charAt(scenarioDescription.length() - 1) == ' '){
-                            scenarioDescription = scenarioDescription.substring(0, scenarioDescription.length() - 1);
-                        }
+
+                        scenarioDescription = sliceEmptyStartAndEnd(scenarioDescription);
                         indexOfAppearance = text.indexOf(scenarioDescription);
                         if (indexOfAppearance >= 0) {
+                            int valueStartIndex = indexOfAppearance + scenarioDescription.length();
                             if(userScenario.getScenario().getScenarioType() == ScenarioType.AUSWAHL) {
-                                int valueStartIndex = indexOfAppearance + scenarioDescription.length();
+
                                 String values = text.substring(valueStartIndex, valueStartIndex + 8).replaceAll("\\s", "");
+                                valueStartIndex += 8;
                                 for(int i = values.length() - 1; i >= 0 ; i--){
                                     if(values.charAt(i) == '☒'){
-                                        somethingChanged = true;
                                         userScenario.setValue((short)(i + 1));
                                         break;
                                     }
+                                    if(i == 0){
+                                        createModelListIfNotExistsAndInsertFilename(model, "noValuesGivenFileNames", file.getOriginalFilename());
+                                    }
                                 }
-                            }else{
-                                //TODO check text
-                                System.out.println("alles andere später");
                             }
+                            String slicedText = text.substring(valueStartIndex);
+                            Pattern pattern = Pattern.compile("(\\d+. )|(keine / gar nicht( |\t)gering( |\t)erheblic)");
+                            Matcher matcher = pattern.matcher(slicedText);
+                            String comment;
+                            if(matcher.find()){
+                                comment = slicedText.substring(0, matcher.start());
+                            }else{
+                                comment = slicedText;
+                            }
+                            comment = sliceEmptyStartAndEnd(comment);
+                            if(comment.contains("Bitte näher ausführen (z. B. personell, logistisch, materiell, gesetzgeberisch)")
+                                    || comment.contains("Bitte immer ausfüllen, wenn nicht „grün“ ausgewählt")) {
+                                comment = "";
+                            }
+                            userScenario.setComment(comment);
+
+                        }else{
+                            createModelListIfNotExistsAndInsertFilename(model, "scenarioNotMatchingFileNames", file.getOriginalFilename());
                         }
 
-                        if(somethingChanged){
-                            userScenarioService.saveUserScenario(userScenario);
-                        }
+                        userScenarioService.saveUserScenario(userScenario);
 
                     }
                     break;
                 }
             }
+
+            if(!branchFound){
+                createModelListIfNotExistsAndInsertFilename(model, "branchNotMatchingFileNames", file.getOriginalFilename());
+            }
+        }else{
+            createModelListIfNotExistsAndInsertFilename(model, "branchStringMissingFileNames", file.getOriginalFilename());
         }
+
+    }
+
+    private void createModelListIfNotExistsAndInsertFilename(Model model, String attributeName, String filename){
+        List<String> branchNotMatchingFileNames = (List<String>) model.getAttribute(attributeName);
+        if(branchNotMatchingFileNames == null){
+            branchNotMatchingFileNames = new ArrayList<>();
+        }
+        if(!branchNotMatchingFileNames.contains(filename)) {
+            branchNotMatchingFileNames.add(filename);
+        }
+        model.addAttribute(attributeName, branchNotMatchingFileNames);
+        model.addAttribute("success", false);
+    }
+
+    private String sliceEmptyStartAndEnd(String text){
+        return text.replaceAll("(^\\s+)|(\\s+$)", "");
     }
 
     private String getTextFromFile(MultipartFile file) {
