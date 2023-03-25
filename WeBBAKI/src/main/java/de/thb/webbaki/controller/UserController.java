@@ -3,6 +3,7 @@ package de.thb.webbaki.controller;
 import de.thb.webbaki.configuration.HelpPathReader;
 import de.thb.webbaki.controller.form.ChangeCredentialsForm;
 import de.thb.webbaki.controller.form.UserRegisterFormModel;
+import de.thb.webbaki.entity.Role;
 import de.thb.webbaki.entity.User;
 import de.thb.webbaki.service.*;
 import de.thb.webbaki.service.Exceptions.EmailNotMatchingException;
@@ -68,11 +69,8 @@ public class UserController {
 
     @GetMapping("/account/user_details")
     public String showUserData(Authentication authentication, Model model) {
-
         User user = userService.getUserByUsername(authentication.getName());
         model.addAttribute("user", user);
-
-
         return "account/user_details";
     }
 

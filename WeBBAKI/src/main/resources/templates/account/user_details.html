@@ -22,20 +22,20 @@
                             <td><span th:text="${user.firstName}"></span></td>
                         </tr>
                         <tr>
-                            <td><b>Sektor:</b></td>
-                            <td><span th:text="${user.branch.getSector}"></span></td>
-                        </tr>
-                        <tr>
-                            <td><b>Branche:</b></td>
-                            <td><span th:text="${user.branch}"></span></td>
-                        </tr>
-                        <tr>
-                            <td><b>Unternehmen:</b></td>
-                            <td><span th:text="${user.company}"></span></td>
+                            <td><b>Benutzername:</b></td>
+                            <td><span th:text="${user.username}"></span></td>
                         </tr>
                         <tr>
                             <td><b>Email-Adresse:</b></td>
                             <td><span th:text="${user.email}"></span></td>
+                        </tr>
+                        <tr th:if="${user.ressort}">
+                            <td><b>Ressort:</b></td>
+                            <td><span th:text="${user.ressort}"></span></td>
+                        </tr>
+                        <tr th:if="${user.federalState}">
+                            <td><b>Land:</b></td>
+                            <td><span th:text="${user.federalState}"></span></td>
                         </tr>
                         <!-- TODO: Fehler mit LastLogin Beheben
                             <tr>

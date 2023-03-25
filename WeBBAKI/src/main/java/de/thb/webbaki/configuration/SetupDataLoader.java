@@ -53,19 +53,18 @@ public class SetupDataLoader implements
         }
 
         FederalState brandenburg = createFederalStates();
+        Ressort ressort3 = createRessorts();
 
         Role bbkAdmin = createRoleIfNotFound("ROLE_BBK_ADMIN", "BBK Admin");
         Role bbkViewer = createRoleIfNotFound("ROLE_BBK_VIEWER", "BBK Viewer");
         Role land = createRoleIfNotFound("ROLE_LAND", "Länder Repräsentant");
         Role ressort = createRoleIfNotFound("ROLE_RESSORT", "Ressort Repräsentant");
 
-        createUserIfNotFound("viewer", "leonschoenberg@gmx.de", "viewer1234", bbkViewer, null);
-        createUserIfNotFound("admin", "leonschoenberg@gmx.de", "admin1234", bbkAdmin, null);
-        createUserIfNotFound("land", "leonschoenberg@gmx.de", "land1234", land, brandenburg);
-        createUserIfNotFound("ressort", "leonschoenberg@gmx.de", "ressort1234", ressort, null);
+        createUserIfNotFound("viewer", "leonschoenberg@gmx.de", "viewer1234", bbkViewer, null, null);
+        createUserIfNotFound("admin", "leonschoenberg@gmx.de", "admin1234", bbkAdmin, null, null);
+        createUserIfNotFound("land", "leonschoenberg@gmx.de", "land1234", land, brandenburg, null);
+        createUserIfNotFound("ressort", "leonschoenberg@gmx.de", "ressort1234", ressort, null, ressort3);
 
-
-        createRessorts();
         createAllSectorsAndBranches();
         createScenarios();
 
@@ -83,10 +82,10 @@ public class SetupDataLoader implements
     }
 
     @Transactional
-    void createRessorts() {
+    Ressort createRessorts() {
         createRessortIfNotFound("Test1", "T1");
         createRessortIfNotFound("Test2", "T2");
-        createRessortIfNotFound("Test3", "T3");
+        return createRessortIfNotFound("Test3", "T3");
     }
 
     @Transactional
@@ -123,7 +122,7 @@ public class SetupDataLoader implements
     }
 
     @Transactional
-    User createUserIfNotFound(final String username, String email, String password, Role role, FederalState federalState) {
+    User createUserIfNotFound(final String username, String email, String password, Role role, FederalState federalState, Ressort ressort) {
         User user = userService.getUserByUsername(username);
         if (user == null) {
             user = new User();
@@ -134,6 +133,7 @@ public class SetupDataLoader implements
             user.setUsername(username);
             user.setEmail(email);
             user.setFederalState(federalState);
+            user.setRessort(ressort);
         }
 
         user = userService.createUser(user);

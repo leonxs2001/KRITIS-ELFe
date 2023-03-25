@@ -1,6 +1,5 @@
 package de.thb.webbaki.repository;
 
-import de.thb.webbaki.entity.Branch;
 import de.thb.webbaki.entity.FederalState;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.RepositoryDefinition;
@@ -13,4 +12,5 @@ public interface FederalStateRepository extends CrudRepository<FederalState, Lon
     List<FederalState> findAll();
 
     FederalState findByName(String name);
+    FederalState findByShortcut(String shortcut);
 }

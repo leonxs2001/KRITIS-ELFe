@@ -27,4 +27,8 @@ public class Ressort {
         this.name = name;
         this.shortcut = shortcut;
     }
+
+    public String toString(){
+        return name;
+    }
 }

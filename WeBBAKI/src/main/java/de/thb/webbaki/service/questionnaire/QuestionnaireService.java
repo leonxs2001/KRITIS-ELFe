@@ -1,6 +1,7 @@
 package de.thb.webbaki.service.questionnaire;
 
 import de.thb.webbaki.entity.Branch;
+import de.thb.webbaki.entity.FederalState;
 import de.thb.webbaki.entity.questionnaire.BranchQuestionnaire;
 import de.thb.webbaki.entity.questionnaire.Questionnaire;
 import de.thb.webbaki.entity.Scenario;
@@ -47,12 +48,12 @@ public class QuestionnaireService {
         return questionnaireRepository.findAll();
     }
 
-    public Questionnaire getQuestionnaireForUser(User user) {
-        Questionnaire questionnaire = questionnaireRepository.findFirstByFederalStateOrderByIdDesc(user.getFederalState());
+    public Questionnaire getQuestionnaireForFederalState(FederalState federalState) {
+        Questionnaire questionnaire = questionnaireRepository.findFirstByFederalStateOrderByIdDesc(federalState);
 
         if (questionnaire == null){
             // TODO change from usr to federal state
-            questionnaire = Questionnaire.builder().federalState(user.getFederalState()).build();
+            questionnaire = Questionnaire.builder().federalState(federalState).build();
 
             List<Branch> branches = branchService.getAllBranches();
             List<Scenario> scenarios = scenarioService.getAllScenariosByActiveTrue();
@@ -154,10 +155,9 @@ public class QuestionnaireService {
 
     /**
      * Create a new Questionnaire with the UserScenarios from inside the form and save it
-     * @param user
      */
     @Transactional
-    public void saveQuestionnaireFromForm(Questionnaire questionnaire, User user) {
+    public void saveQuestionnaireFromForm(Questionnaire questionnaire) {
 
         questionnaireRepository.updateQuestionnaireDateFromId(LocalDateTime.now(), questionnaire.getId());
 
@@ -169,9 +169,9 @@ public class QuestionnaireService {
     }
 
     @Transactional
-    public Questionnaire saveQuestionnaireFromFiles(MultipartFile[] files, User user, Model model){
+    public Questionnaire saveQuestionnaireFromFiles(MultipartFile[] files, FederalState federalState, Model model){
         model.addAttribute("success", true);
-        Questionnaire questionnaire = getQuestionnaireForUser(user);
+        Questionnaire questionnaire = getQuestionnaireForFederalState(federalState);
         questionnaireRepository.updateQuestionnaireDateFromId(LocalDateTime.now(), questionnaire.getId());
 
         for(MultipartFile file: files){

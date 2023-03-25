@@ -1,20 +1,19 @@
 package de.thb.webbaki.controller;
 
-import de.thb.webbaki.entity.Sector;
+import de.thb.webbaki.entity.FederalState;
+import de.thb.webbaki.entity.Role;
+import de.thb.webbaki.entity.User;
 import de.thb.webbaki.entity.questionnaire.Questionnaire;
-import de.thb.webbaki.service.SectorService;
+import de.thb.webbaki.service.*;
+import de.thb.webbaki.service.Exceptions.AccessDeniedException;
 import de.thb.webbaki.service.helper.SectorChangeDetector;
 import de.thb.webbaki.service.questionnaire.QuestionnaireService;
-import de.thb.webbaki.service.ScenarioService;
-import de.thb.webbaki.service.UserService;
 import lombok.AllArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-
-import java.util.List;
 
 @Controller
 @AllArgsConstructor
@@ -24,32 +23,74 @@ public class SituationController {
     private final ScenarioService scenarioService;
     private final UserService userService;
     private final SectorService sectorService;
+    private final FederalStateService federalStateService;
+    private final RoleService roleService;
 
     @GetMapping("/situation")
-    public String showQuestionnaireForm(Authentication authentication, Model model) {
-        //TODO Check which Role (Ressort or FederalState)
-        Questionnaire questionnaire = questionnaireService.getQuestionnaireForUser(userService.getUserByUsername(authentication.getName()));
+    public String showSomeQuestionnaireForm(Authentication authentication){
+        User user = userService.getUserByUsername(authentication.getName());
+        FederalState federalState;
+        Role landRole = roleService.getRoleByName("ROLE_LAND");
 
-        model.addAttribute("questionnaire", questionnaire);
+        if(user.getRoles().contains(landRole)){
+            federalState = user.getFederalState();
+        }else{
+            federalState = federalStateService.getFederalStateByName("Brandenburg");
+        }
 
-        model.addAttribute("sectorChangeDetector", new SectorChangeDetector());
-
-        return "situation/situation";
+        return "redirect:/situation/" + federalState.getShortcut();
     }
 
-    @PostMapping("/situation/form")
+    @GetMapping("/situation/{federalStateShortcut}")
+    public String showQuestionnaireForm(@PathVariable String federalStateShortcut, Authentication authentication, Model model) throws AccessDeniedException {
+        FederalState federalState = federalStateService.getFederalStateByShortcut(federalStateShortcut);
+        User user = userService.getUserByUsername(authentication.getName());
+        Role adminRole = roleService.getRoleByName("ROLE_BBK_ADMIN");
+
+        if(user.getRoles().contains(adminRole) || user.getFederalState().equals(federalState)){
+            Questionnaire questionnaire = questionnaireService.getQuestionnaireForFederalState(federalState);
+
+            model.addAttribute("questionnaire", questionnaire);
+
+            model.addAttribute("sectorChangeDetector", new SectorChangeDetector());
+            model.addAttribute("federalStateShortcut", federalStateShortcut);
+
+            return "situation/situation";
+        }else{
+            throw new AccessDeniedException("The user doesnt have the permission to access the federal State " + federalState.getName() + ".");
+        }
+    }
+
+    @PostMapping("/situation/form/{federalStateShortcut}")
     public String submitQuestionnaire(@ModelAttribute("questionnaire") Questionnaire questionnaire,
-                                      Authentication authentication) {
-        questionnaireService.saveQuestionnaireFromForm(questionnaire, userService.getUserByUsername(authentication.getName()));
-        return "redirect:/situation";
+                                      @PathVariable String federalStateShortcut, Authentication authentication) throws AccessDeniedException {
+        FederalState federalState = federalStateService.getFederalStateByShortcut(federalStateShortcut);
+        Role adminRole = roleService.getRoleByName("ROLE_BBK_ADMIN");
+        User user = userService.getUserByUsername(authentication.getName());
+
+        if(user.getRoles().contains(adminRole) || user.getFederalState().equals(federalState)) {
+            questionnaireService.saveQuestionnaireFromForm(questionnaire);
+            return "redirect:/situation/" + federalStateShortcut;
+        }else{
+            throw new AccessDeniedException("The user doesnt have the permission to access the federal State " + federalState.getName() + ".");
+        }
     }
 
-    @PostMapping("/situation")
-    public String submitFilesFromForm(@RequestParam("files") MultipartFile[] files, Authentication authentication, Model model){
-        Questionnaire questionnaire = questionnaireService.saveQuestionnaireFromFiles(files, userService.getUserByUsername(authentication.getName()), model);
-        model.addAttribute("questionnaire", questionnaire);
-        model.addAttribute("sectorChangeDetector", new SectorChangeDetector());
-        return "situation/situation";
+    @PostMapping("/situation/{federalStateShortcut}")
+    public String submitFilesFromForm(@RequestParam("files") MultipartFile[] files, @PathVariable String federalStateShortcut,
+                                      Authentication authentication, Model model) throws AccessDeniedException {
+        FederalState federalState = federalStateService.getFederalStateByShortcut(federalStateShortcut);
+        Role adminRole = roleService.getRoleByName("ROLE_BBK_ADMIN");
+        User user = userService.getUserByUsername(authentication.getName());
+
+        if(user.getRoles().contains(adminRole) || user.getFederalState().equals(federalState)) {
+            Questionnaire questionnaire = questionnaireService.saveQuestionnaireFromFiles(files, federalState, model);
+            model.addAttribute("questionnaire", questionnaire);
+            model.addAttribute("sectorChangeDetector", new SectorChangeDetector());
+            return "situation/situation";
+        }else{
+            throw new AccessDeniedException("The user doesnt have the permission to access the federal State " + federalState.getName() + ".");
+        }
     }
 
 }
