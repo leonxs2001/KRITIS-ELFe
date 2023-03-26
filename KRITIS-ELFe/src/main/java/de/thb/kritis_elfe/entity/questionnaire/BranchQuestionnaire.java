@@ -29,7 +29,7 @@ public class BranchQuestionnaire {
 
     @OneToMany(mappedBy = "branchQuestionnaire")
     @OrderBy("scenario ASC")
-    private List<UserScenario> userScenarios;
+    private List<FilledScenario> filledScenarios;
 
     //EQUALS & HASHCODE
     @Override

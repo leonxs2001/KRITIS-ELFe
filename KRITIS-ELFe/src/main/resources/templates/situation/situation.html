@@ -65,13 +65,13 @@
                     <i class="bi bi-diamond"></i>
                     <span th:text="${branchQuestionnaire.getBranch().getName()}"></span>
                 </h4>
-                <div class="input-div description-div" th:each="userScenario, iter2: ${branchQuestionnaire.userScenarios}">
-                    <p th:text="${userScenario.getScenario().getDescription()}" class="description-p"></p>
+                <div class="input-div description-div" th:each="filledScenario, iter2: ${branchQuestionnaire.filledScenarios}">
+                    <p th:text="${filledScenario.getScenario().getDescription()}" class="description-p"></p>
                     <div class="input-div without-description-div">
-                        <input type="hidden" th:field="*{branchQuestionnaires[__${iter1.index}__].userScenarios[__${iter2.index}__].id}">
-                        <input type="hidden" th:field="*{branchQuestionnaires[__${iter1.index}__].userScenarios[__${iter2.index}__].scenario.id}">
-                        <select th:if="${userScenario.getScenario().getScenarioType().isWithSelection()}" onchange="onSelectionChange(this)"
-                                th:field="*{branchQuestionnaires[__${iter1.index}__].userScenarios[__${iter2.index}__].value}" class="form-select value-select" >
+                        <input type="hidden" th:field="*{branchQuestionnaires[__${iter1.index}__].filledScenarios[__${iter2.index}__].id}">
+                        <input type="hidden" th:field="*{branchQuestionnaires[__${iter1.index}__].filledScenarios[__${iter2.index}__].scenario.id}">
+                        <select th:if="${filledScenario.getScenario().getScenarioType().isWithSelection()}" onchange="onSelectionChange(this)"
+                                th:field="*{branchQuestionnaires[__${iter1.index}__].filledScenarios[__${iter2.index}__].value}" class="form-select value-select" >
                             <option value="0">unbekannt</option>
                             <option value="1">keine / gar nicht</option>
                             <option value="2">gering</option>
@@ -79,7 +79,7 @@
                             <option value="4">massiv</option>
                         </select>
 
-                        <textarea maxlength="1024" placeholder="Kommentar..." class="form-control comment-textarea" th:field="*{branchQuestionnaires[__${iter1.index}__].userScenarios[__${iter2.index}__].comment}"></textarea>
+                        <textarea maxlength="1024" placeholder="Kommentar..." class="form-control comment-textarea" th:field="*{branchQuestionnaires[__${iter1.index}__].filledScenarios[__${iter2.index}__].comment}"></textarea>
                     </div>
                 </div>
             </div>

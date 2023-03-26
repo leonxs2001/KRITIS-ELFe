@@ -7,7 +7,7 @@ import javax.persistence.*;
 import javax.validation.constraints.Size;
 
 /**
- * A UserScenario is one filled row of  a Questionnaire.
+ * A FilledScenario is one filled row of  a Questionnaire.
  */
 @Builder
 @AllArgsConstructor
@@ -15,7 +15,7 @@ import javax.validation.constraints.Size;
 @Getter
 @Setter
 @Entity
-public class UserScenario{
+public class FilledScenario {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

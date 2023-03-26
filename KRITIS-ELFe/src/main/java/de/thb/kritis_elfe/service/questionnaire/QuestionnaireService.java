@@ -6,7 +6,7 @@ import de.thb.kritis_elfe.entity.questionnaire.BranchQuestionnaire;
 import de.thb.kritis_elfe.entity.questionnaire.Questionnaire;
 import de.thb.kritis_elfe.entity.Scenario;
 import de.thb.kritis_elfe.entity.User;
-import de.thb.kritis_elfe.entity.questionnaire.UserScenario;
+import de.thb.kritis_elfe.entity.questionnaire.FilledScenario;
 import de.thb.kritis_elfe.enums.ScenarioType;
 import de.thb.kritis_elfe.repository.questionnaire.QuestionnaireRepository;
 import de.thb.kritis_elfe.repository.UserRepository;
@@ -38,7 +38,7 @@ public class QuestionnaireService {
     private final UserRepository userRepository;
 
     private final ScenarioService scenarioService;
-    private final UserScenarioService userScenarioService;
+    private final FilledScenarioService filledScenarioService;
     private final BranchService branchService;
     private final BranchQuestionnaireService branchQuestionnaireService;
 
@@ -58,24 +58,24 @@ public class QuestionnaireService {
             List<Branch> branches = branchService.getAllBranches();
             List<Scenario> scenarios = scenarioService.getAllScenariosByActiveTrue();
             List<BranchQuestionnaire> branchQuestionnaires = new ArrayList<>();
-            List<UserScenario> allUserScenarios = new ArrayList<>();
+            List<FilledScenario> allFilledScenarios = new ArrayList<>();
 
             for(Branch branch: branches){
                 BranchQuestionnaire branchQuestionnaire = BranchQuestionnaire.builder().
                         questionnaire(questionnaire).
                         branch(branch).build();
 
-                List<UserScenario> userScenarios = new ArrayList<>();
+                List<FilledScenario> filledScenarios = new ArrayList<>();
 
                 for(Scenario scenario: scenarios){
-                    UserScenario userScenario = UserScenario.builder()
+                    FilledScenario filledScenario = FilledScenario.builder()
                             .scenario(scenario)
                             .branchQuestionnaire(branchQuestionnaire)
                             .comment("").build();
-                    userScenarios.add(userScenario);
+                    filledScenarios.add(filledScenario);
                 }
-                allUserScenarios.addAll(userScenarios);
-                branchQuestionnaire.setUserScenarios(userScenarios);
+                allFilledScenarios.addAll(filledScenarios);
+                branchQuestionnaire.setFilledScenarios(filledScenarios);
                 branchQuestionnaires.add(branchQuestionnaire);
 
             }
@@ -84,7 +84,7 @@ public class QuestionnaireService {
 
             questionnaireRepository.save(questionnaire);
             branchQuestionnaireService.saveBranchQuestionnaires(branchQuestionnaires);
-            userScenarioService.saveAllUserScenario(allUserScenarios);
+            filledScenarioService.saveAllFilledScenarios(allFilledScenarios);
         }
 
         return questionnaire;
@@ -102,7 +102,7 @@ public class QuestionnaireService {
 
         //create a UserScenario for every active Scenario
         List<Scenario> scenarios = scenarioService.getAllScenarios();
-        List<UserScenario> userScenarios = new LinkedList<>();
+        List<FilledScenario> filledScenarios = new LinkedList<>();
         for(Scenario scenario : scenarios){
             if(scenario.isActive()) {
                 /*UserScenario userScenario = UserScenario.builder().smallComment("")
@@ -114,15 +114,15 @@ public class QuestionnaireService {
                 //userScenarios.add(userScenario);
             }
         }
-        userScenarioService.saveAllUserScenario(userScenarios);
+        filledScenarioService.saveAllFilledScenarios(filledScenarios);
 
         return questionnaire;
     }
 
     /**
-     * Checks if all active scenarios have a representation in the questionnaires UserScenarios
-     * --> add an empty UserScenario from this Scenario if not.
-     * delete UserScenarios with an inactive Scenario from this questionnaire
+     * Checks if all active scenarios have a representation in the questionnaires FilledScenarios
+     * --> add an empty FilledScenario from this Scenario if not.
+     * delete FilledScenarios with an inactive Scenario from this questionnaire
      * @param questionnaire
      */
     /*public void checkIfMatchingWithActiveScenariosFromDB(Questionnaire questionnaire){
@@ -154,7 +154,7 @@ public class QuestionnaireService {
     }*/
 
     /**
-     * Create a new Questionnaire with the UserScenarios from inside the form and save it
+     * Create a new Questionnaire with the FilledScenarios from inside the form and save it
      */
     @Transactional
     public void saveQuestionnaireFromForm(Questionnaire questionnaire) {
@@ -162,8 +162,8 @@ public class QuestionnaireService {
         questionnaireRepository.updateQuestionnaireDateFromId(LocalDateTime.now(), questionnaire.getId());
 
         for(BranchQuestionnaire branchQuestionnaire: questionnaire.getBranchQuestionnaires()){
-            for(UserScenario userScenario: branchQuestionnaire.getUserScenarios()){
-                userScenarioService.updateUserScenarioValueAndCommentById(userScenario.getValue(), userScenario.getComment(), userScenario.getId());
+            for(FilledScenario filledScenario: branchQuestionnaire.getFilledScenarios()){
+                filledScenarioService.updateFilledScenarioValueAndCommentById(filledScenario.getValue(), filledScenario.getComment(), filledScenario.getId());
             }
         }
     }
@@ -175,13 +175,13 @@ public class QuestionnaireService {
         questionnaireRepository.updateQuestionnaireDateFromId(LocalDateTime.now(), questionnaire.getId());
 
         for(MultipartFile file: files){
-            saveUserScenariosFromFile(questionnaire, file, model);
+            saveFilledScenariosFromFile(questionnaire, file, model);
         }
         return questionnaire;
     }
 
     @Transactional
-    protected void saveUserScenariosFromFile(Questionnaire questionnaire, MultipartFile file, Model model) {
+    protected void saveFilledScenariosFromFile(Questionnaire questionnaire, MultipartFile file, Model model) {
         String text = getTextFromFile(file);
         //Branch is behind this combination
         String combination = "Branche    ";
@@ -203,20 +203,20 @@ public class QuestionnaireService {
                     text = text.substring(indexOfAppearance + 1);
                     text = text.replaceAll("\\s{2,3}", " ");
 
-                    for (UserScenario userScenario : branchQuestionnaire.getUserScenarios()) {
-                        String scenarioDescription = userScenario.getScenario().getDescription().replaceAll("\r", "").replaceAll("\\s{2,3}", " ");
+                    for (FilledScenario filledScenario : branchQuestionnaire.getFilledScenarios()) {
+                        String scenarioDescription = filledScenario.getScenario().getDescription().replaceAll("\r", "").replaceAll("\\s{2,3}", " ");
 
                         scenarioDescription = sliceEmptyStartAndEnd(scenarioDescription);
                         indexOfAppearance = text.indexOf(scenarioDescription);
                         if (indexOfAppearance >= 0) {
                             int valueStartIndex = indexOfAppearance + scenarioDescription.length();
-                            if(userScenario.getScenario().getScenarioType() == ScenarioType.AUSWAHL) {
+                            if(filledScenario.getScenario().getScenarioType() == ScenarioType.AUSWAHL) {
 
                                 String values = text.substring(valueStartIndex, valueStartIndex + 8).replaceAll("\\s", "");
                                 valueStartIndex += 8;
                                 for(int i = values.length() - 1; i >= 0 ; i--){
                                     if(values.charAt(i) == '☒'){
-                                        userScenario.setValue((short)(i + 1));
+                                        filledScenario.setValue((short)(i + 1));
                                         break;
                                     }
                                     if(i == 0){
@@ -238,13 +238,13 @@ public class QuestionnaireService {
                                     || comment.contains("Bitte immer ausfüllen, wenn nicht „grün“ ausgewählt")) {
                                 comment = "";
                             }
-                            userScenario.setComment(comment);
+                            filledScenario.setComment(comment);
 
                         }else{
                             createModelListIfNotExistsAndInsertFilename(model, "scenarioNotMatchingFileNames", file.getOriginalFilename());
                         }
 
-                        userScenarioService.saveUserScenario(userScenario);
+                        filledScenarioService.saveFilledScenario(filledScenario);
 
                     }
                     break;
