@@ -355,15 +355,45 @@ public class QuestionnaireService {
             Questionnaire questionnaire = getQuestionnaireForFederalState(federalState);
             questionnaire.setReport(report);
             questionnaires.add(questionnaire);
+
+            duplicateQuestionnaire(questionnaire);
         }
 
         for(Ressort ressort: ressortService.getAllRessorts()){
             Questionnaire questionnaire = getQuestionnaireForRessort(ressort);
             questionnaire.setReport(report);
             questionnaires.add(questionnaire);
+
+            duplicateQuestionnaire(questionnaire);
         }
 
         questionnaireRepository.saveAll(questionnaires);
+    }
+
+    private void duplicateQuestionnaire(Questionnaire questionnaire){
+        Questionnaire newQuestionnaire = Questionnaire.builder()
+                .federalState(questionnaire.getFederalState())
+                .ressort(questionnaire.getRessort())
+                .date(questionnaire.getDate()).build();
+
+        questionnaireRepository.save(newQuestionnaire);
+
+        for(BranchQuestionnaire branchQuestionnaire: questionnaire.getBranchQuestionnaires()){
+            BranchQuestionnaire newBranchQuestionnaire = BranchQuestionnaire.builder()
+                    .questionnaire(newQuestionnaire)
+                    .branch(branchQuestionnaire.getBranch()).build();
+            branchQuestionnaireService.saveBranchQuestionnaire(newBranchQuestionnaire);
+
+            for(FilledScenario filledScenario: branchQuestionnaire.getFilledScenarios()){
+                FilledScenario newFilledScenario = FilledScenario.builder()
+                        .branchQuestionnaire(newBranchQuestionnaire)
+                        .value(filledScenario.getValue())
+                        .comment(filledScenario.getComment())
+                        .scenario(filledScenario.getScenario()).build();
+
+                filledScenarioService.saveFilledScenario(newFilledScenario);
+            }
+        }
     }
 
 }
