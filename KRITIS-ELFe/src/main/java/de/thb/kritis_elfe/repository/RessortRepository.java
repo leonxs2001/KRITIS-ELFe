@@ -12,4 +12,5 @@ public interface RessortRepository extends CrudRepository<Ressort, Long> {
     List<Ressort> findAll();
 
     Ressort findByName(String name);
+    Ressort findByShortcut(String shortcut);
 }

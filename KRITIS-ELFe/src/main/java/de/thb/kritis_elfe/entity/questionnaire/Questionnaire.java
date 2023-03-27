@@ -1,6 +1,7 @@
 package de.thb.kritis_elfe.entity.questionnaire;
 
 import de.thb.kritis_elfe.entity.FederalState;
+import de.thb.kritis_elfe.entity.Ressort;
 import de.thb.kritis_elfe.entity.Snapshot;
 import lombok.*;
 import org.hibernate.Hibernate;
@@ -29,6 +30,9 @@ public class Questionnaire {
 
     @ManyToOne
     private FederalState federalState;
+
+    @ManyToOne
+    private Ressort ressort;
 
     @OneToMany(mappedBy = "questionnaire")
     @OrderBy("branch.id ASC")

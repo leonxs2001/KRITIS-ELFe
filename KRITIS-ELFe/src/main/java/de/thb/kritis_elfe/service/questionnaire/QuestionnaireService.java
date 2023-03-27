@@ -1,16 +1,15 @@
 package de.thb.kritis_elfe.service.questionnaire;
 
-import de.thb.kritis_elfe.entity.Branch;
-import de.thb.kritis_elfe.entity.FederalState;
+import de.thb.kritis_elfe.entity.*;
 import de.thb.kritis_elfe.entity.questionnaire.BranchQuestionnaire;
 import de.thb.kritis_elfe.entity.questionnaire.Questionnaire;
-import de.thb.kritis_elfe.entity.Scenario;
-import de.thb.kritis_elfe.entity.User;
 import de.thb.kritis_elfe.entity.questionnaire.FilledScenario;
 import de.thb.kritis_elfe.enums.ScenarioType;
 import de.thb.kritis_elfe.repository.questionnaire.QuestionnaireRepository;
 import de.thb.kritis_elfe.repository.UserRepository;
 import de.thb.kritis_elfe.service.BranchService;
+import de.thb.kritis_elfe.service.Exceptions.AccessDeniedException;
+import de.thb.kritis_elfe.service.Exceptions.EntityDoesNotExistException;
 import de.thb.kritis_elfe.service.ScenarioService;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -56,39 +55,59 @@ public class QuestionnaireService {
             questionnaire = Questionnaire.builder().federalState(federalState).build();
 
             List<Branch> branches = branchService.getAllBranches();
-            List<Scenario> scenarios = scenarioService.getAllScenariosByActiveTrue();
-            List<BranchQuestionnaire> branchQuestionnaires = new ArrayList<>();
-            List<FilledScenario> allFilledScenarios = new ArrayList<>();
-
-            for(Branch branch: branches){
-                BranchQuestionnaire branchQuestionnaire = BranchQuestionnaire.builder().
-                        questionnaire(questionnaire).
-                        branch(branch).build();
-
-                List<FilledScenario> filledScenarios = new ArrayList<>();
-
-                for(Scenario scenario: scenarios){
-                    FilledScenario filledScenario = FilledScenario.builder()
-                            .scenario(scenario)
-                            .branchQuestionnaire(branchQuestionnaire)
-                            .comment("").build();
-                    filledScenarios.add(filledScenario);
-                }
-                allFilledScenarios.addAll(filledScenarios);
-                branchQuestionnaire.setFilledScenarios(filledScenarios);
-                branchQuestionnaires.add(branchQuestionnaire);
-
-            }
-
-            questionnaire.setBranchQuestionnaires(branchQuestionnaires);
-
-            questionnaireRepository.save(questionnaire);
-            branchQuestionnaireService.saveBranchQuestionnaires(branchQuestionnaires);
-            filledScenarioService.saveAllFilledScenarios(allFilledScenarios);
+            fillNewQuestionnaireFromBranches(branches, questionnaire);
         }
 
         return questionnaire;
     }
+
+    public Questionnaire getQuestionnaireForRessort(Ressort ressort) {
+        Questionnaire questionnaire = questionnaireRepository.findFirstByRessortOrderByIdDesc(ressort);
+
+        if (questionnaire == null){
+            // TODO change from usr to federal state
+            questionnaire = Questionnaire.builder().ressort(ressort).build();
+
+            List<Branch> branches = ressort.getBranches();
+
+            fillNewQuestionnaireFromBranches(branches, questionnaire);
+        }
+
+        return questionnaire;
+    }
+
+    private void fillNewQuestionnaireFromBranches(List<Branch> branches, Questionnaire questionnaire) {
+        List<Scenario> scenarios = scenarioService.getAllScenariosByActiveTrue();
+        List<BranchQuestionnaire> branchQuestionnaires = new ArrayList<>();
+        List<FilledScenario> allFilledScenarios = new ArrayList<>();
+
+        for(Branch branch: branches){
+            BranchQuestionnaire branchQuestionnaire = BranchQuestionnaire.builder().
+                    questionnaire(questionnaire).
+                    branch(branch).build();
+
+            List<FilledScenario> filledScenarios = new ArrayList<>();
+
+            for(Scenario scenario: scenarios){
+                FilledScenario filledScenario = FilledScenario.builder()
+                        .scenario(scenario)
+                        .branchQuestionnaire(branchQuestionnaire)
+                        .comment("").build();
+                filledScenarios.add(filledScenario);
+            }
+            allFilledScenarios.addAll(filledScenarios);
+            branchQuestionnaire.setFilledScenarios(filledScenarios);
+            branchQuestionnaires.add(branchQuestionnaire);
+
+        }
+
+        questionnaire.setBranchQuestionnaires(branchQuestionnaires);
+
+        questionnaireRepository.save(questionnaire);
+        branchQuestionnaireService.saveBranchQuestionnaires(branchQuestionnaires);
+        filledScenarioService.saveAllFilledScenarios(allFilledScenarios);
+    }
+
     /**
      * @param user
      * @return new questionnaire for the given user.
@@ -157,31 +176,45 @@ public class QuestionnaireService {
      * Create a new Questionnaire with the FilledScenarios from inside the form and save it
      */
     @Transactional
-    public void saveQuestionnaireFromForm(Questionnaire questionnaire) {
+    public void saveQuestionnaireFromForm(Questionnaire questionnaire, FederalState federalState, Ressort ressort) throws EntityDoesNotExistException {
 
-        questionnaireRepository.updateQuestionnaireDateFromId(LocalDateTime.now(), questionnaire.getId());
+        if(federalState != null && !questionnaireRepository.existsByIdAndFederalState(questionnaire.getId(), federalState)) {
+            throw new EntityDoesNotExistException("There is no questionnaire with the id " + questionnaire.getId() + " and the federal state " + federalState.getName() + ".");
+        }else if(ressort != null && !questionnaireRepository.existsByIdAndRessort(questionnaire.getId(), ressort)) {
+            throw new EntityDoesNotExistException("There is no questionnaire with the id " + questionnaire.getId() + " and the ressort " + ressort.getName() + ".");
+        }else{
 
-        for(BranchQuestionnaire branchQuestionnaire: questionnaire.getBranchQuestionnaires()){
-            for(FilledScenario filledScenario: branchQuestionnaire.getFilledScenarios()){
-                filledScenarioService.updateFilledScenarioValueAndCommentById(filledScenario.getValue(), filledScenario.getComment(), filledScenario.getId());
+            questionnaireRepository.updateQuestionnaireDateFromId(LocalDateTime.now(), questionnaire.getId());
+
+            for (BranchQuestionnaire branchQuestionnaire : questionnaire.getBranchQuestionnaires()) {
+                if(ressort == null || ressort.getBranches().contains(branchQuestionnaire.getBranch())){
+                    for (FilledScenario filledScenario : branchQuestionnaire.getFilledScenarios()) {
+                        filledScenarioService.updateFilledScenarioValueAndCommentById(filledScenario.getValue(), filledScenario.getComment(), filledScenario.getId());
+                    }
+                }
             }
         }
     }
 
     @Transactional
-    public Questionnaire saveQuestionnaireFromFiles(MultipartFile[] files, FederalState federalState, Model model){
+    public Questionnaire saveQuestionnaireFromFiles(MultipartFile[] files, FederalState federalState, Ressort ressort, Model model){
         model.addAttribute("success", true);
-        Questionnaire questionnaire = getQuestionnaireForFederalState(federalState);
+        Questionnaire questionnaire;
+        if(federalState != null) {
+            questionnaire = getQuestionnaireForFederalState(federalState);
+        }else{
+            questionnaire = getQuestionnaireForRessort(ressort);
+        }
         questionnaireRepository.updateQuestionnaireDateFromId(LocalDateTime.now(), questionnaire.getId());
 
         for(MultipartFile file: files){
-            saveFilledScenariosFromFile(questionnaire, file, model);
+            saveFilledScenariosFromFile(questionnaire, file, ressort, model);
         }
         return questionnaire;
     }
 
     @Transactional
-    protected void saveFilledScenariosFromFile(Questionnaire questionnaire, MultipartFile file, Model model) {
+    protected void saveFilledScenariosFromFile(Questionnaire questionnaire, MultipartFile file, Ressort ressort, Model model) {
         String text = getTextFromFile(file);
         //Branch is behind this combination
         String combination = "Branche    ";
@@ -195,59 +228,63 @@ public class QuestionnaireService {
             String branchNameFromFile = text.substring(combination.length(), indexOfAppearance);
             branchNameFromFile = branchNameFromFile.replaceAll("\\s", "").toLowerCase();
             boolean branchFound = false;
-            //TODO EXCEPTION FOr bad input (after all indexOfAppearance >= 0)
+
             for (BranchQuestionnaire branchQuestionnaire : questionnaire.getBranchQuestionnaires()) {
-                String branchName = branchQuestionnaire.getBranch().getName().replaceAll("\\s", "").toLowerCase();
-                if (branchNameFromFile.contains(branchName)) {
-                    branchFound = true;
-                    text = text.substring(indexOfAppearance + 1);
-                    text = text.replaceAll("\\s{2,3}", " ");
+                if(ressort == null || ressort.getBranches().contains(branchQuestionnaire.getBranch())) {
+                    String branchName = branchQuestionnaire.getBranch().getName().replaceAll("\\s", "").toLowerCase();
+                    if (branchNameFromFile.contains(branchName)) {
+                        branchFound = true;
+                        text = text.substring(indexOfAppearance + 1);
+                        text = text.replaceAll("\\s{2,3}", " ");
 
-                    for (FilledScenario filledScenario : branchQuestionnaire.getFilledScenarios()) {
-                        String scenarioDescription = filledScenario.getScenario().getDescription().replaceAll("\r", "").replaceAll("\\s{2,3}", " ");
+                        for (FilledScenario filledScenario : branchQuestionnaire.getFilledScenarios()) {
+                            String scenarioDescription = filledScenario.getScenario().getDescription().replaceAll("\r", "").replaceAll("\\s{2,3}", " ");
 
-                        scenarioDescription = sliceEmptyStartAndEnd(scenarioDescription);
-                        indexOfAppearance = text.indexOf(scenarioDescription);
-                        if (indexOfAppearance >= 0) {
-                            int valueStartIndex = indexOfAppearance + scenarioDescription.length();
-                            if(filledScenario.getScenario().getScenarioType() == ScenarioType.AUSWAHL) {
+                            scenarioDescription = sliceEmptyStartAndEnd(scenarioDescription);
+                            indexOfAppearance = text.indexOf(scenarioDescription);
+                            if (indexOfAppearance >= 0) {
+                                int valueStartIndex = indexOfAppearance + scenarioDescription.length();
+                                if (filledScenario.getScenario().getScenarioType() == ScenarioType.AUSWAHL) {
 
-                                String values = text.substring(valueStartIndex, valueStartIndex + 8).replaceAll("\\s", "");
-                                valueStartIndex += 8;
-                                for(int i = values.length() - 1; i >= 0 ; i--){
-                                    if(values.charAt(i) == '☒'){
-                                        filledScenario.setValue((short)(i + 1));
-                                        break;
-                                    }
-                                    if(i == 0){
-                                        createModelListIfNotExistsAndInsertFilename(model, "noValuesGivenFileNames", file.getOriginalFilename());
+                                    String values = text.substring(valueStartIndex, valueStartIndex + 8).replaceAll("\\s", "");
+                                    valueStartIndex += 8;
+                                    for (int i = values.length() - 1; i >= 0; i--) {
+                                        if (values.charAt(i) == '☒') {
+                                            filledScenario.setValue((short) (i + 1));
+                                            break;
+                                        }
+                                        if (i == 0) {
+                                            createModelListIfNotExistsAndInsertFilename(model, "noValuesGivenFileNames", file.getOriginalFilename());
+                                        }
                                     }
                                 }
-                            }
-                            String slicedText = text.substring(valueStartIndex);
-                            Pattern pattern = Pattern.compile("(\\d+. )|(keine / gar nicht( |\t)gering( |\t)erheblic)");
-                            Matcher matcher = pattern.matcher(slicedText);
-                            String comment;
-                            if(matcher.find()){
-                                comment = slicedText.substring(0, matcher.start());
-                            }else{
-                                comment = slicedText;
-                            }
-                            comment = sliceEmptyStartAndEnd(comment);
-                            if(comment.contains("Bitte näher ausführen (z. B. personell, logistisch, materiell, gesetzgeberisch)")
-                                    || comment.contains("Bitte immer ausfüllen, wenn nicht „grün“ ausgewählt")) {
-                                comment = "";
-                            }
-                            filledScenario.setComment(comment);
+                                String slicedText = text.substring(valueStartIndex);
+                                Pattern pattern = Pattern.compile("(\\d+. )|(keine / gar nicht( |\t)gering( |\t)erheblic)");
+                                Matcher matcher = pattern.matcher(slicedText);
+                                String comment;
+                                if (matcher.find()) {
+                                    comment = slicedText.substring(0, matcher.start());
+                                } else {
+                                    comment = slicedText;
+                                }
+                                comment = sliceEmptyStartAndEnd(comment);
+                                if (comment.contains("Bitte näher ausführen (z. B. personell, logistisch, materiell, gesetzgeberisch)")
+                                        || comment.contains("Bitte immer ausfüllen, wenn nicht „grün“ ausgewählt")) {
+                                    comment = "";
+                                }
+                                filledScenario.setComment(comment);
 
-                        }else{
-                            createModelListIfNotExistsAndInsertFilename(model, "scenarioNotMatchingFileNames", file.getOriginalFilename());
+                            } else {
+                                createModelListIfNotExistsAndInsertFilename(model, "scenarioNotMatchingFileNames", file.getOriginalFilename());
+                            }
+
+                            filledScenarioService.saveFilledScenario(filledScenario);
+
                         }
-
-                        filledScenarioService.saveFilledScenario(filledScenario);
-
+                        break;
                     }
-                    break;
+                }else{
+                    createModelListIfNotExistsAndInsertFilename(model, "branchNotForThisRessort", file.getOriginalFilename());
                 }
             }
 

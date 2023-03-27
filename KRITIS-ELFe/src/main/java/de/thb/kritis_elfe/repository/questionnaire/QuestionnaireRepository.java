@@ -1,6 +1,7 @@
 package de.thb.kritis_elfe.repository.questionnaire;
 
 import de.thb.kritis_elfe.entity.FederalState;
+import de.thb.kritis_elfe.entity.Ressort;
 import de.thb.kritis_elfe.entity.questionnaire.Questionnaire;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -16,6 +17,9 @@ public interface QuestionnaireRepository extends CrudRepository<Questionnaire, L
     Questionnaire findById(long id);
     Questionnaire findAllByFederalState(FederalState federalState);
     Questionnaire findFirstByFederalStateOrderByIdDesc(FederalState federalState);
+    Questionnaire findFirstByRessortOrderByIdDesc(Ressort ressort);
+    boolean existsByIdAndFederalState(long id, FederalState federalState);
+    boolean existsByIdAndRessort(long id, Ressort ressort);
     List<Questionnaire> findAll();
 
     @Modifying

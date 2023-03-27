@@ -33,6 +33,10 @@
                             <td><b>Ressort:</b></td>
                             <td><span th:text="${user.ressort}"></span></td>
                         </tr>
+                        <tr th:if="${user.ressort}">
+                            <td><b>Zugeordnete Branchen des Ressorts:</b></td>
+                            <td><span th:text="${user.ressort.branches}"></span></td>
+                        </tr>
                         <tr th:if="${user.federalState}">
                             <td><b>Land:</b></td>
                             <td><span th:text="${user.federalState}"></span></td>

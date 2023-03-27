@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 
 import javax.transaction.Transactional;
 import java.util.*;
+import java.util.stream.Stream;
 
 @Component
 public class SetupDataLoader implements
@@ -51,7 +52,7 @@ public class SetupDataLoader implements
         }
 
         FederalState brandenburg = createFederalStates();
-        Ressort ressort3 = createRessorts();
+        Ressort ressort3 = createRessorts(createAllSectorsAndBranches());
 
         Role bbkAdmin = createRoleIfNotFound("ROLE_BBK_ADMIN", "BBK Admin");
         Role bbkViewer = createRoleIfNotFound("ROLE_BBK_VIEWER", "BBK Viewer");
@@ -63,7 +64,6 @@ public class SetupDataLoader implements
         createUserIfNotFound("land", "leonschoenberg@gmx.de", "land1234", land, brandenburg, null);
         createUserIfNotFound("ressort", "leonschoenberg@gmx.de", "ressort1234", ressort, null, ressort3);
 
-        createAllSectorsAndBranches();
         createScenarios();
 
         alreadySetup = true;
@@ -80,10 +80,29 @@ public class SetupDataLoader implements
     }
 
     @Transactional
-    Ressort createRessorts() {
-        createRessortIfNotFound("Test1", "T1");
-        createRessortIfNotFound("Test2", "T2");
-        return createRessortIfNotFound("Test3", "T3");
+    Ressort createRessorts(List<Sector> sectors) {
+        List<Branch> branchList = new ArrayList<>();
+        branchList.addAll(sectors.get(0).getBranches());
+        branchList.addAll(sectors.get(1).getBranches());
+        createRessortIfNotFound("Test1", "T1", branchList);
+
+        branchList = new ArrayList<>();
+        branchList.addAll(sectors.get(2).getBranches());
+        branchList.addAll(sectors.get(3).getBranches());
+        createRessortIfNotFound("Test2", "T2", branchList);
+
+        branchList = new ArrayList<>();
+        branchList.addAll(sectors.get(4).getBranches());
+        branchList.addAll(sectors.get(5).getBranches());
+        createRessortIfNotFound("Test4", "T4", branchList);
+        branchList = new ArrayList<>();
+        branchList.addAll(sectors.get(6).getBranches());
+        branchList.addAll(sectors.get(7).getBranches());
+        createRessortIfNotFound("Test5", "T5", branchList);
+
+        branchList = new ArrayList<>();
+        branchList.addAll(sectors.get(8).getBranches());
+        return createRessortIfNotFound("Test6", "T6", branchList);
     }
 
     @Transactional
@@ -149,10 +168,10 @@ public class SetupDataLoader implements
     }
 
     @Transactional
-    Ressort createRessortIfNotFound(String name, String shortcut){
+    Ressort createRessortIfNotFound(String name, String shortcut, List<Branch> branches){
         Ressort ressort = ressortService.getRessortByName(name);
         if(ressort == null){
-            ressort = ressortService.createRessort(new Ressort(name, shortcut));
+            ressort = ressortService.createRessort(new Ressort(name, shortcut, branches));
         }
         return ressort;
     }
@@ -167,56 +186,68 @@ public class SetupDataLoader implements
     }
 
     @Transactional
-    void createAllSectorsAndBranches(){
+    List<Sector> createAllSectorsAndBranches(){
+        List<Sector> sectors = new ArrayList<>();
         Sector sector = createSectorIfNotFound("Energie");
-        createBranchIfNotFound("Elektrizität", sector);
-        createBranchIfNotFound("Gas", sector);
-        createBranchIfNotFound("Mineralöl", sector);
-        createBranchIfNotFound("Fernwärme", sector);
+        sector.getBranches().add(createBranchIfNotFound("Elektrizität", sector));
+        sector.getBranches().add(createBranchIfNotFound("Gas", sector));
+        sector.getBranches().add(createBranchIfNotFound("Mineralöl", sector));
+        sector.getBranches().add(createBranchIfNotFound("Fernwärme", sector));
+        sectors.add(sector);
 
         sector = createSectorIfNotFound("Gesundheit");
-        createBranchIfNotFound("medizinische Versorgung", sector);
-        createBranchIfNotFound("Arzneimittel und Impfstoffe", sector);
-        createBranchIfNotFound("Labore", sector);
+        sector.getBranches().add(createBranchIfNotFound("medizinische Versorgung", sector));
+        sector.getBranches().add(createBranchIfNotFound("Arzneimittel und Impfstoffe", sector));
+        sector.getBranches().add(createBranchIfNotFound("Labore", sector));
+        sectors.add(sector);
 
         sector = createSectorIfNotFound("Informationstechnik und Telekommunikation");
-        createBranchIfNotFound("Telekommunikationstechnik", sector);
-        createBranchIfNotFound("Informationstechnik", sector);
+        sector.getBranches().add(createBranchIfNotFound("Telekommunikationstechnik", sector));
+        sector.getBranches().add(createBranchIfNotFound("Informationstechnik", sector));
+        sectors.add(sector);
 
         sector = createSectorIfNotFound("Transport und Verkehr");
-        createBranchIfNotFound("Luftfahrt", sector);
-        createBranchIfNotFound("Seeschifffahrt", sector);
-        createBranchIfNotFound("Binnenschifffahrt", sector);
-        createBranchIfNotFound("Schienenverkehr", sector);
-        createBranchIfNotFound("Straßenvekehr", sector);
-        createBranchIfNotFound("Logistik", sector);
-        createBranchIfNotFound("ÖPNV", sector);
+        sector.getBranches().add(createBranchIfNotFound("Luftfahrt", sector));
+        sector.getBranches().add(createBranchIfNotFound("Seeschifffahrt", sector));
+        sector.getBranches().add(createBranchIfNotFound("Binnenschifffahrt", sector));
+        sector.getBranches().add(createBranchIfNotFound("Schienenverkehr", sector));
+        sector.getBranches().add(createBranchIfNotFound("Straßenvekehr", sector));
+        sector.getBranches().add(createBranchIfNotFound("Logistik", sector));
+        sector.getBranches().add(createBranchIfNotFound("ÖPNV", sector));
+        sectors.add(sector);
 
         sector = createSectorIfNotFound("Medien und Kultur");
-        createBranchIfNotFound("Rundfunk (Fernsehen und Radio)", sector);
-        createBranchIfNotFound("gedruckte und elektronische Presse", sector);
-        createBranchIfNotFound("Kulturgut", sector);
-        createBranchIfNotFound("symbolträchtige Bauwerke", sector);
+        sector.getBranches().add(createBranchIfNotFound("Rundfunk (Fernsehen und Radio)", sector));
+        sector.getBranches().add(createBranchIfNotFound("gedruckte und elektronische Presse", sector));
+        sector.getBranches().add(createBranchIfNotFound("Kulturgut", sector));
+        sector.getBranches().add(createBranchIfNotFound("symbolträchtige Bauwerke", sector));
+        sectors.add(sector);
 
         sector = createSectorIfNotFound("Wasser");
-        createBranchIfNotFound("öffentliche Wasserversorgung", sector);
-        createBranchIfNotFound("öffentliche Abwasserbeseitigung", sector);
+        sector.getBranches().add(createBranchIfNotFound("öffentliche Wasserversorgung", sector));
+        sector.getBranches().add(createBranchIfNotFound("öffentliche Abwasserbeseitigung", sector));
+        sectors.add(sector);
 
         sector = createSectorIfNotFound("Finanz- und Versicherungswesen");
-        createBranchIfNotFound("Banken", sector);
-        createBranchIfNotFound("Börsen", sector);
-        createBranchIfNotFound("Versicherungen", sector);
-        createBranchIfNotFound("Finanzdienstleister", sector);
+        sector.getBranches().add(createBranchIfNotFound("Banken", sector));
+        sector.getBranches().add(createBranchIfNotFound("Börsen", sector));
+        sector.getBranches().add(createBranchIfNotFound("Versicherungen", sector));
+        sector.getBranches().add(createBranchIfNotFound("Finanzdienstleister", sector));
+        sectors.add(sector);
 
         sector = createSectorIfNotFound("Ernährung");
-        createBranchIfNotFound("Ernährungswissenschaft", sector);
-        createBranchIfNotFound("Lebensmittelhandel", sector);
+        sector.getBranches().add(createBranchIfNotFound("Ernährungswissenschaft", sector));
+        sector.getBranches().add(createBranchIfNotFound("Lebensmittelhandel", sector));
+        sectors.add(sector);
 
         sector = createSectorIfNotFound("Staat und Verwaltung");
-        createBranchIfNotFound("Regierung und Verwaltung", sector);
-        createBranchIfNotFound("Parlament", sector);
-        createBranchIfNotFound("Justizeinrichtungen", sector);
-        createBranchIfNotFound("Notfall/Rettungswesen", sector);
+        sector.getBranches().add(createBranchIfNotFound("Regierung und Verwaltung", sector));
+        sector.getBranches().add(createBranchIfNotFound("Parlament", sector));
+        sector.getBranches().add(createBranchIfNotFound("Justizeinrichtungen", sector));
+        sector.getBranches().add(createBranchIfNotFound("Notfall/Rettungswesen", sector));
+        sectors.add(sector);
+
+        return sectors;
 
     }
 
@@ -225,6 +256,7 @@ public class SetupDataLoader implements
         Sector sector = sectorService.getSectorByName(name);
         if(sector == null){
             sector = sectorService.createSector(new Sector(name));
+            sector.setBranches(new ArrayList<>());
         }
 
         return sector;

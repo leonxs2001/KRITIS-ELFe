@@ -20,4 +20,7 @@ public class RessortService {
 
     public Ressort createRessort(Ressort ressort){return ressortRepository.save(ressort);}
 
+    public Ressort getRessortByShortcut(String shortcut){
+        return ressortRepository.findByShortcut(shortcut);
+    }
 }

@@ -5,6 +5,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.persistence.*;
+import java.util.List;
 import java.util.Objects;
 
 @Getter
@@ -17,6 +18,9 @@ public class Branch {
     private long id;
     private String name;
 
+    @ManyToMany(mappedBy = "branches")
+    private List<Ressort> ressorts;
+
     @ManyToOne
     @JoinColumn(name="sector_id", nullable=false)
     private Sector sector;
@@ -26,20 +30,21 @@ public class Branch {
         return name;
     }
 
+    public Branch(String name, Sector sector){
+        this.name = name;
+        this.sector = sector;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Branch branch = (Branch) o;
-        return Objects.equals(name, branch.name);
+        return id == branch.id;
     }
 
-    public Branch(String name, Sector sector){
-        this.name = name;
-        this.sector = sector;
-    }
     @Override
     public int hashCode() {
-        return Objects.hash(name);
+        return Objects.hash(id);
     }
 }

@@ -1,11 +1,13 @@
 package de.thb.kritis_elfe.controller;
 
 import de.thb.kritis_elfe.entity.FederalState;
+import de.thb.kritis_elfe.entity.Ressort;
 import de.thb.kritis_elfe.entity.Role;
 import de.thb.kritis_elfe.entity.User;
 import de.thb.kritis_elfe.entity.questionnaire.Questionnaire;
 import de.thb.kritis_elfe.service.*;
 import de.thb.kritis_elfe.service.Exceptions.AccessDeniedException;
+import de.thb.kritis_elfe.service.Exceptions.EntityDoesNotExistException;
 import de.thb.kritis_elfe.service.helper.SectorChangeDetector;
 import de.thb.kritis_elfe.service.questionnaire.QuestionnaireService;
 import lombok.AllArgsConstructor;
@@ -25,71 +27,116 @@ public class SituationController {
     private final SectorService sectorService;
     private final FederalStateService federalStateService;
     private final RoleService roleService;
+    private final RessortService ressortService;
 
     @GetMapping("/situation")
     public String showSomeQuestionnaireForm(Authentication authentication){
         User user = userService.getUserByUsername(authentication.getName());
-        FederalState federalState;
+        String shortcut;
         Role landRole = roleService.getRoleByName("ROLE_LAND");
+        Role ressortRole = roleService.getRoleByName("ROLE_Ressort");
 
         if(user.getRoles().contains(landRole)){
-            federalState = user.getFederalState();
+            shortcut = user.getFederalState().getShortcut();
+        }else if(user.getRoles().contains(ressortRole)){
+            shortcut = user.getRessort().getShortcut();
         }else{
-            federalState = federalStateService.getFederalStateByName("Brandenburg");
+            shortcut =  federalStateService.getFederalStateByName("Brandenburg").getShortcut();
         }
 
-        return "redirect:/situation/" + federalState.getShortcut();
+        return "redirect:/situation/" + shortcut;
     }
 
-    @GetMapping("/situation/{federalStateShortcut}")
-    public String showQuestionnaireForm(@PathVariable String federalStateShortcut, Authentication authentication, Model model) throws AccessDeniedException {
-        FederalState federalState = federalStateService.getFederalStateByShortcut(federalStateShortcut);
+    @GetMapping("/situation/{shortcut}")
+    public String showQuestionnaireForm(@PathVariable String shortcut, Authentication authentication, Model model) throws AccessDeniedException {
+        FederalState federalState = federalStateService.getFederalStateByShortcut(shortcut);
+        Ressort ressort = null;
+        if(federalState == null){
+            ressort = ressortService.getRessortByShortcut(shortcut);
+        }
         User user = userService.getUserByUsername(authentication.getName());
         Role adminRole = roleService.getRoleByName("ROLE_BBK_ADMIN");
+        Role landRole = roleService.getRoleByName("ROLE_LAND");
+        Role ressortRole = roleService.getRoleByName("ROLE_RESSORT");
 
-        if(user.getRoles().contains(adminRole) || user.getFederalState().equals(federalState)){
-            Questionnaire questionnaire = questionnaireService.getQuestionnaireForFederalState(federalState);
-
+        if(user.getRoles().contains(adminRole) ||
+                (user.getRoles().contains(landRole) && user.getFederalState().equals(federalState)) ||
+                (user.getRoles().contains(ressortRole) && user.getRessort().equals(ressort))){
+            Questionnaire questionnaire;
+            if(federalState != null) {
+                questionnaire = questionnaireService.getQuestionnaireForFederalState(federalState);
+            }else{
+                questionnaire = questionnaireService.getQuestionnaireForRessort(ressort);
+            }
             model.addAttribute("questionnaire", questionnaire);
 
             model.addAttribute("sectorChangeDetector", new SectorChangeDetector());
-            model.addAttribute("federalStateShortcut", federalStateShortcut);
+            model.addAttribute("shortcut", shortcut);
 
             return "situation/situation";
         }else{
-            throw new AccessDeniedException("The user doesnt have the permission to access the federal State " + federalState.getName() + ".");
+            if(federalState != null) {
+                throw new AccessDeniedException("The user doesnt have the permission to access the federal State " + federalState.getName() + ".");
+            }else{
+                throw new AccessDeniedException("The user doesnt have the permission to access the ressort " + ressort.getName() + ".");
+            }
         }
     }
 
-    @PostMapping("/situation/form/{federalStateShortcut}")
+    @PostMapping("/situation/form/{shortcut}")
     public String submitQuestionnaire(@ModelAttribute("questionnaire") Questionnaire questionnaire,
-                                      @PathVariable String federalStateShortcut, Authentication authentication) throws AccessDeniedException {
-        FederalState federalState = federalStateService.getFederalStateByShortcut(federalStateShortcut);
-        Role adminRole = roleService.getRoleByName("ROLE_BBK_ADMIN");
+                                      @PathVariable String shortcut, Authentication authentication) throws AccessDeniedException, EntityDoesNotExistException {
+        FederalState federalState = federalStateService.getFederalStateByShortcut(shortcut);
+        Ressort ressort = null;
+        if(federalState == null){
+            ressort = ressortService.getRessortByShortcut(shortcut);
+        }
         User user = userService.getUserByUsername(authentication.getName());
+        Role adminRole = roleService.getRoleByName("ROLE_BBK_ADMIN");
+        Role landRole = roleService.getRoleByName("ROLE_LAND");
+        Role ressortRole = roleService.getRoleByName("ROLE_RESSORT");
 
-        if(user.getRoles().contains(adminRole) || user.getFederalState().equals(federalState)) {
-            questionnaireService.saveQuestionnaireFromForm(questionnaire);
-            return "redirect:/situation/" + federalStateShortcut;
+        if(user.getRoles().contains(adminRole) ||
+                (user.getRoles().contains(landRole) && user.getFederalState().equals(federalState)) ||
+                (user.getRoles().contains(ressortRole) && user.getRessort().equals(ressort))){
+            questionnaireService.saveQuestionnaireFromForm(questionnaire, federalState, ressort);
+            return "redirect:/situation/" + shortcut;
         }else{
-            throw new AccessDeniedException("The user doesnt have the permission to access the federal State " + federalState.getName() + ".");
+            if(federalState != null) {
+                throw new AccessDeniedException("The user doesnt have the permission to access the federal State " + federalState.getName() + ".");
+            }else{
+                throw new AccessDeniedException("The user doesnt have the permission to access the ressort " + ressort.getName() + ".");
+            }
         }
     }
 
-    @PostMapping("/situation/{federalStateShortcut}")
-    public String submitFilesFromForm(@RequestParam("files") MultipartFile[] files, @PathVariable String federalStateShortcut,
+    @PostMapping("/situation/{shortcut}")
+    public String submitFilesFromForm(@RequestParam("files") MultipartFile[] files, @PathVariable String shortcut,
                                       Authentication authentication, Model model) throws AccessDeniedException {
-        FederalState federalState = federalStateService.getFederalStateByShortcut(federalStateShortcut);
-        Role adminRole = roleService.getRoleByName("ROLE_BBK_ADMIN");
+        FederalState federalState = federalStateService.getFederalStateByShortcut(shortcut);
+        Ressort ressort = null;
+        if(federalState == null){
+            ressort = ressortService.getRessortByShortcut(shortcut);
+        }
         User user = userService.getUserByUsername(authentication.getName());
+        Role adminRole = roleService.getRoleByName("ROLE_BBK_ADMIN");
+        Role landRole = roleService.getRoleByName("ROLE_LAND");
+        Role ressortRole = roleService.getRoleByName("ROLE_RESSORT");
 
-        if(user.getRoles().contains(adminRole) || user.getFederalState().equals(federalState)) {
-            Questionnaire questionnaire = questionnaireService.saveQuestionnaireFromFiles(files, federalState, model);
+        if(user.getRoles().contains(adminRole) ||
+                (user.getRoles().contains(landRole) && user.getFederalState().equals(federalState)) ||
+                (user.getRoles().contains(ressortRole) && user.getRessort().equals(ressort))){
+            Questionnaire questionnaire = questionnaireService.saveQuestionnaireFromFiles(files, federalState, ressort, model);
             model.addAttribute("questionnaire", questionnaire);
             model.addAttribute("sectorChangeDetector", new SectorChangeDetector());
+            model.addAttribute("shortcut", shortcut);
             return "situation/situation";
         }else{
-            throw new AccessDeniedException("The user doesnt have the permission to access the federal State " + federalState.getName() + ".");
+            if(federalState != null) {
+                throw new AccessDeniedException("The user doesnt have the permission to access the federal State " + federalState.getName() + ".");
+            }else{
+                throw new AccessDeniedException("The user doesnt have the permission to access the ressort " + ressort.getName() + ".");
+            }
         }
     }
 

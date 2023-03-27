@@ -5,10 +5,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Setter
@@ -20,12 +19,16 @@ public class Ressort {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
-    String name;
-    String shortcut;
+    private String name;
+    private String shortcut;
 
-    public Ressort(String name, String shortcut){
+    @ManyToMany()
+    private List<Branch> branches;
+
+    public Ressort(String name, String shortcut, List<Branch> branches){
         this.name = name;
         this.shortcut = shortcut;
+        this.setBranches(branches);
     }
 
     public String toString(){
