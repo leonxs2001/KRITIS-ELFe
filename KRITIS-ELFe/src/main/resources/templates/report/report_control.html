@@ -4,17 +4,37 @@
 <head>
 
     <meta charset="UTF-8">
-    <title>Lagereport</title>
+    <title>Lagereportsverwaltung</title>
+    <link th:href="@{/css/report_control_style.css}" rel="stylesheet">
 </head>
 <body>
 <div layout:fragment="content">
     <div class="container">
-        <h2>Lagereportserstellung</h2><br>
+        <h2>Lagereportsverwaltung</h2><br>
 
-        <!-- Button trigger modal -->
-        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModalCenter">
-            Lagereport erstellen
-        </button>
+            <!-- Button trigger modal -->
+            <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModalCenter">
+                Neuen Lagereport erstellen
+            </button>
+            <p th:if="${notFullyFilledFederalStates.size() > 0 || notFullyFilledRessorts.size() > 0}" id="error-text" class="text-danger">
+                <span class="font-weight-bold">Achtung!</span><br>
+                Nicht alle Lageberichte wurden komplett ausgefüllt.<br>
+                <th:block th:if="${notFullyFilledFederalStates.size() > 0}">
+                    Es fehlt etwas bei diesen Ländern: <br>
+                    <th:block th:each="federalState, istat: ${notFullyFilledFederalStates}">
+                        <th:block th:text="${federalState.getName()}"></th:block><th:block th:if="${istat.index < notFullyFilledFederalStates.size() - 2}" th:text="${', '}"></th:block>
+                        <th:block th:if="${istat.index == notFullyFilledFederalStates.size() - 2}" th:text="${' und '}"></th:block>
+                    </th:block>
+                </th:block>
+                <br th:if="${notFullyFilledFederalStates.size() > 0 && notFullyFilledRessorts.size() > 0}">
+                <th:block th:if="${notFullyFilledRessorts.size() > 0}">
+                    Es fehlt etwas bei den Ressorts:<br>
+                    <th:block th:each="ressort, istat: ${notFullyFilledRessorts}">
+                        <th:block th:text="${ressort.getName()}"></th:block><th:block th:if="${istat.index < notFullyFilledRessorts.size() - 2}" th:text="${', '}"></th:block>
+                        <th:block th:if="${istat.index == notFullyFilledRessorts.size() - 2}" th:text="${' und '}"></th:block>
+                    </th:block>
+                </th:block>
+            </p>
 
         <!-- Modal -->
         <div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog"
@@ -41,7 +61,7 @@
                 </div>
             </div>
         </div>
-        <br>
+
         <table class="table table-bordered table-striped">
             <thead>
             <tr>

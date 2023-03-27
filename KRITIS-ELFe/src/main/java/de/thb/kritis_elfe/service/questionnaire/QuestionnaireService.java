@@ -396,4 +396,37 @@ public class QuestionnaireService {
         }
     }
 
+    public List<FederalState> getFederalStatesWithEmptyQuestionnaire(){
+        List<FederalState> federalStates = new ArrayList<>();
+        for(FederalState federalState: federalStateService.getAllFederalStates()){
+            if(!isQuestionnaireFullyFilled(getQuestionnaireForFederalState(federalState))){
+                federalStates.add(federalState);
+            }
+        }
+        return  federalStates;
+    }
+
+    public List<Ressort> getRessortsWithEmptyQuestionnaire(){
+        List<Ressort> ressorts = new ArrayList<>();
+        for(Ressort ressort: ressortService.getAllRessorts()){
+            if(!isQuestionnaireFullyFilled(getQuestionnaireForRessort(ressort))){
+                ressorts.add(ressort);
+            }
+        }
+
+        return ressorts;
+    }
+
+    private boolean isQuestionnaireFullyFilled(Questionnaire questionnaire){
+        for(BranchQuestionnaire branchQuestionnaire: questionnaire.getBranchQuestionnaires()){
+            for(FilledScenario filledScenario: branchQuestionnaire.getFilledScenarios()){
+                if(filledScenario.getScenario().getScenarioType() == ScenarioType.AUSWAHL && filledScenario.getValue() <= 0){
+                    return false;
+                }
+            }
+        }
+
+        return true;
+    }
+
 }

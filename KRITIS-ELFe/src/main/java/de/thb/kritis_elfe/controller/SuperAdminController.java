@@ -7,6 +7,7 @@ import de.thb.kritis_elfe.entity.User;
 import de.thb.kritis_elfe.service.RoleService;
 import de.thb.kritis_elfe.service.ReportService;
 import de.thb.kritis_elfe.service.UserService;
+import de.thb.kritis_elfe.service.questionnaire.QuestionnaireService;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -28,6 +29,7 @@ public class SuperAdminController implements Comparable {
     private final UserService userService;
     private final RoleService roleService;
     private final ReportService reportService;
+    private final QuestionnaireService questionnaireService;
 
     @Autowired
     HelpPathReader helpPathReader;
@@ -64,20 +66,22 @@ public class SuperAdminController implements Comparable {
         return "redirect:admin";
     }
 
-    @GetMapping("/create-report")
-    public String getReports(Model model) {
+    @GetMapping("/report-control")
+    public String getReportControl(Model model) {
 
         List<Report> reports = reportService.getAllSnapshots();
         model.addAttribute("reports", reports);
 
         Report newReport = new Report();
         model.addAttribute("newReport", newReport);
+        model.addAttribute("notFullyFilledFederalStates", questionnaireService.getFederalStatesWithEmptyQuestionnaire());
+        model.addAttribute("notFullyFilledRessorts", questionnaireService.getRessortsWithEmptyQuestionnaire());
 
-        return "report/create_report";
+        return "report/report_control";
     }
 
-    @PostMapping("/create-report")
-    public String postSnap(@ModelAttribute("snapName") Report newReport) {
+    @PostMapping("/report-control")
+    public String postNewReport(@ModelAttribute("snapName") Report newReport) {
         reportService.createReport(newReport);
         return "redirect:create-report";
     }
