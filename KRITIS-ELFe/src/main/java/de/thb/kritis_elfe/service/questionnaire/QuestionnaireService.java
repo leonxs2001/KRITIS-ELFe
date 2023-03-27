@@ -10,6 +10,8 @@ import de.thb.kritis_elfe.repository.UserRepository;
 import de.thb.kritis_elfe.service.BranchService;
 import de.thb.kritis_elfe.service.Exceptions.AccessDeniedException;
 import de.thb.kritis_elfe.service.Exceptions.EntityDoesNotExistException;
+import de.thb.kritis_elfe.service.FederalStateService;
+import de.thb.kritis_elfe.service.RessortService;
 import de.thb.kritis_elfe.service.ScenarioService;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -40,6 +42,8 @@ public class QuestionnaireService {
     private final FilledScenarioService filledScenarioService;
     private final BranchService branchService;
     private final BranchQuestionnaireService branchQuestionnaireService;
+    private final FederalStateService federalStateService;
+    private final RessortService ressortService;
 
     public void save(Questionnaire questionnaire){questionnaireRepository.save(questionnaire);}
     public Questionnaire getQuestionnaire(long id) {return questionnaireRepository.findById(id);}
@@ -343,6 +347,23 @@ public class QuestionnaireService {
         }
 
         return extractedText.replaceAll(Character.toString((char)160), " ");
+    }
+
+    public void persistQuestionnairesForReport(Report report){
+        List<Questionnaire> questionnaires = new ArrayList<>();
+        for(FederalState federalState: federalStateService.getAllFederalStates()){
+            Questionnaire questionnaire = getQuestionnaireForFederalState(federalState);
+            questionnaire.setReport(report);
+            questionnaires.add(questionnaire);
+        }
+
+        for(Ressort ressort: ressortService.getAllRessorts()){
+            Questionnaire questionnaire = getQuestionnaireForRessort(ressort);
+            questionnaire.setReport(report);
+            questionnaires.add(questionnaire);
+        }
+
+        questionnaireRepository.saveAll(questionnaires);
     }
 
 }

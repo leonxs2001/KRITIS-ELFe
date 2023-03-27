@@ -30,7 +30,7 @@
                     <form th:action="@{/create-report}" method="post">
                         <div class="modal-body">
                             <label for="sname">Name:</label><br>
-                            <input class="form-control" required type="text" id="sname" th:field="${snapName.name}"><br>
+                            <input class="form-control" required type="text" id="sname" th:field="${newReport.name}"><br>
                         </div>
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
@@ -52,12 +52,12 @@
             </tr>
             </thead>
             <tbody>
-            <tr th:each="i: ${#numbers.sequence(snaps.size() -1,0,-1)}">
-                <td th:text="${snaps[i].id}"></td>
-                <td th:text="${snaps[i].name}"></td>
-                <td th:text="${snaps[i].date.toLocalDate().toString() + ' ' + snaps[i].date.toLocalTime().toString().substring(0,5)}"></td>
+            <tr th:each="report: ${reports}">
+                <td th:text="${report.id}"></td>
+                <td th:text="${report.name}"></td>
+                <td th:text="${report.getDateAsString()}"></td>
                 <td>
-                    <a th:href="@{/snap/{snapID}(snapID=${snaps[i].id})}">
+                    <a th:href="${'/report-details/?id=' +report.getId()}">
                         <button class="btn btn-outline-primary">Details</button>
                     </a>
                 </td>

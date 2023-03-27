@@ -1,11 +1,11 @@
 package de.thb.kritis_elfe.controller;
 
 import com.lowagie.text.DocumentException;
-import de.thb.kritis_elfe.entity.Snapshot;
+import de.thb.kritis_elfe.entity.Report;
 import de.thb.kritis_elfe.service.Exceptions.UnknownReportFocusException;
-import de.thb.kritis_elfe.service.ReportService;
+import de.thb.kritis_elfe.service.ooooooldReportService;
 import de.thb.kritis_elfe.service.helper.Counter;
-import de.thb.kritis_elfe.service.SnapshotService;
+import de.thb.kritis_elfe.service.ReportService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
@@ -23,10 +23,10 @@ import javax.servlet.http.HttpServletResponse;
 @Controller
 public class ReportController {
     @Autowired
-    private SnapshotService snapshotService;
+    private ReportService reportService;
 
     @Autowired
-    private ReportService reportService;
+    private ooooooldReportService ooooooldReportService;
 
     /**
      * Redirect to url with newest snap-id (because of the Nav elements in the layout.html).
@@ -34,7 +34,7 @@ public class ReportController {
      */
     @GetMapping("report/{reportFocus}")
     public String showReport(@PathVariable("reportFocus") String reportFocusString){
-        long snapId = snapshotService.getNewestSnapshot().getId();
+        long snapId = reportService.getNewestSnapshot().getId();
         return "redirect:/report/"+reportFocusString+"/"+String.valueOf(snapId);
     }
 
@@ -44,11 +44,11 @@ public class ReportController {
         //ReportFocus reportFocus = ReportFocus.getReportFocusByEnglishRepresentation(reportFocusString);
         //model.addAttribute("reportFocus", reportFocus);
 
-        Snapshot currentSnapshot = snapshotService.getSnapshotByID(snapId).get();
-        model.addAttribute("currentSnapshot", currentSnapshot);
+        Report currentReport = reportService.getReportById(snapId);
+        model.addAttribute("currentSnapshot", currentReport);
 
-        final List<Snapshot> snapshotList = snapshotService.getAllSnapshotOrderByDESC();
-        model.addAttribute("snapshotList", snapshotList);
+        final List<Report> reportList = reportService.getAllSnapshotOrderByDESC();
+        model.addAttribute("snapshotList", reportList);
 
         model.addAttribute("counter", new Counter());
 
@@ -68,12 +68,12 @@ public class ReportController {
         /*ReportFocus reportFocus = ReportFocus.getReportFocusByEnglishRepresentation(reportFocusString);
         context.setVariable("reportFocus", reportFocus);*/
 
-        Snapshot currentSnapshot = snapshotService.getSnapshotByID(snapId).get();
-        context.setVariable("currentSnapshot", currentSnapshot);
+        Report currentReport = reportService.getReportById(snapId);
+        context.setVariable("currentSnapshot", currentReport);
 
         context.setVariable("counter", new Counter());
 
-        reportService.generatePdfFromHtml(reportService.parseThymeleafTemplateToHtml("report/report", context),
+        ooooooldReportService.generatePdfFromHtml(ooooooldReportService.parseThymeleafTemplateToHtml("report/report", context),
                 request.getScheme()+"://"+request.getServerName()+":"+request.getServerPort(), response.getOutputStream());
 
     }

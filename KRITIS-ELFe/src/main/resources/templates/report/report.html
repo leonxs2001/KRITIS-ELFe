@@ -11,7 +11,7 @@
         <img width="160px" style="float: right; margin: 0;" src="/images/UP-KRITIS_LOGO_Transparent.png"></img>
     </div>
     <div th:fragment="report">
-        <h1 style="width: 100%; text-align: center; margin-bottom: 2em;" th:text='${reportFocus.getGermanRepresentation() +" Report von " + currentSnapshot.getName()}'></h1>
+        <h1 style="width: 100%; text-align: center; margin-bottom: 2em;" th:text='${reportFocus.getGermanRepresentation() +" Report von " + currentReport.getName()}'></h1>
         <p style="margin-bottom: 2em; font-size: 1.3em;" th:if="${!reportFocus.getGermanRepresentation().equals('Firmeninterner')}" th:text="${'Die Anzahl der ' + ((reportFocus.getGermanRepresentation().equals('Nationaler'))?(' Branchenmittelwerte der Bedrohungsmatrizen'):(' Bedrohungsmatrizen')) + ', auf dessen Grundlage die Berechnung des Reports beruht ist ' + report.getNumberOfQuestionnaires() + '.' }"></p>
         <th:block th:each="masterScenario: ${masterScenarioList}" th:if="${report.checkIfContainsMasterScenario(masterScenario)}">
             <div >
@@ -25,8 +25,8 @@
                             <td style="border-bottom: 1px dashed grey;text-align: center;">
                                 <div style="display: flex; flex-direction: row;justify-content: center;">
                                     <span>Anzahl</span>
-                                    <!-- only show the information- button and text if there is a snapshotList(if not ist the downloadable part)-->
-                                    <div class="dropdown" th:if="${snapshotList != null}">
+                                    <!-- only show the information- button and text if there is a reportList(if not ist the downloadable part)-->
+                                    <div class="dropdown" th:if="${reportList != null}">
                                         <button style="background-color: transparent; border: 0;" class="bi bi-info-circle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"></button>
                                         <!--Show different description for the national report (has no user, sector or branch)-->
                                         <div class="dropdown-menu" style="width: auto;" th:if="${report.getSector() == null && report.getBranch() == null && report.getUser() == null}">

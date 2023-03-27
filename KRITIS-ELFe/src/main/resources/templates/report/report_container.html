@@ -12,10 +12,10 @@
             <div class="container">
                 <h4 id="snapshotH5">Der Report von:</h4>
                 <select id="snapshotSelect" onchange="onThreatSituationChange(this)" class="form-select form-select-sm">
-                    <option th:each="snapshot, iStat : ${snapshotList}" th:text="${snapshot.getName()}" th:value="${snapshot.getId()}" th:selected='${((currentSnapshot.getId() == snapshot.getId())?("true"):("false"))}'></option>
+                    <option th:each="report, iStat : ${reportList}" th:text="${report.getName()}" th:value="${report.getId()}" th:selected='${((currentReport.getId() == report.getId())?("true"):("false"))}'></option>
                 </select>
                 <th:block th:if="${report.getNumberOfQuestionnaires() > 0}">
-                    <a type="button" id="downloadButton" class="btn btn-primary" th:href='${"/report/"+reportFocus.getUrlPart()+"/"+currentSnapshot.getId()+"/download"}' style="margin-bottom: 2em;"> Download</a>
+                    <a type="button" id="downloadButton" class="btn btn-primary" th:href='${"/report/"+reportFocus.getUrlPart()+"/"+currentReport.getId()+"/download"}' style="margin-bottom: 2em;"> Download</a>
                     <div th:replace="report/report :: report"></div>
                 </th:block >
                 <p id="ErrorP" th:if="${report.getNumberOfQuestionnaires() <= 0}" >Leider gibt es keine gespeicherte Bedrohungsmatrix in diesem Snapshot für diese Situation.</p>

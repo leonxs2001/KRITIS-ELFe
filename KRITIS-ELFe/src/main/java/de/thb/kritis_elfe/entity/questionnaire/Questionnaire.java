@@ -2,7 +2,7 @@ package de.thb.kritis_elfe.entity.questionnaire;
 
 import de.thb.kritis_elfe.entity.FederalState;
 import de.thb.kritis_elfe.entity.Ressort;
-import de.thb.kritis_elfe.entity.Snapshot;
+import de.thb.kritis_elfe.entity.Report;
 import lombok.*;
 import org.hibernate.Hibernate;
 
@@ -26,7 +26,7 @@ public class Questionnaire {
     private LocalDateTime date;
 
     @ManyToOne
-    private Snapshot snapshot;
+    private Report report;
 
     @ManyToOne
     private FederalState federalState;

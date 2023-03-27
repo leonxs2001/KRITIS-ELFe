@@ -2,10 +2,10 @@ package de.thb.kritis_elfe.controller;
 
 import de.thb.kritis_elfe.configuration.HelpPathReader;
 import de.thb.kritis_elfe.controller.form.UserToRoleFormModel;
-import de.thb.kritis_elfe.entity.Snapshot;
+import de.thb.kritis_elfe.entity.Report;
 import de.thb.kritis_elfe.entity.User;
 import de.thb.kritis_elfe.service.RoleService;
-import de.thb.kritis_elfe.service.SnapshotService;
+import de.thb.kritis_elfe.service.ReportService;
 import de.thb.kritis_elfe.service.UserService;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,7 +27,7 @@ import java.util.List;
 public class SuperAdminController implements Comparable {
     private final UserService userService;
     private final RoleService roleService;
-    private final SnapshotService snapshotService;
+    private final ReportService reportService;
 
     @Autowired
     HelpPathReader helpPathReader;
@@ -65,15 +65,21 @@ public class SuperAdminController implements Comparable {
     }
 
     @GetMapping("/create-report")
-    public String getSnap(Model model) {
+    public String getReports(Model model) {
 
-        List<Snapshot> snaps = snapshotService.getAllSnapshots();
-        model.addAttribute("snaps", snaps);
+        List<Report> reports = reportService.getAllSnapshots();
+        model.addAttribute("reports", reports);
 
-        Snapshot snapName = new Snapshot();
-        model.addAttribute("snapName", snapName);
+        Report newReport = new Report();
+        model.addAttribute("newReport", newReport);
 
-        return "snap/snapshot";
+        return "report/create_report";
+    }
+
+    @PostMapping("/create-report")
+    public String postSnap(@ModelAttribute("snapName") Report newReport) {
+        reportService.createReport(newReport);
+        return "redirect:create-report";
     }
 
     @GetMapping("/confirmation/userDenied")
@@ -81,19 +87,12 @@ public class SuperAdminController implements Comparable {
         return "confirmation/userDenied";
     }
 
-    @PostMapping("/create-report")
-    public String postSnap(@ModelAttribute("snapName") Snapshot snapName) {
-        snapshotService.createSnap(snapName);
-        return "redirect:snap";
+    @GetMapping("/report-details")
+    public String showSnapByID(@RequestParam("id") long reportId, Model model) {
+        Report report = reportService.getReportById(reportId);
+        model.addAttribute("report", report);
 
-    }
-
-    @GetMapping("/snap/{snapID}")
-    public String showSnapByID(@PathVariable("snapID") long snapID, Model model) {
-        Snapshot snapshot = snapshotService.getSnapshotByID(snapID).get();
-        model.addAttribute("snapshot", snapshot);
-
-        return "snap/details";
+        return "report/report_details";
     }
 
     @GetMapping("/adjustHelp")

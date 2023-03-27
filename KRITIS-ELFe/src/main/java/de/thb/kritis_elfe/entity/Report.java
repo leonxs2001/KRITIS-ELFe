@@ -15,7 +15,7 @@ import java.util.List;
 @Setter
 @Entity(name="snapshot")
 @Table
-public class Snapshot {
+public class Report {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -25,7 +25,7 @@ public class Snapshot {
 
     private LocalDateTime date;
 
-    @OneToMany(mappedBy = "snapshot")
+    @OneToMany(mappedBy = "report")
     private List<Questionnaire> questionnaires;
 
     public String getDateAsString(){

@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout.html}">
+<head>
+
+    <meta charset="UTF-8">
+    <title>Reportdetails</title>
+</head>
+<body>
+<div layout:fragment="content">
+    <div class="container">
+        <h2 th:text="${'Report Details für ' + report.getName()}"></h2><br>
+        <h5 th:text="${'Erstellt ' + report.getDateAsString()}"></h5>
+        <table class="table table-bordered table-striped">
+            <thead>
+            <tr>
+                <th>ID</th>
+                <th>Letzte Änderung</th>
+                <th>Typ</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="questionnaire : ${report.getQuestionnaires()}">
+                <td th:text="${questionnaire.getId()}"></td>
+                <td th:text="${questionnaire.getDate()}"></td>
+                <td th:if="${questionnaire.getFederalState() != null}" th:text="${questionnaire.getFederalState().getName()}"></td>
+                <td th:if="${questionnaire.getRessort() != null}" th:text="${questionnaire.getRessort().getName()}"></td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+</body>
+</html>

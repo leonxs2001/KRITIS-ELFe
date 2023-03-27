@@ -1,55 +1,40 @@
 package de.thb.kritis_elfe.service;
 
-import com.lowagie.text.DocumentException;
+import de.thb.kritis_elfe.entity.Report;
+import de.thb.kritis_elfe.repository.ReportRepository;
+import de.thb.kritis_elfe.service.questionnaire.QuestionnaireService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.thymeleaf.TemplateEngine;
-import org.thymeleaf.context.Context;
-import org.thymeleaf.templatemode.TemplateMode;
-import org.thymeleaf.templateresolver.ClassLoaderTemplateResolver;
-import org.xhtmlrenderer.pdf.ITextRenderer;
 
-import java.io.BufferedOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
-
+import java.time.LocalDateTime;
+import java.util.*;
 
 @Service
-public class  ReportService {
+public class ReportService {
 
-    /**
-     *
-     * @param template Does not need the .html.
-     * @param context Contains the variables that we want to be passed to Thymeleaf.
-     *                Addable with context.setVariable(key, value);
-     * @return the html of the parsed template code as a String
-     */
-    public String parseThymeleafTemplateToHtml(String template, Context context){
-        ClassLoaderTemplateResolver templateResolver = new ClassLoaderTemplateResolver();
-        templateResolver.setSuffix(".html");
-        templateResolver.setTemplateMode(TemplateMode.HTML);
+    @Autowired
+    private ReportRepository reportRepository;
 
-        TemplateEngine templateEngine = new TemplateEngine();
-        templateEngine.setTemplateResolver(templateResolver);
+    @Autowired
+    QuestionnaireService questionnaireService;
 
-        return templateEngine.process("templates/" + template, context);
-    }
+    public List<Report> getAllSnapshots(){return reportRepository.findAll();}
 
-    /**
-     * Create an pdf outputStream from a html-string
-     * @param html
-     * @param outputStream is used as return value to write in the pdf-document-stream
-     * @throws IOException
-     * All styles in the html have to be inline.
-     * Not closed elements like <br> and <link> have to be closed like this
-     * <br></br> and <link></link>
-     */
-    public void generatePdfFromHtml(String html, String baseUrl, OutputStream outputStream) throws IOException, DocumentException {
-        BufferedOutputStream bufferedOutputStream = new BufferedOutputStream(outputStream);
-        ITextRenderer renderer = new ITextRenderer();
-        renderer.setDocumentFromString(html,baseUrl);
-        renderer.layout();
-        renderer.createPDF(bufferedOutputStream);
+    public List<Report> getAllSnapshotOrderByDESC(){return reportRepository.findAllByOrderByIdDesc();}
 
-        bufferedOutputStream.close();
+    public Report getReportById(Long id){return reportRepository.findById(id).get();}
+
+    public Report getNewestSnapshot(){return reportRepository.findTopByOrderByIdDesc();}
+
+    public boolean ExistsByName(String name){return reportRepository.existsSnapshotByName(name);}
+
+    public void createReport(Report report){
+
+        // Perist Snapshot
+        report.setDate(LocalDateTime.now());
+        reportRepository.save(report);
+
+        questionnaireService.persistQuestionnairesForReport(report);
+
     }
 }
