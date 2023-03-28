@@ -2,3 +2,12 @@
     margin-top: 0.5em;
     margin-bottom: 1em;
 }
+
+#heading{
+    margin-bottom: 1em;
+}
+
+#questionnaire-select{
+    width: fit-content;
+    margin-bottom: 0.5em;
+}

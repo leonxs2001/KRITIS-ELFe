@@ -4,9 +4,7 @@ import de.thb.kritis_elfe.configuration.HelpPathReader;
 import de.thb.kritis_elfe.controller.form.UserToRoleFormModel;
 import de.thb.kritis_elfe.entity.Report;
 import de.thb.kritis_elfe.entity.User;
-import de.thb.kritis_elfe.service.RoleService;
-import de.thb.kritis_elfe.service.ReportService;
-import de.thb.kritis_elfe.service.UserService;
+import de.thb.kritis_elfe.service.*;
 import de.thb.kritis_elfe.service.questionnaire.QuestionnaireService;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,6 +28,8 @@ public class SuperAdminController implements Comparable {
     private final RoleService roleService;
     private final ReportService reportService;
     private final QuestionnaireService questionnaireService;
+    private final RessortService ressortService;
+    private final FederalStateService federalStateService;
 
     @Autowired
     HelpPathReader helpPathReader;
@@ -76,7 +76,8 @@ public class SuperAdminController implements Comparable {
         model.addAttribute("newReport", newReport);
         model.addAttribute("notFullyFilledFederalStates", questionnaireService.getFederalStatesWithEmptyQuestionnaire());
         model.addAttribute("notFullyFilledRessorts", questionnaireService.getRessortsWithEmptyQuestionnaire());
-
+        model.addAttribute("ressorts", ressortService.getAllRessorts());
+        model.addAttribute("federalStates", federalStateService.getAllFederalStates());
         return "report/report_control";
     }
 
