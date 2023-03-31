@@ -34,7 +34,7 @@ public class ReportController {
      */
     @GetMapping("report/{reportFocus}")
     public String showReport(@PathVariable("reportFocus") String reportFocusString){
-        long snapId = reportService.getNewestSnapshot().getId();
+        long snapId = reportService.getNewestReport().getId();
         return "redirect:/report/"+reportFocusString+"/"+String.valueOf(snapId);
     }
 
@@ -47,7 +47,7 @@ public class ReportController {
         Report currentReport = reportService.getReportById(snapId);
         model.addAttribute("currentSnapshot", currentReport);
 
-        final List<Report> reportList = reportService.getAllSnapshotOrderByDESC();
+        final List<Report> reportList = reportService.getAllReportsOrderByDESC();
         model.addAttribute("snapshotList", reportList);
 
         model.addAttribute("counter", new Counter());

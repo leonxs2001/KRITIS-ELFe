@@ -43,11 +43,12 @@ form{
 .value-select{
     align-self: center;
     margin-right: 1em;
-    height: 50%;
+    height: fit-content;
 }
 
 .description-p{
     width: 40%;
+    align-self: center;
 }
 
 .without-description-div{
@@ -60,7 +61,4 @@ form{
         height: 70%;
     }
 
-    .value-select{
-        height: 70%;
-    }
 }

@@ -18,13 +18,13 @@ public class ReportService {
     @Autowired
     QuestionnaireService questionnaireService;
 
-    public List<Report> getAllSnapshots(){return reportRepository.findAll();}
+    public List<Report> getAllReports(){return reportRepository.findAll();}
 
-    public List<Report> getAllSnapshotOrderByDESC(){return reportRepository.findAllByOrderByIdDesc();}
+    public List<Report> getAllReportsOrderByDESC(){return reportRepository.findAllByOrderByIdDesc();}
 
     public Report getReportById(Long id){return reportRepository.findById(id).get();}
 
-    public Report getNewestSnapshot(){return reportRepository.findTopByOrderByIdDesc();}
+    public Report getNewestReport(){return reportRepository.findTopByOrderByIdDesc();}
 
     public boolean ExistsByName(String name){return reportRepository.existsSnapshotByName(name);}
 

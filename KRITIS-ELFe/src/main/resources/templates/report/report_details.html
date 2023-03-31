@@ -22,7 +22,7 @@
             <tbody>
             <tr th:each="questionnaire : ${report.getQuestionnaires()}">
                 <td th:text="${questionnaire.getId()}"></td>
-                <td th:text="${questionnaire.getDate()}"></td>
+                <td th:text="${questionnaire.getDateAsString()}"></td>
                 <td th:if="${questionnaire.getFederalState() != null}" th:text="${questionnaire.getFederalState().getName()}"></td>
                 <td th:if="${questionnaire.getRessort() != null}" th:text="${questionnaire.getRessort().getName()}"></td>
             </tr>

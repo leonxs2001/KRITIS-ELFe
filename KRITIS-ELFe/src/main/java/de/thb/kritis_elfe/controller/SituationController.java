@@ -32,27 +32,27 @@ public class SituationController {
     @GetMapping("/situation")
     public String showSomeQuestionnaireForm(Authentication authentication){
         User user = userService.getUserByUsername(authentication.getName());
-        String shortcut;
+        String name;
         Role landRole = roleService.getRoleByName("ROLE_LAND");
         Role ressortRole = roleService.getRoleByName("ROLE_Ressort");
 
         if(user.getRoles().contains(landRole)){
-            shortcut = user.getFederalState().getShortcut();
+            name = user.getFederalState().getName();
         }else if(user.getRoles().contains(ressortRole)){
-            shortcut = user.getRessort().getShortcut();
+            name = user.getRessort().getName();
         }else{
-            shortcut =  federalStateService.getFederalStateByName("Brandenburg").getShortcut();
+            name =  federalStateService.getFederalStateByName("Brandenburg").getName();
         }
 
-        return "redirect:/situation/" + shortcut;
+        return "redirect:/situation/" + name;
     }
 
-    @GetMapping("/situation/{shortcut}")
-    public String showQuestionnaireForm(@PathVariable String shortcut, Authentication authentication, Model model) throws AccessDeniedException {
-        FederalState federalState = federalStateService.getFederalStateByShortcut(shortcut);
+    @GetMapping("/situation/{name}")
+    public String showQuestionnaireForm(@PathVariable String name, Authentication authentication, Model model) throws AccessDeniedException {
+        FederalState federalState = federalStateService.getFederalStateByName(name);
         Ressort ressort = null;
         if(federalState == null){
-            ressort = ressortService.getRessortByShortcut(shortcut);
+            ressort = ressortService.getRessortByName(name);
         }
         User user = userService.getUserByUsername(authentication.getName());
         Role adminRole = roleService.getRoleByName("ROLE_BBK_ADMIN");
@@ -71,7 +71,7 @@ public class SituationController {
             model.addAttribute("questionnaire", questionnaire);
 
             model.addAttribute("sectorChangeDetector", new SectorChangeDetector());
-            model.addAttribute("shortcut", shortcut);
+            model.addAttribute("name", name);
 
             return "situation/situation";
         }else{
@@ -83,13 +83,13 @@ public class SituationController {
         }
     }
 
-    @PostMapping("/situation/form/{shortcut}")
+    @PostMapping("/situation/form/{name}")
     public String submitQuestionnaire(@ModelAttribute("questionnaire") Questionnaire questionnaire,
-                                      @PathVariable String shortcut, Authentication authentication) throws AccessDeniedException, EntityDoesNotExistException {
-        FederalState federalState = federalStateService.getFederalStateByShortcut(shortcut);
+                                      @PathVariable String name, Authentication authentication) throws AccessDeniedException, EntityDoesNotExistException {
+        FederalState federalState = federalStateService.getFederalStateByName(name);
         Ressort ressort = null;
         if(federalState == null){
-            ressort = ressortService.getRessortByShortcut(shortcut);
+            ressort = ressortService.getRessortByName(name);
         }
         User user = userService.getUserByUsername(authentication.getName());
         Role adminRole = roleService.getRoleByName("ROLE_BBK_ADMIN");
@@ -100,7 +100,7 @@ public class SituationController {
                 (user.getRoles().contains(landRole) && user.getFederalState().equals(federalState)) ||
                 (user.getRoles().contains(ressortRole) && user.getRessort().equals(ressort))){
             questionnaireService.saveQuestionnaireFromForm(questionnaire, federalState, ressort);
-            return "redirect:/situation/" + shortcut;
+            return "redirect:/situation/" + name;
         }else{
             if(federalState != null) {
                 throw new AccessDeniedException("The user doesnt have the permission to access the federal State " + federalState.getName() + ".");
@@ -110,13 +110,13 @@ public class SituationController {
         }
     }
 
-    @PostMapping("/situation/{shortcut}")
-    public String submitFilesFromForm(@RequestParam("files") MultipartFile[] files, @PathVariable String shortcut,
+    @PostMapping("/situation/{name}")
+    public String submitFilesFromForm(@RequestParam("files") MultipartFile[] files, @PathVariable String name,
                                       Authentication authentication, Model model) throws AccessDeniedException {
-        FederalState federalState = federalStateService.getFederalStateByShortcut(shortcut);
+        FederalState federalState = federalStateService.getFederalStateByName(name);
         Ressort ressort = null;
         if(federalState == null){
-            ressort = ressortService.getRessortByShortcut(shortcut);
+            ressort = ressortService.getRessortByShortcut(name);
         }
         User user = userService.getUserByUsername(authentication.getName());
         Role adminRole = roleService.getRoleByName("ROLE_BBK_ADMIN");
@@ -129,7 +129,7 @@ public class SituationController {
             Questionnaire questionnaire = questionnaireService.saveQuestionnaireFromFiles(files, federalState, ressort, model);
             model.addAttribute("questionnaire", questionnaire);
             model.addAttribute("sectorChangeDetector", new SectorChangeDetector());
-            model.addAttribute("shortcut", shortcut);
+            model.addAttribute("name", name);
             return "situation/situation";
         }else{
             if(federalState != null) {

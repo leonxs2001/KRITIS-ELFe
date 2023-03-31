@@ -12,9 +12,22 @@
 <body>
 <div layout:fragment="content" class="container">
     <h1>Lagebericht</h1>
-    <form id="situation-file-form" method="POST" th:action="${'/situation/'+shortcut}" enctype="multipart/form-data">
+    <form id="situation-file-form" method="POST" th:action="${'/situation/'+name}" enctype="multipart/form-data">
         <div th:if="${success == true}"
              class="alert alert-success success-error-message" role="alert">Die Dateien wurden erfolgreich hochgeladen und der Inhalt gespeichert.</div>
+        <div th:if="${commentToLongFileNames}" class="success-error-message alert alert-danger" role="alert">
+            In einer oder mehreren Dateien ist ein Kommentar länger als die vorgeschrieben maximallänge von 10000 Zeichen. <br>
+            Der Kommetar kann leider nur bis zum 10000. Zeichen gespeichert werden.<br>
+            Die besagten Dateien sind: <span th:each="filename:${commentToLongFileNames}"
+                                             th:text="${' „' + filename + ((filenameStat.index == commentToLongFileNames.size() - 1)?'“':'“, ')}"></span>.<br>
+            Alle Dateien, welche nicht gennant wurden konnten erfolgreich ausgewertet und die Daten gespeichert werden.
+        </div>
+        <div th:if="${sectorStringMissingFileNames}" class="success-error-message alert alert-danger" role="alert">
+            Es konnte in einer oder mehreren Dateien kein Hinweis auf einen gegebenen Sektor gefunden werden. <br>
+            Die besagten Dateien sind: <span th:each="filename:${sectorStringMissingFileNames}"
+                                             th:text="${' „' + filename + ((filenameStat.index == sectorStringMissingFileNames.size() - 1)?'“':'“, ')}"></span>.<br>
+            Alle Dateien, welche nicht gennant wurden konnten erfolgreich ausgewertet und die Daten gespeichert werden.
+        </div>
         <div th:if="${branchStringMissingFileNames}" class="success-error-message alert alert-danger" role="alert">
             Es konnte in einer oder mehreren Dateien kein Hinweis auf eine gegebene Branche gefunden werden. <br>
             Die besagten Dateien sind: <span th:each="filename:${branchStringMissingFileNames}"
@@ -50,7 +63,7 @@
         <button class="btn btn-primary" type="submit">Hochladen</button>
     </form>
 
-    <form id="situation-form" th:action="${'/situation/form/'+shortcut}" th:object="${questionnaire}" method="post">
+    <form id="situation-form" th:action="${'/situation/form/'+name}" th:object="${questionnaire}" method="post">
         <input type="hidden" th:field="*{id}">
         <th:block th:each="branchQuestionnaire, iter1: *{branchQuestionnaires}"
                   th:with="isSectorChanged=${sectorChangeDetector.isSectorChanged(branchQuestionnaire.getBranch().getSector())},

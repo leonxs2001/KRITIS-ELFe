@@ -13,7 +13,7 @@ import java.util.List;
 @NoArgsConstructor
 @Getter
 @Setter
-@Entity(name="snapshot")
+@Entity
 @Table
 public class Report {
 

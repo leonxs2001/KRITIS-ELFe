@@ -69,7 +69,7 @@ public class SuperAdminController implements Comparable {
     @GetMapping("/report-control")
     public String getReportControl(Model model) {
 
-        List<Report> reports = reportService.getAllSnapshots();
+        List<Report> reports = reportService.getAllReportsOrderByDESC();
         model.addAttribute("reports", reports);
 
         Report newReport = new Report();
@@ -84,7 +84,7 @@ public class SuperAdminController implements Comparable {
     @PostMapping("/report-control")
     public String postNewReport(@ModelAttribute("snapName") Report newReport) {
         reportService.createReport(newReport);
-        return "redirect:create-report";
+        return "redirect:report-control";
     }
 
     @GetMapping("/confirmation/userDenied")

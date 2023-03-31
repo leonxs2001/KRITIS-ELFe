@@ -220,83 +220,159 @@ public class QuestionnaireService {
     @Transactional
     protected void saveFilledScenariosFromFile(Questionnaire questionnaire, MultipartFile file, Ressort ressort, Model model) {
         String text = getTextFromFile(file);
-        //Branch is behind this combination
-        String combination = "Branche    ";
-        int indexOfAppearance = text.indexOf(combination);
+        int indexOfAppearance = text.indexOf("Fachlage");
+        if(indexOfAppearance < 0){
+            indexOfAppearance = text.indexOf("Sektor ");
+        }
 
-
-        if(indexOfAppearance >= 0) {
-            //slice everything before the Branch
+        if(indexOfAppearance > -1) {
             text = text.substring(indexOfAppearance).replaceAll("\r", "");
-            indexOfAppearance = text.indexOf("\n");
-            String branchNameFromFile = text.substring(combination.length(), indexOfAppearance);
-            branchNameFromFile = branchNameFromFile.replaceAll("\\s", "").toLowerCase();
-            boolean branchFound = false;
 
-            for (BranchQuestionnaire branchQuestionnaire : questionnaire.getBranchQuestionnaires()) {
-                if(ressort == null || ressort.getBranches().contains(branchQuestionnaire.getBranch())) {
-                    String branchName = branchQuestionnaire.getBranch().getName().replaceAll("\\s", "").toLowerCase();
-                    if (branchNameFromFile.contains(branchName)) {
-                        branchFound = true;
-                        text = text.substring(indexOfAppearance + 1);
-                        text = text.replaceAll("\\s{2,3}", " ");
+            String regex = "\n\\d+\\. (\\P{Cn})*?((\n\\d+\\. )|$)";
+            String newText = text;
+            Pattern pattern = Pattern.compile(regex);
+            Matcher matcher = pattern.matcher(newText);
+            List<String> scenarioListFromText = new ArrayList<>();
 
-                        for (FilledScenario filledScenario : branchQuestionnaire.getFilledScenarios()) {
-                            String scenarioDescription = filledScenario.getScenario().getDescription().replaceAll("\r", "").replaceAll("\\s{2,3}", " ");
 
-                            scenarioDescription = sliceEmptyStartAndEnd(scenarioDescription);
-                            indexOfAppearance = text.indexOf(scenarioDescription);
-                            if (indexOfAppearance >= 0) {
-                                int valueStartIndex = indexOfAppearance + scenarioDescription.length();
-                                if (filledScenario.getScenario().getScenarioType() == ScenarioType.AUSWAHL) {
+            while (matcher.find()) {
+                String scenarioText = matcher.group();
+                ;
+                if (matcher.end() != text.length() - 1) {
+                    scenarioText = scenarioText.replaceAll("\n\\d+\\. $", "");
+                    newText = newText.substring(matcher.start() + scenarioText.length());
+                    matcher = pattern.matcher(newText);
+                }
+                scenarioListFromText.add(scenarioText);
+            }
 
-                                    String values = text.substring(valueStartIndex, valueStartIndex + 8).replaceAll("\\s", "");
-                                    valueStartIndex += 8;
-                                    for (int i = values.length() - 1; i >= 0; i--) {
-                                        if (values.charAt(i) == '☒') {
-                                            filledScenario.setValue((short) (i + 1));
-                                            break;
+            //Branch is behind this combination
+            String combination = "Branche";
+            indexOfAppearance = text.indexOf(combination);
+
+
+            if (indexOfAppearance >= 0) {
+                //slice everything before the Branch
+                text = text.substring(indexOfAppearance);
+                indexOfAppearance = text.indexOf("\n");
+                String branchNameFromFile = text.substring(combination.length(), indexOfAppearance);
+                branchNameFromFile = branchNameFromFile.replaceAll("\\s", "").toLowerCase();
+                boolean branchFound = false;//TODO ist auch noch false,wenn durch ressort nicht nutzbar siehe unten
+
+                for (BranchQuestionnaire branchQuestionnaire : questionnaire.getBranchQuestionnaires()) {
+                    if (ressort == null || ressort.getBranches().contains(branchQuestionnaire.getBranch())) {
+                        String newBranchNameFromFile = branchNameFromFile;
+                        String branchName = branchQuestionnaire.getBranch().getName().replaceAll("\\s", "").toLowerCase();
+
+                        //delete sector from branch in file if its not part of the branch name
+                        String sectorName = branchQuestionnaire.getBranch().getSector().getName().replaceAll("\\s", "").toLowerCase();
+                        if(!branchName.contains(sectorName)) {
+                            newBranchNameFromFile = newBranchNameFromFile.replace(sectorName, "");
+                        }
+
+                        if (newBranchNameFromFile.contains(branchName)) {
+                            branchFound = true;
+                            for (FilledScenario filledScenario : branchQuestionnaire.getFilledScenarios()) {
+                                String scenarioDescription = filledScenario.getScenario().getDescription().replaceAll("\r", "").replaceAll("\\s{2,3}", " ");
+                                scenarioDescription = sliceEmptyStartAndEnd(scenarioDescription)
+                                        .replace("\\", "\\\\")
+                                        .replaceAll("\\(", "\\\\(")
+                                        .replaceAll("\\)", "\\\\)")
+                                        .replaceAll("\\[", "\\\\[")
+                                        .replaceAll("\\]", "\\\\]")
+                                        .replaceAll("\\{", "\\\\{")
+                                        .replaceAll("\\}", "\\\\}")
+                                        .replaceAll("\\*", "\\\\*")
+                                        .replaceAll("\\+", "\\\\+")
+                                        .replaceAll("\\?", "\\\\?")
+                                        .replaceAll("\\.","\\\\.")
+                                        .replaceAll("\\$","\\\\$")
+                                        .replaceAll("\\^", "\\\\^")
+                                        .replaceAll("\\&", "\\\\&")
+                                        .replaceAll("\\|", "\\\\|")
+                                        .replaceAll("sie", "(sie|diese)")
+                                        .replaceAll(",", ",?")
+                                        .replaceAll("\\s", "\\\\s{1,3}");
+                                boolean scenarioFound = false;
+                                for (String scenarioFromText : scenarioListFromText) {
+                                    pattern = Pattern.compile(scenarioDescription);
+                                    matcher = pattern.matcher(scenarioFromText);
+                                    if (matcher.find()) {
+                                        scenarioFound = true;
+                                        String scenarioFilling = scenarioFromText.substring(matcher.end());
+
+                                        if (filledScenario.getScenario().getScenarioType() == ScenarioType.AUSWAHL) {
+                                            pattern = Pattern.compile("((☒|☐|T|£)\\s*){1,4}");
+                                            matcher = pattern.matcher(scenarioFilling);
+
+                                            if(matcher.find()){
+                                                String values = matcher.group().replaceAll("\\s", "");
+                                                scenarioFilling = scenarioFilling.substring(matcher.end());
+
+                                                for (int i = values.length() - 1; i >= 0; i--) {
+                                                    char value = values.charAt(i);
+                                                    if (value == '☒' || value == 'T') {
+                                                        filledScenario.setValue((short) (i + 1 + 4 - values.length()));//to match also ones with only 3 values
+                                                        break;
+                                                    }
+                                                    if (i == 0) {//not filled
+                                                        createModelListIfNotExistsAndInsertFilename(model, "noValuesGivenFileNames", file.getOriginalFilename());
+                                                    }
+                                                }
+                                            }else{
+                                                createModelListIfNotExistsAndInsertFilename(model, "noValuesGivenFileNames", file.getOriginalFilename());
+                                            }
                                         }
-                                        if (i == 0) {
-                                            createModelListIfNotExistsAndInsertFilename(model, "noValuesGivenFileNames", file.getOriginalFilename());
+                                        String comment = sliceEmptyStartAndEnd(scenarioFilling);
+                                        List<String> replaceables = new ArrayList<>();
+                                        replaceables.add("\\s?keine\\s/\\s{1,2}gar\\s{1,2}nicht\\s{1,2}gering\\s{1,2}erheb(-\\s)?lic(\\s{0,3})h\\s{1,2}massiv\\sKonkretisierung\\s?");
+                                        replaceables.add("\\s{0,3}Lageprognose\\s/\\slängerfristige\\sPerspektive\\s\\(bitte\\sZeithorizont\\sder\\sAussage\\sim\\sFreitextfeld\\sspezifizieren\\)\\s{0,3}");
+                                        replaceables.add("\\s?!\\sVSA-Einstufung\\sauswählen\\s!\\s{0,3}");
+                                        replaceables.add("\\s?Gemeinsames\\s{1,2}Kompetenzzentrum\\s{1,2}Bevölkerungsschutz\\s+Seite\\s\\d+\\svon\\s\\d+\\sStand:\\sGemeinsames\\sLagebild\\sBevölkerungsschutz\\s–\\sMeldevorlage\\s[A-Za-z] -\\sKRITIS\\s?");
+                                        replaceables.add("\\s?keine\\s/\\s{1,2}gar\\snicht\\serheblic\\s?h\\s{1,2}kritisch\\s?/\\s{1,2}umfasse\\s?nd(\\s{1,2}Konkretisierung\\s{1,2}gering)?\\s?");
+                                        replaceables.add("\\s?Bitte\\snäher\\sausführen\\s\\(z.\\sB.\\sorganisatorisch,\\spersonell,\\slogistisch,\\smateriell,\\sgesetzgeberisch\\)\\s?");
+                                        replaceables.add("\\s?Bitte\\simmer\\sausfüllen,\\swenn\\snicht\\s„grün“\\sausgewählt(\\swurde\\.)?\\s?");
+                                        replaceables.add("\\s?((Personenbezogene Einschränkungen bzw. Personalausfälle)" +
+                                                "|(Technikeinschränkungen / technische Ausstattung)" +
+                                                "|(Technikeinschränkungen / technische Ausstattung)" +
+                                                "|(Gefährdung / Beeinträchtigung IT-Systeme \\(IT-Security\\))" +
+                                                "|(Einschränkungen bei Betriebsmitteln)|(Organisatorische Einwirkungen / Einschränkungen)" +
+                                                "|(\\(z. B. organisatorisch, personell, logistisch, materiell, gesetzgeberisch\\))"+
+                                                "|(Sonstiges und äußere Einflüsse))\\s-\\s?" );
+                                        for (String replaceable : replaceables) {
+                                            comment = comment.replaceAll(replaceable, "");
                                         }
+                                        if(comment.length() > 10000){
+                                            comment = comment.substring(0,9999);
+                                            createModelListIfNotExistsAndInsertFilename(model, "commentToLongFileNames", file.getOriginalFilename());
+                                        }
+                                        filledScenario.setComment(comment.replaceAll("\t","\n"));
+                                        break;
                                     }
                                 }
-                                String slicedText = text.substring(valueStartIndex);
-                                Pattern pattern = Pattern.compile("(\\d+. )|(keine / gar nicht( |\t)gering( |\t)erheblic)");
-                                Matcher matcher = pattern.matcher(slicedText);
-                                String comment;
-                                if (matcher.find()) {
-                                    comment = slicedText.substring(0, matcher.start());
-                                } else {
-                                    comment = slicedText;
+                                //scenario not found
+                                if (!scenarioFound) {
+                                    createModelListIfNotExistsAndInsertFilename(model, "scenarioNotMatchingFileNames", file.getOriginalFilename());
                                 }
-                                comment = sliceEmptyStartAndEnd(comment);
-                                if (comment.contains("Bitte näher ausführen (z. B. personell, logistisch, materiell, gesetzgeberisch)")
-                                        || comment.contains("Bitte immer ausfüllen, wenn nicht „grün“ ausgewählt")) {
-                                    comment = "";
-                                }
-                                filledScenario.setComment(comment);
 
-                            } else {
-                                createModelListIfNotExistsAndInsertFilename(model, "scenarioNotMatchingFileNames", file.getOriginalFilename());
+                                filledScenarioService.saveFilledScenario(filledScenario);
+
                             }
-
-                            filledScenarioService.saveFilledScenario(filledScenario);
-
+                            break;
                         }
-                        break;
+                    } else {
+                        createModelListIfNotExistsAndInsertFilename(model, "branchNotForThisRessort", file.getOriginalFilename());
                     }
-                }else{
-                    createModelListIfNotExistsAndInsertFilename(model, "branchNotForThisRessort", file.getOriginalFilename());
                 }
-            }
 
-            if(!branchFound){
-                createModelListIfNotExistsAndInsertFilename(model, "branchNotMatchingFileNames", file.getOriginalFilename());
+                if (!branchFound) {
+                    createModelListIfNotExistsAndInsertFilename(model, "branchNotMatchingFileNames", file.getOriginalFilename());
+                }
+            } else {
+                createModelListIfNotExistsAndInsertFilename(model, "branchStringMissingFileNames", file.getOriginalFilename());
             }
         }else{
-            createModelListIfNotExistsAndInsertFilename(model, "branchStringMissingFileNames", file.getOriginalFilename());
+            createModelListIfNotExistsAndInsertFilename(model, "sectorStringMissingFileNames", file.getOriginalFilename());
         }
 
     }

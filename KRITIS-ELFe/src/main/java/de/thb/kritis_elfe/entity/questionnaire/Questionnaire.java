@@ -8,6 +8,7 @@ import org.hibernate.Hibernate;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @AllArgsConstructor
@@ -37,6 +38,15 @@ public class Questionnaire {
     @OneToMany(mappedBy = "questionnaire")
     @OrderBy("branch.id ASC")
     private List<BranchQuestionnaire> branchQuestionnaires;
+
+    public String getDateAsString(){
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
+        DateTimeFormatter formatter2 = DateTimeFormatter.ofPattern("HH:mm");
+
+        String formattedDate = date.format(formatter);
+        String formattedTime = date.format(formatter2);
+        return "am " + formattedDate + " um " + formattedTime + " Uhr";
+    }
 
     //EQUALS & HASHCODE
     @Override

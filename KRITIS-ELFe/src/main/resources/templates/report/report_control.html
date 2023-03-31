@@ -41,7 +41,7 @@
                             <span aria-hidden="true">&times;</span>
                         </button>
                     </div>
-                    <form th:action="@{/create-report}" method="post">
+                    <form th:action="@{/report-control}" method="post">
                         <div class="modal-body">
                             <label for="sname">Name:</label><br>
                             <input class="form-control" required type="text" id="sname" th:field="${newReport.name}"><br>
@@ -69,10 +69,10 @@
                     <div class="modal-body">
                         <select id="questionnaire-select" class="form-select" onchange="resetLinkHref(this)">
                             <optgroup label="Bundesländer">
-                                <option th:each="federalState: ${federalStates}" th:text="${federalState.getName()}" th:value="${federalState.getShortcut()}"></option>
+                                <option th:each="federalState: ${federalStates}" th:text="${federalState.getName()}" th:value="${federalState.getName()}"></option>
                             </optgroup>
                             <optgroup label="Ressorts">
-                                <option th:each="ressort: ${ressorts}" th:text="${ressort.getName()}" th:value="${ressort.getShortcut()}"></option>
+                                <option th:each="ressort: ${ressorts}" th:text="${ressort.getName()}" th:value="${ressort.getName()}"></option>
                             </optgroup>
                         </select>
                         <a id="redirectToSituationLink" class="btn btn-primary" href="/situation/">Diesen Lagebericht öffnen</a>
@@ -98,7 +98,7 @@
                         <th:block th:if="${notFullyFilledFederalStates.size() > 0}">
                             Es fehlt etwas bei diesen Ländern: <br>
                             <th:block th:each="federalState, istat: ${notFullyFilledFederalStates}">
-                                <a class="text-danger error-situation-link" th:text="${federalState.getName()}" th:href="${'/situation/'+federalState.getShortcut()}"></a><th:block th:if="${istat.index < notFullyFilledFederalStates.size() - 2}" th:text="${', '}"></th:block>
+                                <a class="text-danger error-situation-link" th:text="${federalState.getName()}" th:href="${'/situation/'+federalState.getName()}"></a><th:block th:if="${istat.index < notFullyFilledFederalStates.size() - 2}" th:text="${', '}"></th:block>
                                 <th:block th:if="${istat.index == notFullyFilledFederalStates.size() - 2}" th:text="${' und '}"></th:block>
                             </th:block>
                         </th:block>
@@ -109,7 +109,7 @@
                         <th:block th:if="${notFullyFilledRessorts.size() > 0}">
                             Es fehlt etwas bei den Ressorts:<br>
                             <th:block th:each="ressort, istat: ${notFullyFilledRessorts}">
-                                <a class="text-danger error-situation-link" th:text="${ressort.getName()}" th:href="${'/situation/'+ressort.getShortcut()}"></a><th:block th:if="${istat.index < notFullyFilledRessorts.size() - 2}" th:text="${', '}"></th:block>
+                                <a class="text-danger error-situation-link" th:text="${ressort.getName()}" th:href="${'/situation/'+ressort.getName()}"></a><th:block th:if="${istat.index < notFullyFilledRessorts.size() - 2}" th:text="${', '}"></th:block>
                                 <th:block th:if="${istat.index == notFullyFilledRessorts.size() - 2}" th:text="${' und '}"></th:block>
                             </th:block>
                         </th:block>

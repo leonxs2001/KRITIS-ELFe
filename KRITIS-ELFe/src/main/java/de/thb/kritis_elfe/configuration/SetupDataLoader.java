@@ -74,8 +74,8 @@ public class SetupDataLoader implements
     void createScenarios(){
         createScenarioIfNotFound("1. Inwieweit ist die Bereitstellung der Dienstleistungen in der benannten Branche aktuell eingeschränkt? \n" +
                 "(Gibt es Einschränkungen und wie sind sie zu bewerten?)\n", ScenarioType.AUSWAHL, (short)1);
-        createScenarioIfNotFound("5. Inwieweit erwarten Sie mittel- und langfristig Einschränkungen bei der Bereitstellung der Dienstleistungen in der benannten Branche? ", ScenarioType.AUSWAHL, (short)2);
-        createScenarioIfNotFound("4. Besteht weiterer Bedarf an staatlicher Unterstützung, um den o. g. aktuellen / kurzfristig zu erwartenden Einschränkungen vorzubeugen oder ihnen entgegenzuwirken?", ScenarioType.TEXT, (short)1);
+        createScenarioIfNotFound("5. Inwieweit erwarten Sie mittel- und langfristig Einschränkungen bei der Bereitstellung der Dienstleistungen in der benannten Branche? ", ScenarioType.AUSWAHL, (short)3);
+        createScenarioIfNotFound("4. Besteht weiterer Bedarf an staatlicher Unterstützung, um den o. g. aktuellen / kurzfristig zu erwartenden Einschränkungen vorzubeugen oder ihnen entgegenzuwirken?", ScenarioType.TEXT, (short)2);
 
     }
 
@@ -102,6 +102,7 @@ public class SetupDataLoader implements
 
         branchList = new ArrayList<>();
         branchList.addAll(sectors.get(8).getBranches());
+        branchList.addAll(sectors.get(9).getBranches());
         return createRessortIfNotFound("Test6", "T6", branchList);
     }
 
@@ -202,7 +203,7 @@ public class SetupDataLoader implements
         sectors.add(sector);
 
         sector = createSectorIfNotFound("Informationstechnik und Telekommunikation");
-        sector.getBranches().add(createBranchIfNotFound("Telekommunikationstechnik", sector));
+        sector.getBranches().add(createBranchIfNotFound("Telekommunikation", sector));
         sector.getBranches().add(createBranchIfNotFound("Informationstechnik", sector));
         sectors.add(sector);
 
@@ -211,9 +212,8 @@ public class SetupDataLoader implements
         sector.getBranches().add(createBranchIfNotFound("Seeschifffahrt", sector));
         sector.getBranches().add(createBranchIfNotFound("Binnenschifffahrt", sector));
         sector.getBranches().add(createBranchIfNotFound("Schienenverkehr", sector));
-        sector.getBranches().add(createBranchIfNotFound("Straßenvekehr", sector));
+        sector.getBranches().add(createBranchIfNotFound("Straßenverkehr", sector));
         sector.getBranches().add(createBranchIfNotFound("Logistik", sector));
-        sector.getBranches().add(createBranchIfNotFound("ÖPNV", sector));
         sectors.add(sector);
 
         sector = createSectorIfNotFound("Medien und Kultur");
@@ -235,8 +235,12 @@ public class SetupDataLoader implements
         sector.getBranches().add(createBranchIfNotFound("Finanzdienstleister", sector));
         sectors.add(sector);
 
+        sector = createSectorIfNotFound("Siedlungsabfallentsorgung");
+        sector.getBranches().add(createBranchIfNotFound("Siedlungsabfallentsorgung", sector));
+        sectors.add(sector);
+
         sector = createSectorIfNotFound("Ernährung");
-        sector.getBranches().add(createBranchIfNotFound("Ernährungswissenschaft", sector));
+        sector.getBranches().add(createBranchIfNotFound("Ernährungswirtschaft", sector));
         sector.getBranches().add(createBranchIfNotFound("Lebensmittelhandel", sector));
         sectors.add(sector);
 
@@ -244,7 +248,7 @@ public class SetupDataLoader implements
         sector.getBranches().add(createBranchIfNotFound("Regierung und Verwaltung", sector));
         sector.getBranches().add(createBranchIfNotFound("Parlament", sector));
         sector.getBranches().add(createBranchIfNotFound("Justizeinrichtungen", sector));
-        sector.getBranches().add(createBranchIfNotFound("Notfall/Rettungswesen", sector));
+        sector.getBranches().add(createBranchIfNotFound("Notfall-/Rettungswesen & Katastrophenschutz", sector));
         sectors.add(sector);
 
         return sectors;
