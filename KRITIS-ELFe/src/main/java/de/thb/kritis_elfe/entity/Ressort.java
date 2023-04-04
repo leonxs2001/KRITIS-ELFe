@@ -25,6 +25,16 @@ public class Ressort {
     @ManyToMany()
     private List<Branch> branches;
 
+    public boolean belongsToBranchFromList(List<Branch> branchList){
+        for(Branch branch: branchList){
+            if(this.branches.contains(branch)){
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     public Ressort(String name, String shortcut, List<Branch> branches){
         this.name = name;
         this.shortcut = shortcut;

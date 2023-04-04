@@ -1,0 +1,75 @@
+h1{
+    margin-bottom: 2em;
+}
+
+.ressort-head-div{
+    display: flex;
+    flex-direction: row;
+    border-bottom: dashed lightgrey;
+    margin-bottom: 1em;
+    padding-bottom: 0.5em;
+}
+
+.ressort-name, .ressort-shortcut {
+    height: 100%;
+    width: 70%;
+    font-size: 1.3em;
+    font-weight: bold;
+}
+
+.ressort-shortcut{
+    width: 30%;
+    margin-left: 0.3em;
+}
+
+.branch-div{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    background-color: #f6f6f6;
+    padding: 0 1em;
+    border-radius: 0.5em;
+    margin: 0.5em 0 0.5em 1em;
+    flex: auto;
+}
+
+.branch-div:has(select){
+    padding-left: 0;
+}
+.delete-branch-button, .add-branch-button{
+    margin-left: 1em;
+    height: fit-content;
+    margin: auto 0;
+}
+
+.delete-ressort-button{
+    margin-left: 0.3em;
+}
+
+.new-branch-select{
+    height: fit-content;
+    background-color: transparent;
+    border: 0;
+    font-size: 1.4em;
+}
+
+.ressort-div{
+    margin-top: 1.5em;
+    margin-bottom: 3.2em;
+}
+
+.branch-name-span{
+    margin: 0;
+    font-size: 1.4em;
+    margin-right: 0.2em;
+}
+
+.branchelements-div{
+    display: flex;
+    flex-wrap: wrap;
+}
+
+#submit-button{
+    margin-bottom: 2em;
+    float: right;
+}

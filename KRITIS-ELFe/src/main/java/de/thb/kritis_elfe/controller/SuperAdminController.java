@@ -1,9 +1,9 @@
 package de.thb.kritis_elfe.controller;
 
 import de.thb.kritis_elfe.configuration.HelpPathReader;
+import de.thb.kritis_elfe.controller.form.RessortsForm;
 import de.thb.kritis_elfe.controller.form.UserToRoleFormModel;
-import de.thb.kritis_elfe.entity.Report;
-import de.thb.kritis_elfe.entity.User;
+import de.thb.kritis_elfe.entity.*;
 import de.thb.kritis_elfe.service.*;
 import de.thb.kritis_elfe.service.questionnaire.QuestionnaireService;
 import lombok.AllArgsConstructor;
@@ -30,6 +30,7 @@ public class SuperAdminController implements Comparable {
     private final QuestionnaireService questionnaireService;
     private final RessortService ressortService;
     private final FederalStateService federalStateService;
+    private final SectorService sectorService;
 
     @Autowired
     HelpPathReader helpPathReader;
@@ -120,6 +121,15 @@ public class SuperAdminController implements Comparable {
             return "redirect:adjustHelp?failure";
         }
 
+    }
+
+    @GetMapping("/ressorts")
+    public String getRessorts(Model model){
+        List<Sector> sectors = sectorService.getAllSectors();
+        RessortsForm ressortsForm =  new RessortsForm(ressortService.getAllRessorts());
+        model.addAttribute("sectors", sectors);
+        model.addAttribute("ressortForm",ressortsForm);
+        return "ressorts";
     }
 
 

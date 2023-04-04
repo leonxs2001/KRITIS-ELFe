@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout.html}">
+<head>
+    <title>Ressorts</title>
+    <link th:href="@{/css/ressorts_style.css}" rel="stylesheet">
+    <script type="text/javascript" th:src="@{/js/ressorts_script.js}"></script>
+</head>
+<body>
+<div layout:fragment="content">
+    <div class="container">
+        <h1>Ressorts</h1>
+        <form th:object="${ressortForm}" method="post" onsubmit="resetIdFromAllEntries()">
+            <div class="ressort-div" th:each="ressort:*{ressorts}">
+                <div class="ressort-head-div">
+                    <input placeholder="Name..." class="ressort-name form-control" type="text" th:field="*{ressorts[__${ressortStat.index}__].name}">
+                    <input type="text" class="ressort-shortcut form-control" placeholder="Abkürzung..." th:field="*{ressorts[__${ressortStat.index}__].shortcut}">
+                    <button type="button" class="delete-ressort-button btn btn-outline-danger bi bi-trash-fill" onclick="deleteRessortDivFromButton(this)"></button>
+                </div>
+                <div class="branchelements-div" th:attr="data-ressort_index=${ressortStat.index}">
+                    <div class="branch-div" th:each="branch:*{ressorts[__${ressortStat.index}__].branches}"
+                         th:attr="data-sector_id=${branch.getSector().getId()}, data-sector_name=${branch.getSector().getName()}">
+                        <input class="hidden-branch-id-input" th:field="*{ressorts[__${ressortStat.index}__].branches[__${branchStat.index}__]}" hidden>
+                        <span class="branch-name-span" th:text="${branch.getName()}"></span>
+                        <button type="button" class="delete-branch-button btn btn-outline-danger bi bi-trash-fill" onclick="deleteBranchDivFromButton(this)"></button>
+                    </div>
+                    <div class="branch-div">
+                        <select class="new-branch-select form-select">
+                            <optgroup th:each="sector:${sectors}" th:label="${sector.getName()}" th:class="${'sector-optgroup-'+sector.getId()}"
+                                      th:if="${!ressort.belongsToBranchFromList(sector.getBranches())}">
+                                <option th:each="branchFromSector:${sector.getBranches()}" th:if="${!ressort.getBranches().contains(branchFromSector)}"
+                                        th:value="${branchFromSector.getId()}" th:text="${branchFromSector.getName()}"
+                                th:attr="data-sector_id=${sector.getId()}, data-sector_name=${sector.getName()}"></option>
+                            </optgroup>
+                        </select>
+                        <button type="button" onclick="addBranchFromOption(this)" class="add-branch-button btn btn-outline-success bi bi-plus-circle"></button>
+                    </div>
+                </div>
+            </div>
+            <button type="submit" id="submit-button" class="btn btn-primary">Speichern</button>
+        </form>
+    </div>
+</div>
+</body>
+</html>
