@@ -10,21 +10,30 @@
 <div layout:fragment="content">
     <div class="container">
         <h1>Ressorts</h1>
-        <form th:object="${ressortForm}" method="post" onsubmit="resetIdFromAllEntries()">
+        <form th:object="${ressortForm}" method="post" onsubmit="resetIndicesFromAllEntries()">
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
             <div class="ressort-div" th:each="ressort:*{ressorts}">
                 <div class="ressort-head-div">
-                    <input placeholder="Name..." class="ressort-name form-control" type="text" th:field="*{ressorts[__${ressortStat.index}__].name}">
-                    <input type="text" class="ressort-shortcut form-control" placeholder="Abkürzung..." th:field="*{ressorts[__${ressortStat.index}__].shortcut}">
+                    <div class="ressortNameDiv">
+                        <label>Name:</label>
+                        <input placeholder="Name..." class="ressort-name form-control" type="text" th:field="*{ressorts[__${ressortStat.index}__].name}">
+                    </div>
+                    <div class="ressortShortcutDiv">
+                        <label>Abkürzung:</label>
+                        <input type="text" class="ressort-shortcut form-control" placeholder="Abkürzung..." th:field="*{ressorts[__${ressortStat.index}__].shortcut}">
+                    </div>
                     <button type="button" class="delete-ressort-button btn btn-outline-danger bi bi-trash-fill" onclick="deleteRessortDivFromButton(this)"></button>
                 </div>
-                <div class="branchelements-div" th:attr="data-ressort_index=${ressortStat.index}">
+                <div class="branchelements-div">
                     <div class="branch-div" th:each="branch:*{ressorts[__${ressortStat.index}__].branches}"
                          th:attr="data-sector_id=${branch.getSector().getId()}, data-sector_name=${branch.getSector().getName()}">
                         <input class="hidden-branch-id-input" th:field="*{ressorts[__${ressortStat.index}__].branches[__${branchStat.index}__]}" hidden>
-                        <span class="branch-name-span" th:text="${branch.getName()}"></span>
                         <button type="button" class="delete-branch-button btn btn-outline-danger bi bi-trash-fill" onclick="deleteBranchDivFromButton(this)"></button>
+                        <span class="branch-name-span" th:text="${branch.getName()}"></span>
                     </div>
+                    <div class="break"></div>
                     <div class="branch-div">
+                        <button type="button" onclick="addBranchFromOption(this)" class="add-branch-button btn btn-outline-success bi bi-plus-circle"></button>
                         <select class="new-branch-select form-select">
                             <optgroup th:each="sector:${sectors}" th:label="${sector.getName()}" th:class="${'sector-optgroup-'+sector.getId()}"
                                       th:if="${!ressort.belongsToBranchFromList(sector.getBranches())}">
@@ -33,11 +42,41 @@
                                 th:attr="data-sector_id=${sector.getId()}, data-sector_name=${sector.getName()}"></option>
                             </optgroup>
                         </select>
-                        <button type="button" onclick="addBranchFromOption(this)" class="add-branch-button btn btn-outline-success bi bi-plus-circle"></button>
                     </div>
                 </div>
             </div>
+            <button id="add-ressort-button" type="button" onclick="addRessort(this)" class="btn btn-outline-success bi bi-plus-circle"> neues Ressort</button><br>
+
             <button type="submit" id="submit-button" class="btn btn-primary">Speichern</button>
+
+
+            <!--template for ressort -->
+            <div class="ressort-div" hidden>
+                <div class="ressort-head-div">
+                    <div class="ressortNameDiv">
+                        <label>Name:</label>
+                        <input value="" placeholder="Name..." class="ressort-name form-control" type="text" id="ressorts1.name" name="ressorts[1].name">
+                    </div>
+                    <div class="ressortShortcutDiv">
+                        <label>Abkürzung:</label>
+                        <input value="" type="text" class="ressort-shortcut form-control" placeholder="Abkürzung..." id="ressorts1.shortcut" name="ressorts[1].shortcut">
+                    </div>
+                    <button type="button" class="delete-ressort-button btn btn-outline-danger bi bi-trash-fill" onclick="deleteRessortDivFromButton(this)"></button>
+                </div>
+                <div class="branchelements-div">
+                    <div class="break"></div>
+                    <div class="branch-div">
+                        <button type="button" onclick="addBranchFromOption(this)" class="add-branch-button btn btn-outline-success bi bi-plus-circle"></button>
+                        <select class="new-branch-select form-select">
+                            <optgroup th:each="sector:${sectors}" th:label="${sector.getName()}" th:class="${'sector-optgroup-'+sector.getId()}">
+                                <option th:each="branchFromSector:${sector.getBranches()}"
+                                        th:value="${branchFromSector.getId()}" th:text="${branchFromSector.getName()}"
+                                        th:attr="data-sector_id=${sector.getId()}, data-sector_name=${sector.getName()}"></option>
+                            </optgroup>
+                        </select>
+                    </div>
+                </div>
+            </div>
         </form>
     </div>
 </div>

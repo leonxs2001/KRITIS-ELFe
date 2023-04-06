@@ -132,6 +132,12 @@ public class SuperAdminController implements Comparable {
         return "ressorts";
     }
 
+    @PostMapping("/ressorts")
+    public String resetRessorts(@ModelAttribute RessortsForm ressortsForm){
+        ressortService.resetRessortsByRessortsForm(ressortsForm);
+        return "redirect:ressorts";
+    }
+
 
     @Override
     public int compareTo(Object o) {

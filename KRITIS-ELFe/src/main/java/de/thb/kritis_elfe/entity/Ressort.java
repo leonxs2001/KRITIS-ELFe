@@ -17,7 +17,7 @@ import java.util.List;
 public class Ressort {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long id;
+    private long id;
 
     private String name;
     private String shortcut;

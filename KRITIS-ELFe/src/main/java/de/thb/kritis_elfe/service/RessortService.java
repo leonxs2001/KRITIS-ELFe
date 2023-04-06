@@ -1,5 +1,6 @@
 package de.thb.kritis_elfe.service;
 
+import de.thb.kritis_elfe.controller.form.RessortsForm;
 import de.thb.kritis_elfe.entity.Ressort;
 import de.thb.kritis_elfe.repository.RessortRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,5 +23,11 @@ public class RessortService {
 
     public Ressort getRessortByShortcut(String shortcut){
         return ressortRepository.findByShortcut(shortcut);
+    }
+
+    public void resetRessortsByRessortsForm(RessortsForm ressortsForm){
+        //TODO better handling with user ressort
+        ressortRepository.deleteAll();
+        ressortRepository.saveAll(ressortsForm.getRessorts());
     }
 }

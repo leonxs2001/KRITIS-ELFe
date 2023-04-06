@@ -1,8 +1,8 @@
 const branchDivHTML = '<div class="branch-div" data-sector_name="{sectorName}" data-sector_id="{sectorId}">' +
-                        '<input class="hidden-branch-id-input" hidden id="ressorts{ressortIndex}.branches0" name="ressorts[{ressortIndex}].branches[0]" value="{branchId}">' +
-                        '<span class="branch-name-span">{branchName}</span>' +
+                        '<input class="hidden-branch-id-input" hidden id="ressorts0.branches0" name="ressorts[0].branches[0]" value="{branchId}">' +
                         '<button type="button" class="delete-branch-button btn btn-outline-danger bi bi-trash-fill" onclick="deleteBranchDivFromButton(this)"></button>' +
-                    '</div>';
+                        '<span class="branch-name-span">{branchName}</span>' +
+                        '</div>';
 
 $(document).ready(function (){
     let links = document.querySelectorAll("a");
@@ -20,7 +20,6 @@ function deleteBranchDivFromButton(button){
     let branchNameSpan = branchDiv.querySelector(".branch-name-span");
     if(confirm(`Sind Sie sicher, dass Sie die Branche "${branchNameSpan.innerText}" aus dem Ressort "${ressortName.value}" löschen wollen?`)){
 
-        let branchElementsDiv = branchDiv.closest(".branchelements-div");
         let newBranchSelect = branchDiv.parentElement.querySelector(".new-branch-select");
         let hiddenBranchIdInput = branchDiv.querySelector(".hidden-branch-id-input");
 
@@ -41,6 +40,8 @@ function deleteBranchDivFromButton(button){
         let newOption = document.createElement("option");
         newOption.value = branchId;
         newOption.innerText = branchName;
+        newOption.setAttribute("data-sector_id", sectorId);
+        newOption.setAttribute("data-sector_name", sectorName);
         sectorOptGroup.appendChild(newOption);
 
         branchDiv.remove();
@@ -54,6 +55,7 @@ function addBranchFromOption(button){
     let branchDiv = button.closest(".branch-div");
     let branchElementsDiv =  branchDiv.closest(".branchelements-div");
     let newBranchSelect = branchDiv.parentElement.querySelector(".new-branch-select");
+    let branchId = newBranchSelect.value;
     let branchOption = newBranchSelect.options[newBranchSelect.selectedIndex];
 
     //delet option (and optGroup, if empty)
@@ -64,21 +66,17 @@ function addBranchFromOption(button){
         branchOption.remove();
     }
 
-    let branchId = newBranchSelect.value;
     let branchName = branchOption.text;
     let sectorName = branchOption.dataset.sector_name;
     let sectorId = branchOption.dataset.sector_id;
-    let ressortIndex = branchElementsDiv.dataset.ressort_index;
-
     let newBranchDivString = branchDivHTML.replaceAll("{sectorName}", sectorName)
-        .replaceAll("{ressortIndex}", ressortIndex)
         .replaceAll("{branchId}", branchId)
         .replaceAll("{branchName}", branchName)
         .replaceAll("{sectorId}", sectorId);
     //insert it into a template element
     let template = document.createElement('template');
     template.innerHTML = newBranchDivString;
-    branchElementsDiv.insertBefore(template.content.firstChild, branchDiv);
+    branchElementsDiv.insertBefore(template.content.firstChild, branchDiv.previousElementSibling);
 
     if(newBranchSelect.children.length == 0){
         branchDiv.hidden = true;
@@ -93,14 +91,22 @@ function deleteRessortDivFromButton(button){
     }
 }
 
-function resetIdFromAllEntries(){
-    resetAllIdsFromRessortHeads();
+function addRessort(button){
+    let hiddenRessortDiv = document.querySelector(".ressort-div:nth-last-child(1)");
+    let newRessortDiv = hiddenRessortDiv.cloneNode(true);
+    newRessortDiv.hidden = false;
 
-    let branchElementsDivs = document.querySelectorAll(".branchelements-div");
-    branchElementsDivs.forEach(branchElementsDiv => resetIdsFromBranchElements(branchElementsDiv));
+    button.parentElement.insertBefore(newRessortDiv, button);
 }
 
-function resetIdsFromBranchElements(branchElement){
+function resetIndicesFromAllEntries(){
+    resetAllIndicesFromRessortHeads();
+
+    let branchElementsDivs = document.querySelectorAll(".branchelements-div");
+    branchElementsDivs.forEach(branchElementsDiv => resetIndicesFromBranchElements(branchElementsDiv));
+}
+
+function resetIndicesFromBranchElements(branchElement){
     let branchIdInputs = branchElement.querySelectorAll(".hidden-branch-id-input");
     for(let i = 0; i < branchIdInputs.length; i++){
         branchIdInputs[i].id = branchIdInputs[i].id.split(".")[0] + ".branches" + i;
@@ -108,14 +114,21 @@ function resetIdsFromBranchElements(branchElement){
     }
 }
 
-function resetAllIdsFromRessortHeads(){
-    let ressortHeadDivs = document.querySelectorAll(".ressort-head-div");
-    for(let i = 0; i < ressortHeadDivs.length; i++){
-        let ressortName = ressortHeadDivs[i].querySelector(".ressort-name");
-        let ressortShortcut =  ressortHeadDivs[i].querySelector(".ressort-shortcut");
+function resetAllIndicesFromRessortHeads(){
+    let ressortDivs = document.querySelectorAll(".ressort-div");
+    for(let i = 0; i < ressortDivs.length - 1; i++){
+        let ressortHeadDiv = ressortDivs[i].querySelector(".ressort-head-div");
+        let ressortName = ressortHeadDiv.querySelector(".ressort-name");
+        let ressortShortcut =  ressortHeadDiv.querySelector(".ressort-shortcut");
+        let branchIds = ressortDivs[i].querySelectorAll(".hidden-branch-id-input");
+
+        for(let j = 0; j < branchIds.length; j++){
+            setRessortIndexOnNameAndId(i, branchIds[j]);
+        }
 
         setRessortIndexOnNameAndId(i, ressortName);
         setRessortIndexOnNameAndId(i, ressortShortcut);
+
     }
 
 }

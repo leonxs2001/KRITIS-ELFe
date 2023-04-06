@@ -1,31 +1,37 @@
 h1{
-    margin-bottom: 2em;
+    margin-bottom: 1.2em;
 }
 
 .ressort-head-div{
     display: flex;
     flex-direction: row;
-    border-bottom: dashed lightgrey;
+    border-bottom: solid lightgrey;
     margin-bottom: 1em;
     padding-bottom: 0.5em;
 }
 
-.ressort-name, .ressort-shortcut {
-    height: 100%;
-    width: 70%;
-    font-size: 1.3em;
+label{
+    font-size: 1.2em;
     font-weight: bold;
 }
 
-.ressort-shortcut{
-    width: 30%;
+.ressort-name, .ressort-shortcut {
+    font-size: 1.2em;
+    font-weight: bold;
+}
+
+.ressortNameDiv{
+    width: 60%;
+}
+
+.ressortShortcutDiv{
+    width: 40%;
     margin-left: 0.3em;
 }
 
 .branch-div{
-    display: flex;
+    display: inline-flex;
     flex-direction: row;
-    justify-content: space-between;
     background-color: #f6f6f6;
     padding: 0 1em;
     border-radius: 0.5em;
@@ -33,17 +39,31 @@ h1{
     flex: auto;
 }
 
+.branch-div:nth-last-child(3){
+    flex: inherit;
+}
+
+.break{
+    flex-basis: 100%;
+    height: 0;
+}
+
 .branch-div:has(select){
     padding-left: 0;
+    flex: inherit;
 }
+
 .delete-branch-button, .add-branch-button{
-    margin-left: 1em;
     height: fit-content;
     margin: auto 0;
 }
 
+.add-branch-button{
+    margin: auto 0 auto 1em;
+}
+
 .delete-ressort-button{
-    margin-left: 0.3em;
+    margin: auto 0.3em;
 }
 
 .new-branch-select{
@@ -56,12 +76,14 @@ h1{
 .ressort-div{
     margin-top: 1.5em;
     margin-bottom: 3.2em;
+    border: solid lightgrey;
+    padding: 1.5em;
+    border-radius: 1em;
 }
 
 .branch-name-span{
-    margin: 0;
     font-size: 1.4em;
-    margin-right: 0.2em;
+    margin: 0 0.2em 0 1em;
 }
 
 .branchelements-div{
@@ -72,4 +94,9 @@ h1{
 #submit-button{
     margin-bottom: 2em;
     float: right;
+}
+
+#add-ressort-button{
+    margin-bottom: 1em;
+    margin-bottom: 1em;
 }
