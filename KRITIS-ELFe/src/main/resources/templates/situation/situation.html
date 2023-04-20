@@ -2,16 +2,17 @@
 <html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{layout}">
 <head>
+    <META HTTP-EQUIV="content-type" CONTENT="text/html; charset=utf-8">
     <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
     <link rel="stylesheet" th:href="@{/css/situation_style.css}">
     <script th:src="@{/js/situation_script.js}"></script>
 
-    <title>Lagebericht</title>
+    <title >Lagebild</title>
 
 </head>
 <body>
 <div layout:fragment="content" class="container">
-    <h1>Lagebericht</h1>
+    <h1 th:text="${'Lagebild ' + name}"></h1>
     <form id="situation-file-form" method="POST" th:action="${'/situation/'+name}" enctype="multipart/form-data">
         <div th:if="${success == true}"
              class="alert alert-success success-error-message" role="alert">Die Dateien wurden erfolgreich hochgeladen und der Inhalt gespeichert.</div>

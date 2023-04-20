@@ -27,7 +27,12 @@ public class RessortService {
 
     public void resetRessortsByRessortsForm(RessortsForm ressortsForm){
         //TODO better handling with user ressort
-        ressortRepository.deleteAll();
+        //ressortRepository.deleteAll();
+        for(Ressort ressort: ressortRepository.findAll()){
+            if(!ressortsForm.getRessorts().contains(ressort)){
+                ressortRepository.delete(ressort);
+            }
+        }
         ressortRepository.saveAll(ressortsForm.getRessorts());
     }
 }

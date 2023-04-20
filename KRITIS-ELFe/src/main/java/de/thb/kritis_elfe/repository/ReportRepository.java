@@ -15,5 +15,6 @@ public interface ReportRepository extends CrudRepository<Report, Long> {
     Report findTopByOrderByIdDesc();
     boolean existsSnapshotByName(String name);
     Optional<Report> findById(Long id);
+    Report findTopByIdLessThanOrderByIdDesc(long oldReportId);
 
 }

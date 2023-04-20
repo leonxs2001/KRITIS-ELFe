@@ -70,6 +70,10 @@ public class UserService {
         return userRepository.findByRoles_Name("ROLE_BBK_ADMIN");
     }
 
+    public List<User> getUserByOfficeRole() {
+        return userRepository.findByRoles_Name("ROLE_GESCHÄFTSSTELLE");
+    }
+
     public User createUser(User user){
         return userRepository.save(user);
     }
@@ -107,9 +111,9 @@ public class UserService {
                     password(passwordEncoder.encode(form.getPassword())).
                     roles(Collections.singletonList(form.getRole())).build();
 
-            if(form.getRole().getName() == "ROLE_LAND"){
+            if(form.getRole().getName().equals("ROLE_LAND")){
                 user.setFederalState(form.getFederalState());
-            }else if(form.getRole().getName() == "ROLE_RESSORT"){
+            }else if(form.getRole().getName().equals("ROLE_RESSORT")){
                 user.setRessort(form.getRessort());
             }
 
@@ -194,10 +198,10 @@ public class UserService {
 
                     emailSender.send(user.getEmail(), UserNotificationAfterUserConfirmation.mailAfterUserConfirm(user.getFirstName(), user.getLastName()));
 
-                    for (User adminUser : getUserByAdminRole()) {
+                    for (User officeUser : getUserByOfficeRole()) {
                         //only send it to enabled users
-                        if(adminUser.isEnabled()) {
-                            emailSender.send(adminUser.getEmail(), AdminRegisterNotification.buildAdminEmail(adminUser.getFirstName(), adminLink,
+                        if(officeUser.isEnabled()) {
+                            emailSender.send(officeUser.getEmail(), AdminRegisterNotification.buildAdminEmail(officeUser.getFirstName(), adminLink,
                                     user.getFirstName(), user.getLastName(),
                                     user.getEmail(), user.getRoles()));
                         }
@@ -292,28 +296,35 @@ public class UserService {
      *
      * @param form to get userlist
      */
-    public void changeEnabledStatus(UserFormModel form) {
+    public void changeEnabledStatusFromForm(UserFormModel form) {
 
         List<User> users = getAllUsers();
+        List<User> changedUsers = new ArrayList<>();
+
+        for(User user: form.getUsers()){
+            User oldUser = users.get(users.indexOf(user));
+            if(oldUser.isEnabled() != user.isEnabled()){
+                oldUser.setEnabled(user.isEnabled());
+                userRepository.save(oldUser);
+                changedUsers.add(oldUser);
+            }
+        }
+
+        List<User> users1 = getUserByOfficeRole();
 
         /*Outsourcing Mail to thread for speed purposes*/
         new Thread(() -> {
-            for (int i = 0; i < users.size(); i++) {
+            for (User user: changedUsers) {
 
-                if (users.get(i).isEnabled() != (form.getUsers().get(i).isEnabled())) {
-                    users.get(i).setEnabled(form.getUsers().get(i).isEnabled());
+                emailSender.send(user.getEmail(), UserChangeEnabledStatusNotification.changeBrancheMail(user.getFirstName(), user.getLastName()));
 
-
-                    emailSender.send(users.get(i).getEmail(), UserChangeEnabledStatusNotification.changeBrancheMail(users.get(i).getFirstName(), users.get(i).getLastName()));
-
-                    for (User officeAdmin : getUserByAdminRole()) {
-                        //only send it to enabled users
-                        if(officeAdmin.isEnabled()) {
-                            emailSender.send(officeAdmin.getEmail(), AdminDeactivateUserSubmit.changeEnabledStatus(officeAdmin.getFirstName(),
-                                    officeAdmin.getLastName(),
-                                    users.get(i).isEnabled(),
-                                    users.get(i).getUsername()));
-                        }
+                for (User officeAdmin : getUserByOfficeRole()) {
+                    //only send it to enabled users
+                    if(officeAdmin.isEnabled()) {
+                        emailSender.send(officeAdmin.getEmail(), AdminDeactivateUserSubmit.changeEnabledStatus(officeAdmin.getFirstName(),
+                                officeAdmin.getLastName(),
+                                user.isEnabled(),
+                                user.getUsername()));
                     }
                 }
             }

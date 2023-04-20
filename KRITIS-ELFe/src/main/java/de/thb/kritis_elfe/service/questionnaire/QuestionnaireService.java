@@ -106,7 +106,7 @@ public class QuestionnaireService {
         }
 
         questionnaire.setBranchQuestionnaires(branchQuestionnaires);
-
+        questionnaire.setDate(LocalDateTime.now());
         questionnaireRepository.save(questionnaire);
         branchQuestionnaireService.saveBranchQuestionnaires(branchQuestionnaires);
         filledScenarioService.saveAllFilledScenarios(allFilledScenarios);
@@ -237,7 +237,7 @@ public class QuestionnaireService {
 
             while (matcher.find()) {
                 String scenarioText = matcher.group();
-                ;
+
                 if (matcher.end() != text.length() - 1) {
                     scenarioText = scenarioText.replaceAll("\n\\d+\\. $", "");
                     newText = newText.substring(matcher.start() + scenarioText.length());

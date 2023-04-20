@@ -17,6 +17,9 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+
 @Controller
 @AllArgsConstructor
 public class SituationController {
@@ -30,7 +33,7 @@ public class SituationController {
     private final RessortService ressortService;
 
     @GetMapping("/situation")
-    public String showSomeQuestionnaireForm(Authentication authentication){
+    public String showSomeQuestionnaireForm(Authentication authentication) throws UnsupportedEncodingException {
         User user = userService.getUserByUsername(authentication.getName());
         String name;
         Role landRole = roleService.getRoleByName("ROLE_LAND");
@@ -44,11 +47,11 @@ public class SituationController {
             name =  federalStateService.getFederalStateByName("Brandenburg").getName();
         }
 
-        return "redirect:/situation/" + name;
+        return "redirect:/situation/" + URLEncoder.encode(name, "UTF-8");
     }
 
     @GetMapping("/situation/{name}")
-    public String showQuestionnaireForm(@PathVariable String name, Authentication authentication, Model model) throws AccessDeniedException {
+    public String showQuestionnaireForm(@PathVariable String name, Authentication authentication, Model model) throws AccessDeniedException, EntityDoesNotExistException {
         FederalState federalState = federalStateService.getFederalStateByName(name);
         Ressort ressort = null;
         if(federalState == null){
@@ -65,8 +68,10 @@ public class SituationController {
             Questionnaire questionnaire;
             if(federalState != null) {
                 questionnaire = questionnaireService.getQuestionnaireForFederalState(federalState);
-            }else{
+            }else if(ressort != null) {
                 questionnaire = questionnaireService.getQuestionnaireForRessort(ressort);
+            }else{
+                throw new EntityDoesNotExistException("The Ressort or Federal State does not exist.");
             }
             model.addAttribute("questionnaire", questionnaire);
 
@@ -76,16 +81,16 @@ public class SituationController {
             return "situation/situation";
         }else{
             if(federalState != null) {
-                throw new AccessDeniedException("The user doesnt have the permission to access the federal State " + federalState.getName() + ".");
+                throw new AccessDeniedException("The user doesnt have the permission to access the federal State.");
             }else{
-                throw new AccessDeniedException("The user doesnt have the permission to access the ressort " + ressort.getName() + ".");
+                throw new AccessDeniedException("The user doesnt have the permission to access the ressort.");
             }
         }
     }
 
     @PostMapping("/situation/form/{name}")
     public String submitQuestionnaire(@ModelAttribute("questionnaire") Questionnaire questionnaire,
-                                      @PathVariable String name, Authentication authentication) throws AccessDeniedException, EntityDoesNotExistException {
+                                      @PathVariable String name, Authentication authentication) throws AccessDeniedException, EntityDoesNotExistException, UnsupportedEncodingException {
         FederalState federalState = federalStateService.getFederalStateByName(name);
         Ressort ressort = null;
         if(federalState == null){
@@ -100,7 +105,7 @@ public class SituationController {
                 (user.getRoles().contains(landRole) && user.getFederalState().equals(federalState)) ||
                 (user.getRoles().contains(ressortRole) && user.getRessort().equals(ressort))){
             questionnaireService.saveQuestionnaireFromForm(questionnaire, federalState, ressort);
-            return "redirect:/situation/" + name;
+            return "redirect:/situation/" + URLEncoder.encode(name, "UTF-8");
         }else{
             if(federalState != null) {
                 throw new AccessDeniedException("The user doesnt have the permission to access the federal State " + federalState.getName() + ".");
@@ -116,7 +121,7 @@ public class SituationController {
         FederalState federalState = federalStateService.getFederalStateByName(name);
         Ressort ressort = null;
         if(federalState == null){
-            ressort = ressortService.getRessortByShortcut(name);
+            ressort = ressortService.getRessortByName(name);
         }
         User user = userService.getUserByUsername(authentication.getName());
         Role adminRole = roleService.getRoleByName("ROLE_BBK_ADMIN");

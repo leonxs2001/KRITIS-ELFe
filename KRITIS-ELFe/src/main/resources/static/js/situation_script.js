@@ -86,24 +86,30 @@ function setIconByGivenValue(icon, value){
 
 function submitForm(){
     let selectList = $(".value-select");
-    let firstSelectIsUnvalid = false;
+    let valueIsMissing = false;
     for(let i = 0; i < selectList.length; i++){
-        let parentElement = selectList[i].parentElement.parentElement.querySelector(".description-p");
-        if(selectList[i].value == "0"){
-            parentElement.style.color = "red";
-            if(!firstSelectIsUnvalid){
-                firstSelectIsUnvalid = true;
-                selectList[i].scrollIntoView();
+        let parentElement = selectList[i].parentElement;
+        if(selectList[i].value <= "1"){
+            //reset comment if value is <= 1
+            parentElement.querySelector(".comment-textarea").value = "";
+            if(selectList[i].value == "0"){
+                valueIsMissing = true;
             }
-        }else{
-            parentElement.style.color = "black";
         }
+
     }
-    if(firstSelectIsUnvalid){
-        alert("Es muss alles ausgefüllt werden. Bitte füllen sie die fehlenden Branchen komplett aus. Alle fehlenden Werte sind rot markiert.");
-        return false;
+    console.log("hä");
+    if(valueIsMissing){
+        console.log("hä2");
+        if(confirm("Mindestens eines der Branchen wurde nicht komplett ausgefüllt. Die Gefahrenwerte sollten alle ausgefüllt sein. Wollen sie trotzdem speichern?")){
+            $("#situation-form").submit()
+            return true;
+        }else{
+            return false;
+        }
+    }else{
+        $("#situation-form").submit()
+        return true;
     }
 
-    $("#situation-form").submit()
-    return true;
 }

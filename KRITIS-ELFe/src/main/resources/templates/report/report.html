@@ -1,82 +1,68 @@
-<html xmlns:th="http://www.thymeleaf.org" >
-<head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"></meta>
-</head>
-<body>
-    <div style="height: 80px;">
-        <div style="float: right; margin: 0;">
-            <p style="font-weight: 700;font-size: 0.8em;color: darkgray;font-family: initial;margin: 0 0 0.4em 0;">In Kooperation mit</p>
-            <img width="160px" src="/images/THB_Logo.png"></img>
-        </div>
-        <img width="160px" style="float: right; margin: 0;" src="/images/UP-KRITIS_LOGO_Transparent.png"></img>
-    </div>
-    <div th:fragment="report">
-        <h1 style="width: 100%; text-align: center; margin-bottom: 2em;" th:text='${reportFocus.getGermanRepresentation() +" Report von " + currentReport.getName()}'></h1>
-        <p style="margin-bottom: 2em; font-size: 1.3em;" th:if="${!reportFocus.getGermanRepresentation().equals('Firmeninterner')}" th:text="${'Die Anzahl der ' + ((reportFocus.getGermanRepresentation().equals('Nationaler'))?(' Branchenmittelwerte der Bedrohungsmatrizen'):(' Bedrohungsmatrizen')) + ', auf dessen Grundlage die Berechnung des Reports beruht ist ' + report.getNumberOfQuestionnaires() + '.' }"></p>
-        <th:block th:each="masterScenario: ${masterScenarioList}" th:if="${report.checkIfContainsMasterScenario(masterScenario)}">
-            <div >
-                <h5 th:text="${masterScenario.name}" style="page-break-inside:avoid;"></h5>
-                <table  class="threatmatrix-table" style="border-bottom: 1px solid black;width: 100%; border-collapse: collapse; margin-bottom: 5em; font-size: 16px; letter-spacing: 1px; padding: 8px;">
-                    <thead style="color: grey;">
-                        <tr style="page-break-inside:avoid;">
-                            <td style="border-bottom: 1px dashed grey;">#</td>
-                            <td style="border-bottom: 1px dashed grey;">Szenarien</td>
-                            <td style="border-bottom: 1px dashed grey;text-align: center;">Bedrohungslage</td>
-                            <td style="border-bottom: 1px dashed grey;text-align: center;">
-                                <div style="display: flex; flex-direction: row;justify-content: center;">
-                                    <span>Anzahl</span>
-                                    <!-- only show the information- button and text if there is a reportList(if not ist the downloadable part)-->
-                                    <div class="dropdown" th:if="${reportList != null}">
-                                        <button style="background-color: transparent; border: 0;" class="bi bi-info-circle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"></button>
-                                        <!--Show different description for the national report (has no user, sector or branch)-->
-                                        <div class="dropdown-menu" style="width: auto;" th:if="${report.getSector() == null && report.getBranch() == null && report.getUser() == null}">
-                                            <p>Anzahl der zu Reporterstellung herangezogenen Branchenreports.</p>
-                                        </div>
-                                        <div class="dropdown-menu" style="width: auto;" th:unless="${report.getSector() == null && report.getBranch() == null && report.getUser() == null}">
-                                            <p>Anzahl der zu Reporterstellung herangezogenen Unternehmensreports.</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </td>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:sec="http://www.w3.org/1999/xhtml"
+      layout:decorate="~{layout}" lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Lagebild Report</title>
+        <link rel="stylesheet" type="text/css" th:href="@{/css/report_style.css}">
+        <script th:src="@{/js/report_script.js}"></script>
+    </head>
+    <body>
+        <div layout:fragment="content">
+            <div class="container">
+                <th:block th:if="${report}">
+                    <h1 id="heading">Lagebild Report</h1>
+                    <p id="report-question-p">Wähle aus, welchen Report Sie sich ansehen wollen:</p>
+                    <select id="report-select" class="form-select" onchange="onReportSelectChange(this)">
+                        <option th:each="singleReport: ${reports}"
+                                th:text="${singleReport}"
+                                th:value="${singleReport.getId()}"
+                                th:selected="${singleReport.equals(report)}"></option>
+                    </select>
+
+                    <table>
+                        <tr>
+                            <td></td>
+                            <td class="federalstate-td">Bund</td>
+                            <td class="federalstate-td" th:each="federalState: ${federalStates}"
+                                th:text="${federalState.getShortcut()}"></td>
                         </tr>
-                    </thead>
-                    <tbody>
-                        <th:block th:each="scenario: ${masterScenario.scenarios}" th:if="${report.checkIfContainsScenario(scenario)}" >
-                            <tr style="page-break-inside:avoid;">
-                                <td th:text="${counter.countAndGet() + 1}" th:style="${'background-color: '+ masterScenario.getLayerColorAsString() +';'+'border-bottom: 1px solid grey; text-align: center;width: 3%'}"></td>
+                        <tr th:each="sector: ${sectors}">
+                            <td class="sector-td" th:text="${(sectorStat.index + 1) + '. '+ sector.getName()}"></td>
 
-                                <td style="border-bottom: 1px solid grey;width: 80%;padding-left: 1%;" th:text="${scenario.name}"></td>
+                            <td th:with="sectorReportValue=${sectorReportValueAccessor.getSectorRessortReportValue(sector)}"
+                                th:style="${'background-color: ' + sectorReportValue.getValueColorAsHTMLString()}">
 
-                                <!--Get next value from the Queue and parse the next element based on the value(the td)-->
-                                <th:block th:with="reportScenario=${report.getReportScenario(scenario)}">
-                                    <th:block th:if="${reportScenario != null}">
-                                        <td style="border-bottom: 1px solid grey;width: 15%;" >
-                                            <div th:style='${"float: left; width: 100%; height: 100%; text-align: center; border: black solid 1px; background-color: " + reportScenario.getColor() + ";"}'>
-                                                <div style="font-weight: 550;" th:text="${reportScenario.getStringRepresentation()}"></div>
-                                                <div style="clear: both; border-top: black solid 1px;" th:if="${reportScenario.getThreatSituation() != -1}" th:text="${reportScenario.getRoundedThreatSituationString()}"></div>
-                                            </div>
-                                        </td>
-                                        <td th:text="${reportScenario.getNumberOfValues()}" style="border-bottom: 1px solid grey; text-align: center;"></td>
-                                    </th:block>
-                                    <th:block th:if="${reportScenario == null}">
-                                        <td style="border-bottom: 1px solid grey;width: 15%;" >
-                                            <div style="float: left; width: 100%; height: 100%; text-align: center; border: black solid 1px; background-color: white;">
-                                                <div style="font-weight: 550;" >Unbekannt</div>
-                                            </div>
-                                        </td>
-                                        <td style="border-bottom: 1px solid grey; text-align: center;">0</td>
-                                    </th:block>
-                                </th:block>
-                            </tr>
-                        </th:block>
-                    </tbody>
-                </table>
+                                <span th:if="${sectorReportValue.getValueChangedType().getRepresentation().equals('up')}"
+                                      class="bi bi-arrow-up-square" style="font-weight: bold;"></span>
+                                <span th:if="${sectorReportValue.getValueChangedType().getRepresentation().equals('down')}"
+                                      class="bi bi-arrow-down-square" style="font-weight: bold;"></span>
+                                <span th:if="${sectorReportValue.getValueChangedType().getRepresentation().equals('unequal')}"
+                                      style="font-weight: bold;">&ne;</span>
+                            </td>
+
+                            <th:block th:each="federalState:${federalStates}"
+                                      th:with="sectorReportValue=${sectorReportValueAccessor.getSectorFederalStateSectorReportValue(sector, federalState)}">
+                                <td th:style="${'background-color: ' + sectorReportValue.getValueColorAsHTMLString()}">
+                                    <span th:if="${sectorReportValue.getValueChangedType().getRepresentation().equals('up')}"
+                                          class="bi bi-arrow-up-square" style="font-weight: bold;"></span>
+                                    <span th:if="${sectorReportValue.getValueChangedType().getRepresentation().equals('down')}"
+                                          class="bi bi-arrow-down-square" style="font-weight: bold;"></span>
+                                    <span th:if="${sectorReportValue.getValueChangedType().getRepresentation().equals('unequal')}"
+                                          style="font-weight: bold;">&ne;</span>
+                                </td>
+                            </th:block>
+
+                        </tr>
+                    </table>
+
+                    <a id="download-a" class="btn btn-primary" th:href="${'report/download?id=' + report.getId()}">Download</a>
+                </th:block>
+                <div class="success-error-message alert alert-danger" role="alert"
+                     th:unless="${report}" >
+                    Leider gibt es hier keinen Report zum Lagebild.
+                </div>
             </div>
-        </th:block>
-        <th:block th:if="${report.getComment() != null}" >
-            <h4 style="font-size: 1.4em;">Kommentar zum Fragebogen:</h4>
-            <p th:text="${report.getComment()}" style="font-size: 1.2em;"></p>
-        </th:block>
-    </div>
-</body>
+        </div>
+    </body>
 </html>

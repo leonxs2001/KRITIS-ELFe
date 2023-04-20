@@ -15,5 +15,4 @@ import java.util.List;
 public class UserFormModel {
 
     private List<User> users;
-    private List<String> branchesAsString;
 }

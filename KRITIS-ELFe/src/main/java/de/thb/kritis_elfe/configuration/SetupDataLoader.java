@@ -58,11 +58,13 @@ public class SetupDataLoader implements
         Role bbkViewer = createRoleIfNotFound("ROLE_BBK_VIEWER", "BBK Viewer");
         Role land = createRoleIfNotFound("ROLE_LAND", "Länder Repräsentant");
         Role ressort = createRoleIfNotFound("ROLE_RESSORT", "Ressort Repräsentant");
+        Role office = createRoleIfNotFound("ROLE_GESCHÄFTSSTELLE", "Geschäftsstelle");
 
         createUserIfNotFound("viewer", "leonschoenberg@gmx.de", "viewer1234", bbkViewer, null, null);
         createUserIfNotFound("admin", "leonschoenberg@gmx.de", "admin1234", bbkAdmin, null, null);
         createUserIfNotFound("land", "leonschoenberg@gmx.de", "land1234", land, brandenburg, null);
         createUserIfNotFound("ressort", "leonschoenberg@gmx.de", "ressort1234", ressort, null, ressort3);
+        createUserIfNotFound("office", "leonschoenberg@gmx.de", "office1234", office, null, null);
 
         createScenarios();
 

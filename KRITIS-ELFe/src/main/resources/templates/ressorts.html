@@ -14,6 +14,7 @@
             <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
             <div class="ressort-div" th:each="ressort:*{ressorts}">
                 <div class="ressort-head-div">
+                    <input class="hidden-ressort-id" hidden th:field="*{ressorts[__${ressortStat.index}__].id}">
                     <div class="ressortNameDiv">
                         <label>Name:</label>
                         <input placeholder="Name..." class="ressort-name form-control" type="text" th:field="*{ressorts[__${ressortStat.index}__].name}">
@@ -22,7 +23,7 @@
                         <label>Abkürzung:</label>
                         <input type="text" class="ressort-shortcut form-control" placeholder="Abkürzung..." th:field="*{ressorts[__${ressortStat.index}__].shortcut}">
                     </div>
-                    <button type="button" class="delete-ressort-button btn btn-outline-danger bi bi-trash-fill" onclick="deleteRessortDivFromButton(this)"></button>
+                    <button th:if="${ressort.getUsers().size() == 0}" type="button" class="delete-ressort-button btn btn-outline-danger bi bi-trash-fill" onclick="deleteRessortDivFromButton(this)"></button>
                 </div>
                 <div class="branchelements-div">
                     <div class="branch-div" th:each="branch:*{ressorts[__${ressortStat.index}__].branches}"
@@ -53,13 +54,14 @@
             <!--template for ressort -->
             <div class="ressort-div" hidden>
                 <div class="ressort-head-div">
+
                     <div class="ressortNameDiv">
                         <label>Name:</label>
-                        <input value="" placeholder="Name..." class="ressort-name form-control" type="text" id="ressorts1.name" name="ressorts[1].name">
+                        <input value="" placeholder="Name..." class="ressort-name form-control" type="text" id="ressorts.name" name="ressorts.name">
                     </div>
                     <div class="ressortShortcutDiv">
                         <label>Abkürzung:</label>
-                        <input value="" type="text" class="ressort-shortcut form-control" placeholder="Abkürzung..." id="ressorts1.shortcut" name="ressorts[1].shortcut">
+                        <input value="" type="text" class="ressort-shortcut form-control" placeholder="Abkürzung..." id="ressorts.shortcut" name="ressorts.shortcut">
                     </div>
                     <button type="button" class="delete-ressort-button btn btn-outline-danger bi bi-trash-fill" onclick="deleteRessortDivFromButton(this)"></button>
                 </div>
