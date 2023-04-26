@@ -155,9 +155,7 @@ public class DocumentService {
 
                 createCommentRepresentationForComments(commentParagraph, federalState.getShortcut(), comments);
             }
-            branchTable.setWidth(1);
-            branchTable.setColBandSize(1);
-            branchTable.setRowBandSize(1);
+
 
         }
 
@@ -174,7 +172,7 @@ public class DocumentService {
     }
 
     private void createCommentRepresentationForComments(XWPFParagraph commentParagraph, String shortcut, List<String> comments) {
-        if(comments.size() > 0) {//duplicate
+        if(comments != null && comments.size() > 0) {
             XWPFRun commentRessortHeadRun = commentParagraph.createRun();
             commentRessortHeadRun.setBold(true);
             commentRessortHeadRun.setText(shortcut + ":");
@@ -184,8 +182,12 @@ public class DocumentService {
 
 
             for (String comment : comments) {
-                commentRun.setText("- " + comment);
-                commentRun.addBreak();
+                String[] singleCommentParts = comment.split("\n");
+                commentRun.setText("- ");
+                for(String singleCommentPart: singleCommentParts){
+                    commentRun.setText(singleCommentPart);
+                    commentRun.addBreak();
+                }
             }
         }
     }

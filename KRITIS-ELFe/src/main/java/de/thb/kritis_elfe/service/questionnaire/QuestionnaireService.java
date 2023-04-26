@@ -67,15 +67,35 @@ public class QuestionnaireService {
 
     public Questionnaire getQuestionnaireForRessort(Ressort ressort) {
         Questionnaire questionnaire = questionnaireRepository.findFirstByRessortOrderByIdDesc(ressort);
-
+        List<Branch> branches;
         if (questionnaire == null){
             // TODO change from usr to federal state
             questionnaire = Questionnaire.builder().ressort(ressort).build();
 
-            List<Branch> branches = ressort.getBranches();
+             branches = ressort.getBranches();
 
-            fillNewQuestionnaireFromBranches(branches, questionnaire);
+
+        }else{//TODO delte old branches
+            branches = new ArrayList<>();
+            //check if every ressort is present
+            for(Branch branch: ressort.getBranches()){
+                boolean containsBranch = false;
+                for(BranchQuestionnaire branchQuestionnaire: questionnaire.getBranchQuestionnaires()){
+                    if(branchQuestionnaire.getBranch().equals(branch)){
+                        containsBranch = true;
+                        break;
+                    }
+                }
+
+                if(!containsBranch){
+                    branches.add(branch);
+                }
+
+            }
+
         }
+
+        fillNewQuestionnaireFromBranches(branches, questionnaire);
 
         return questionnaire;
     }
@@ -104,8 +124,13 @@ public class QuestionnaireService {
             branchQuestionnaires.add(branchQuestionnaire);
 
         }
+        List<BranchQuestionnaire> newBranchQuestionnaires = questionnaire.getBranchQuestionnaires();
+        if(newBranchQuestionnaires == null){
+            newBranchQuestionnaires = new ArrayList<>();
+        }
 
-        questionnaire.setBranchQuestionnaires(branchQuestionnaires);
+        newBranchQuestionnaires.addAll(branchQuestionnaires);
+        questionnaire.setBranchQuestionnaires(newBranchQuestionnaires);
         questionnaire.setDate(LocalDateTime.now());
         questionnaireRepository.save(questionnaire);
         branchQuestionnaireService.saveBranchQuestionnaires(branchQuestionnaires);

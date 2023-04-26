@@ -116,7 +116,7 @@ public class SetupDataLoader implements
         createFederalStateIfNotFound("Berlin", "BE");
         createFederalStateIfNotFound("Bremen", "HB");
         createFederalStateIfNotFound("Hamburg", "HH");
-        createFederalStateIfNotFound("Hessen", "HH");
+        createFederalStateIfNotFound("Hessen", "HE");
         createFederalStateIfNotFound("Mecklenburg-Vorpommern", "MV");
         createFederalStateIfNotFound("Niedersachsen", "NI");
         createFederalStateIfNotFound("Nordrhein-Westfalen", "NW");

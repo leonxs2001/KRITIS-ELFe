@@ -8,10 +8,14 @@ function resetLinkHref(select){
     link.setAttribute("href", href.slice(0, href.lastIndexOf("/") + 1) + select.value);
 }
 
-function onFormSubmit(form){
-    if(form.hidden == false){
-        form.hidden = true;
-        return true;
-    }
+function onFormSubmit(button){
+    let modalContentDiv = button.closest(".modal-content");
+    let modalHeaderDiv = modalContentDiv.querySelector(".modal-header");
+    let form = modalContentDiv.querySelector("form");
+    let loaderDiv = modalContentDiv.querySelector(".loader");
+
+    modalHeaderDiv.hidden = true;
+    form.hidden = true;
+    loaderDiv.hidden = false;
 
 }
