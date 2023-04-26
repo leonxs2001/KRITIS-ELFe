@@ -12,13 +12,24 @@
             <div class="container">
                 <th:block th:if="${report}">
                     <h1 id="heading">Lagebild Report</h1>
-                    <p id="report-question-p">Wähle aus, welchen Report Sie sich ansehen wollen:</p>
+                    <p id="report-question-p">Wählen Sie aus, welchen Report Sie sich ansehen wollen:</p>
                     <select id="report-select" class="form-select" onchange="onReportSelectChange(this)">
                         <option th:each="singleReport: ${reports}"
                                 th:text="${singleReport}"
                                 th:value="${singleReport.getId()}"
                                 th:selected="${singleReport.equals(report)}"></option>
                     </select>
+
+                    <p id="report-sector-p">Wollen sie den Lagebericht für einen bestimmten Sektor herunterladen?</p>
+
+                    <div id="sector-div">
+                        <select onchange="onSectorSelectChange(this)" id="sector-select" class="form-select">
+                            <option th:each="sector:${sectors}" th:text="${sector.getName()}" th:value="${sector.getId()}"></option>
+                        </select>
+
+                        <a id="sector-link" class="btn btn-primary"
+                           th:href="${'/report/sector/download/?reportId=' + report.getId() + '&ampsectorId=' + sectors.get(0).getId()}">Download für den Sektor</a>
+                    </div>
 
                     <table>
                         <tr>

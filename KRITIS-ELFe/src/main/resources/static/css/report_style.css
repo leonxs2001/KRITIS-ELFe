@@ -7,7 +7,27 @@
     margin-bottom: 1em;
 }
 
-report-question-p{
+#sector-div{
+    display: flex;
+    flex-direction: row;
+    margin-bottom: 1em;
+}
+
+#sector-select{
+    width: fit-content;
+}
+
+#sector-link{
+    color: white;
+    margin-left: 1em;
+}
+
+#report-sector-p{
+    margin-bottom: 0.2em;
+    font-size: 1.1em;
+}
+
+#report-question-p{
     margin-bottom: 0.2em;
     font-size: 1.1em;
 }

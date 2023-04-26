@@ -1,20 +1,20 @@
-package de.thb.kritis_elfe.service.helper;
+package de.thb.kritis_elfe.service.helper.report;
 
 import de.thb.kritis_elfe.enums.ValueChangedType;
 
-public class SectorReportValue {
+public class ReportValue {
     private short value;
     private ValueChangedType valueChangedType;
 
-    public SectorReportValue(short value, ValueChangedType valueChangedType) {
+    public ReportValue(short value, ValueChangedType valueChangedType) {
         this.value = value;
         this.valueChangedType = valueChangedType;
     }
 
-    public SectorReportValue(short value) {
+    public ReportValue(short value) {
         this(value, ValueChangedType.EQUAL);
     }
-    public SectorReportValue() {
+    public ReportValue() {
         this((short)0);
     }
 
