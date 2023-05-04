@@ -13,8 +13,12 @@ form{
     margin-bottom: 2em;
 }
 
+#not-updated-message{
+    margin-top: 2em;
+}
+
 #situation-file-form{
-    margin-top: 3em;
+    margin-top: 2em;
 }
 
 #file-input{

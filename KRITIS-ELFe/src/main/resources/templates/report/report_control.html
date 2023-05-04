@@ -21,9 +21,9 @@
             Lageberichte selber ausfüllen
         </button>
 
-        <p th:if="${notFullyFilledFederalStates.size() > 0 || notFullyFilledRessorts.size() > 0}" id="error-text" class="text-danger">
+        <p th:if="${federalStatesWithNotUpdatedQuest.size() > 0 || ressortsWithNotUpdatedQuest.size() > 0}" id="error-text" class="text-danger">
             <span class="font-weight-bold">Achtung!</span><br>
-            Nicht alle Lageberichte wurden komplett ausgefüllt.
+            Nicht alle Lageberichte wurden seit der letzten Reporterstellung bestätigt.
             <button class="btn btn-outline-danger" data-toggle="modal" data-target="#notAllQuestionnairesFullyFilled">
                 <i class="bi bi-info-square"></i>
             </button>
@@ -96,22 +96,22 @@
                         </button>
                     </div>
                     <div class="modal-body text-danger">
-                        <th:block th:if="${notFullyFilledFederalStates.size() > 0}">
+                        <th:block th:if="${federalStatesWithNotUpdatedQuest.size() > 0}">
                             Es fehlt etwas bei diesen Ländern: <br>
-                            <th:block th:each="federalState, istat: ${notFullyFilledFederalStates}">
-                                <a class="text-danger error-situation-link" th:text="${federalState.getName()}" th:href="${'/situation/'+federalState.getName()}"></a><th:block th:if="${istat.index < notFullyFilledFederalStates.size() - 2}" th:text="${', '}"></th:block>
-                                <th:block th:if="${istat.index == notFullyFilledFederalStates.size() - 2}" th:text="${' und '}"></th:block>
+                            <th:block th:each="federalState, istat: ${federalStatesWithNotUpdatedQuest}">
+                                <a class="text-danger error-situation-link" th:text="${federalState.getName()}" th:href="${'/situation/'+federalState.getName()}"></a><th:block th:if="${istat.index < federalStatesWithNotUpdatedQuest.size() - 2}" th:text="${', '}"></th:block>
+                                <th:block th:if="${istat.index == federalStatesWithNotUpdatedQuest.size() - 2}" th:text="${' und '}"></th:block>
                             </th:block>
                         </th:block>
-                        <th:block th:if="${notFullyFilledFederalStates.size() > 0 && notFullyFilledRessorts.size() > 0}">
+                        <th:block th:if="${federalStatesWithNotUpdatedQuest.size() > 0 && ressortsWithNotUpdatedQuest.size() > 0}">
                             <br>
                             <br>
                         </th:block>
-                        <th:block th:if="${notFullyFilledRessorts.size() > 0}">
+                        <th:block th:if="${ressortsWithNotUpdatedQuest.size() > 0}">
                             Es fehlt etwas bei den Ressorts:<br>
-                            <th:block th:each="ressort, istat: ${notFullyFilledRessorts}">
-                                <a class="text-danger error-situation-link" th:text="${ressort.getName()}" th:href="${'/situation/'+ressort.getName()}"></a><th:block th:if="${istat.index < notFullyFilledRessorts.size() - 2}" th:text="${', '}"></th:block>
-                                <th:block th:if="${istat.index == notFullyFilledRessorts.size() - 2}" th:text="${' und '}"></th:block>
+                            <th:block th:each="ressort, istat: ${ressortsWithNotUpdatedQuest}">
+                                <a class="text-danger error-situation-link" th:text="${ressort.getName()}" th:href="${'/situation/'+ressort.getName()}"></a><th:block th:if="${istat.index < ressortsWithNotUpdatedQuest.size() - 2}" th:text="${', '}"></th:block>
+                                <th:block th:if="${istat.index == ressortsWithNotUpdatedQuest.size() - 2}" th:text="${' und '}"></th:block>
                             </th:block>
                         </th:block>
                     </div>

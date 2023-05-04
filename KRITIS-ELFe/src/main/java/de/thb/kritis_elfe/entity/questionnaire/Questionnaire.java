@@ -26,6 +26,8 @@ public class Questionnaire {
 
     private LocalDateTime date;
 
+    private boolean updated;
+
     @ManyToOne
     private Report report;
 

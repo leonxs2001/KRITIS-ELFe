@@ -75,8 +75,8 @@ public class SuperAdminController implements Comparable {
 
         Report newReport = new Report();
         model.addAttribute("newReport", newReport);
-        model.addAttribute("notFullyFilledFederalStates", questionnaireService.getFederalStatesWithEmptyQuestionnaire());
-        model.addAttribute("notFullyFilledRessorts", questionnaireService.getRessortsWithEmptyQuestionnaire());
+        model.addAttribute("federalStatesWithNotUpdatedQuest", questionnaireService.getFederalStatesWithNotUpdatedQuestionnaire());
+        model.addAttribute("ressortsWithNotUpdatedQuest", questionnaireService.getRessortsWithNotUpdatedQuestionnaire());
         model.addAttribute("ressorts", ressortService.getAllRessorts());
         model.addAttribute("federalStates", federalStateService.getAllFederalStates());
         return "report/report_control";

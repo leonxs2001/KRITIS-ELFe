@@ -14,6 +14,13 @@
 <body>
 <div layout:fragment="content" class="container">
     <h1 th:text="${'Lagebild ' + name}"></h1>
+
+    <p th:if="${!questionnaire.isUpdated()}" id="not-updated-message" class="text-danger">
+        <span class="font-weight-bold">Achtung!</span><br>
+        Der Lagebericht wurde noch nicht wieder bestätigt seit der letzten Reporterstellung. <br>
+        Füllen Sie das Lagebild aus und tun Sie dies über den Button <a class="text-danger" href="#submit-button">"Bestätigen und speichern"</a>.
+    </p>
+
     <form id="situation-file-form" method="POST" th:action="${'/situation/'+name}" enctype="multipart/form-data">
         <div th:if="${success == true}"
              class="alert alert-success success-error-message" role="alert">Die Dateien wurden erfolgreich hochgeladen und der Inhalt gespeichert.</div>
@@ -83,7 +90,7 @@
                  th:class="${'branch-div branch-div-' + sector.getId()}">
                 <h4>
                     <i class="bi bi-diamond"></i>
-                    <span th:text="${branchQuestionnaire.getBranch().getName()}"></span>
+                    <span class="branch-name-span" th:text="${branchQuestionnaire.getBranch().getName()}"></span>
                 </h4>
                 <div class="input-div description-div" th:each="filledScenario, iter2: ${branchQuestionnaire.filledScenarios}">
                     <p th:text="${filledScenario.getScenario().getDescription()}" class="description-p"></p>
@@ -105,7 +112,7 @@
             </div>
         </th:block>
         <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
-        <button type="button" onclick="submitForm()" class="btn btn-primary">Speichern</button>
+        <button type="button" id="submit-button" onclick="submitForm()" class="btn btn-primary">Bestätigen und Speichern</button>
     </form>
 
 </div>

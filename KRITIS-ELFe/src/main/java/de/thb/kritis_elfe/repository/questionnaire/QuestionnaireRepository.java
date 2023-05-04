@@ -25,4 +25,8 @@ public interface QuestionnaireRepository extends CrudRepository<Questionnaire, L
     @Modifying
     @Query("update Questionnaire quest set quest.date = ?1 where quest.id = ?2")
     void updateQuestionnaireDateFromId(LocalDateTime localDateTime, long id);
+
+    @Modifying
+    @Query("update Questionnaire quest set quest.date = ?1, quest.updated = ?2 where quest.id = ?3")
+    void updateQuestionnaireDateAndUpdatedFromId(LocalDateTime localDateTime, boolean updated, long id);
 }

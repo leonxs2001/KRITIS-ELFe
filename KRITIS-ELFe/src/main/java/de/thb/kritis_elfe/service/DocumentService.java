@@ -1,19 +1,19 @@
 package de.thb.kritis_elfe.service;
 
 import de.thb.kritis_elfe.entity.*;
-import de.thb.kritis_elfe.service.helper.report.CommentReportValue;
-import de.thb.kritis_elfe.service.helper.report.ReportValue;
-import de.thb.kritis_elfe.service.helper.report.SectorBranchReportValueAccessor;
-import de.thb.kritis_elfe.service.helper.report.SectorReportValueAccessor;
+import de.thb.kritis_elfe.service.helper.report.*;
 import org.apache.poi.xwpf.usermodel.*;
 import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTPPr;
 import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTSpacing;
+import org.openxmlformats.schemas.wordprocessingml.x2006.main.STHighlightColor;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.io.OutputStream;
 import java.math.BigInteger;
+import java.util.HashMap;
 import java.util.List;
+import java.util.function.BiConsumer;
 
 @Service
 public class DocumentService {
@@ -123,7 +123,7 @@ public class DocumentService {
 
             String ressortHead = null;
             for(Ressort ressort: sectorBranchReportValueAccessor.getRessorts()){
-                List<String> comments = sectorBranchReportValueAccessor.getRessortCommentReportValue(branch).getComments(ressort);
+                HashMap<Scenario, FormattedComment> comments = sectorBranchReportValueAccessor.getRessortCommentReportValue(branch).getComments(ressort);
                 createCommentRepresentationForComments(commentParagraph, ressort.getShortcut(), comments);
 
                 if(ressortHead == null){
@@ -151,7 +151,7 @@ public class DocumentService {
                 XWPFTableCell branchFederalStateTableCell = branchTableRow.getCell(1 + i);
                 setColorAndTextForCellFromSectorReportValue(branchFederalStateTableCell, commentReportValue);
 
-                List<String> comments = commentReportValue.getComments();
+                HashMap<Scenario, FormattedComment> comments = commentReportValue.getComments();
 
                 createCommentRepresentationForComments(commentParagraph, federalState.getShortcut(), comments);
             }
@@ -171,23 +171,35 @@ public class DocumentService {
         paragraph.setSpacingAfter(1);
     }
 
-    private void createCommentRepresentationForComments(XWPFParagraph commentParagraph, String shortcut, List<String> comments) {
+    private void createCommentRepresentationForComments(XWPFParagraph commentParagraph, String shortcut, HashMap<Scenario, FormattedComment> comments) {
         if(comments != null && comments.size() > 0) {
             XWPFRun commentRessortHeadRun = commentParagraph.createRun();
             commentRessortHeadRun.setBold(true);
             commentRessortHeadRun.setText(shortcut + ":");
             commentRessortHeadRun.addBreak();
 
-            XWPFRun commentRun = commentParagraph.createRun();
-
-
-            for (String comment : comments) {
-                String[] singleCommentParts = comment.split("\n");
-                commentRun.setText("- ");
-                for(String singleCommentPart: singleCommentParts){
-                    commentRun.setText(singleCommentPart);
-                    commentRun.addBreak();
+            comments.forEach((scenario, formattedComment) -> {
+                commentParagraph.createRun().setText("- ");
+                for(String coloredComment: formattedComment.getCommentParts()){
+                    XWPFRun commentRun = commentParagraph.createRun();
+                    if(formattedComment.isYellow()){
+                        commentRun.getCTR().addNewRPr().addNewHighlight().setVal(STHighlightColor.YELLOW);
+                    }
+                    writeTextInRunWithBreaks(commentRun, coloredComment);
                 }
+                commentParagraph.createRun().addBreak();
+            });
+
+            commentParagraph.createRun().addBreak();
+        }
+    }
+
+    private void writeTextInRunWithBreaks(XWPFRun run, String text){
+        String[] singleTexts = text.split("\n");
+        for(int i = 0; i < singleTexts.length; i++){
+            run.setText(singleTexts[i]);
+            if(i != singleTexts.length - 1) {
+                run.addBreak();
             }
         }
     }

@@ -17,6 +17,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.function.BiConsumer;
 
 @Service
 public class ReportService {
@@ -77,12 +78,44 @@ public class ReportService {
                     oldCommentReportValue = oldFederalStateBranchCommentReportValueHashMap.get(branch).get(federalState);
                 }
 
+                //format all comments
+                for (Map.Entry<Scenario, FormattedComment> entry : commentReportValue.getComments().entrySet()) {
+                    Scenario scenario = entry.getKey();
+                    FormattedComment formattedComment = entry.getValue();
+
+                    if(oldReport == null){
+                        formattedComment.formatCommentFromOldComment("");
+                    }else{
+                        FormattedComment oldFormattedComment = oldCommentReportValue.getComments().get(scenario);
+                        if(oldFormattedComment == null){
+                            formattedComment.formatCommentFromOldComment("");
+                        }else {
+                            formattedComment.formatCommentFromOldComment(oldFormattedComment.getComment());
+                        }
+                        }
+
+                }
+
                 setValueChangedTypeByOldValue(commentReportValue, oldCommentReportValue);
             });
         });
 
         branchRessortCommentsReportValue.forEach((branch, ressortCommentsReportValue) -> {
-            setValueChangedTypeByOldValue(ressortCommentsReportValue, oldBranchRessortCommentsReportValue.get(branch));
+            RessortCommentsReportValue oldRessortCommentsReportValue = oldBranchRessortCommentsReportValue.get(branch);
+            //format all comments
+            ressortCommentsReportValue.getRessortComments().forEach((ressort, formattedComments) -> {
+                //set to null if old report does not exists
+                HashMap<Scenario, FormattedComment> oldFormattedComments = (oldReport == null)? null : oldRessortCommentsReportValue.getComments(ressort);
+
+                formattedComments.forEach((scenario, formattedComment) -> {
+                    if(oldRessortCommentsReportValue == null){
+                        formattedComment.formatCommentFromOldComment("");
+                    }else {
+                        formattedComment.formatCommentFromOldComment(oldFormattedComments.get(scenario).getComment());
+                    }
+                });
+            });
+            setValueChangedTypeByOldValue(ressortCommentsReportValue, oldRessortCommentsReportValue);
         });
 
         return new SectorBranchReportValueAccessor(federalStateBranchCommentReportValueHashMap, branchRessortCommentsReportValue);
@@ -110,8 +143,9 @@ public class ReportService {
                         }
 
                         for (FilledScenario filledScenario : branchQuestionnaire.getFilledScenarios()) {
-                            if(filledScenario.getValue() > 1 && !filledScenario.getComment().equals("")){//TODO many code duplicates make it simple
-                                commentReportValue.getComments().add(filledScenario.getComment());
+                            if((filledScenario.getValue() > 1 || filledScenario.getScenario().getScenarioType() == ScenarioType.TEXT)
+                                    && !filledScenario.getComment().equals("")){//TODO many code duplicates make it simple
+                                commentReportValue.getComments().put(filledScenario.getScenario(), new FormattedComment(filledScenario.getComment()));
                             }
                             if (filledScenario.getScenario().getScenarioType() == ScenarioType.AUSWAHL) {
                                 if (commentReportValue.getValue() < filledScenario.getValue()) {
@@ -126,15 +160,16 @@ public class ReportService {
                             branchRessortCommentsReportValue.put(branchQuestionnaire.getBranch(), ressortCommentsReportValue);
                         }
 
-                        List<String> comments = ressortCommentsReportValue.getComments(questionnaire.getRessort());
+                        HashMap<Scenario, FormattedComment> comments = ressortCommentsReportValue.getComments(questionnaire.getRessort());
                         if(comments == null){
-                            comments = new ArrayList<>();
+                            comments = new HashMap<>();
                             ressortCommentsReportValue.getRessortComments().put(questionnaire.getRessort(), comments);
                         }
 
                         for (FilledScenario filledScenario : branchQuestionnaire.getFilledScenarios()) {
-                            if(filledScenario.getValue() > 1 && !filledScenario.getComment().equals("")){
-                                comments.add(filledScenario.getComment());
+                            if((filledScenario.getValue() > 1 || filledScenario.getScenario().getScenarioType() == ScenarioType.TEXT)
+                                    && !filledScenario.getComment().equals("")){
+                                comments.put(filledScenario.getScenario(), new FormattedComment(filledScenario.getComment()));
                             }
 
                             if (filledScenario.getScenario().getScenarioType() == ScenarioType.AUSWAHL) {

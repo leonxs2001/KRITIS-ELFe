@@ -168,40 +168,6 @@ public class QuestionnaireService {
     }
 
     /**
-     * Checks if all active scenarios have a representation in the questionnaires FilledScenarios
-     * --> add an empty FilledScenario from this Scenario if not.
-     * delete FilledScenarios with an inactive Scenario from this questionnaire
-     * @param questionnaire
-     */
-    /*public void checkIfMatchingWithActiveScenariosFromDB(Questionnaire questionnaire){
-        List<Scenario> activeScenarios = scenarioService.getAllScenariosByActiveTrue();
-        //create a copy of the UserScenarioList. Because we need to delete items from the list inside the Questionnaire.
-        List<UserScenario> userScenarios = new ArrayList<>(questionnaire.getUserScenarios());
-
-        //try to remove every UserScenario of the Questionnaire from the activeScenario-list
-        //and remove it from the questionnaire List, if its not part of the List
-        for(UserScenario userScenario : userScenarios){
-            //try to remove the Scenario
-            if(!activeScenarios.remove(userScenario.getScenario())){
-                //delete the UserScenario from the Questionnaire, if it is not from an active Scenario (not in active list)
-                questionnaire.getUserScenarios().remove(userScenario);
-            }
-        }
-
-        //all scenarios which were not deleted have to be created as new UserScenario for the Questionnaire
-        for(Scenario scenario : activeScenarios){
-            if (!userScenarioService.existsUerScenarioByScenarioIdAndQuestionnaireId(scenario.getId(), questionnaire.getId())) {
-                UserScenario userScenario = UserScenario.builder().smallComment("")
-                        .scenario(scenario)
-                        .questionnaire(questionnaire)
-                        .impact(-1)
-                        .probability(-1).build();
-                questionnaire.getUserScenarios().add(userScenario);
-            }
-        }
-    }*/
-
-    /**
      * Create a new Questionnaire with the FilledScenarios from inside the form and save it
      */
     @Transactional
@@ -212,8 +178,7 @@ public class QuestionnaireService {
         }else if(ressort != null && !questionnaireRepository.existsByIdAndRessort(questionnaire.getId(), ressort)) {
             throw new EntityDoesNotExistException("There is no questionnaire with the id " + questionnaire.getId() + " and the ressort " + ressort.getName() + ".");
         }else{
-
-            questionnaireRepository.updateQuestionnaireDateFromId(LocalDateTime.now(), questionnaire.getId());
+            questionnaireRepository.updateQuestionnaireDateAndUpdatedFromId(LocalDateTime.now(), true, questionnaire.getId());
 
             for (BranchQuestionnaire branchQuestionnaire : questionnaire.getBranchQuestionnaires()) {
                 if(ressort == null || ressort.getBranches().contains(branchQuestionnaire.getBranch())){
@@ -234,7 +199,7 @@ public class QuestionnaireService {
         }else{
             questionnaire = getQuestionnaireForRessort(ressort);
         }
-        questionnaireRepository.updateQuestionnaireDateFromId(LocalDateTime.now(), questionnaire.getId());
+        questionnaireRepository.updateQuestionnaireDateFromId(LocalDateTime.now(), questionnaire.getId());//TODO Also updating if saved from files?
 
         for(MultipartFile file: files){
             saveFilledScenariosFromFile(questionnaire, file, ressort, model);
@@ -497,20 +462,20 @@ public class QuestionnaireService {
         }
     }
 
-    public List<FederalState> getFederalStatesWithEmptyQuestionnaire(){
+    public List<FederalState> getFederalStatesWithNotUpdatedQuestionnaire(){
         List<FederalState> federalStates = new ArrayList<>();
         for(FederalState federalState: federalStateService.getAllFederalStates()){
-            if(!isQuestionnaireFullyFilled(getQuestionnaireForFederalState(federalState))){
+            if(!getQuestionnaireForFederalState(federalState).isUpdated()){
                 federalStates.add(federalState);
             }
         }
         return  federalStates;
     }
 
-    public List<Ressort> getRessortsWithEmptyQuestionnaire(){
+    public List<Ressort> getRessortsWithNotUpdatedQuestionnaire(){
         List<Ressort> ressorts = new ArrayList<>();
         for(Ressort ressort: ressortService.getAllRessorts()){
-            if(!isQuestionnaireFullyFilled(getQuestionnaireForRessort(ressort))){
+            if(!getQuestionnaireForRessort(ressort).isUpdated()){
                 ressorts.add(ressort);
             }
         }
@@ -518,16 +483,6 @@ public class QuestionnaireService {
         return ressorts;
     }
 
-    private boolean isQuestionnaireFullyFilled(Questionnaire questionnaire){
-        for(BranchQuestionnaire branchQuestionnaire: questionnaire.getBranchQuestionnaires()){
-            for(FilledScenario filledScenario: branchQuestionnaire.getFilledScenarios()){
-                if(filledScenario.getScenario().getScenarioType() == ScenarioType.AUSWAHL && filledScenario.getValue() <= 0){
-                    return false;
-                }
-            }
-        }
 
-        return true;
-    }
 
 }
