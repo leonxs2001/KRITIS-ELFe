@@ -68,7 +68,7 @@ public class PasswordResetTokenService {
         PasswordResetToken myToken = new PasswordResetToken(user, token);
         passwordResetTokenRepository.save(myToken);
 
-        emailSender.send(user.getEmail(), ResetPasswordNotification.resetPasswordMail(user.getFirstName(), user.getLastName(), token));
+        emailSender.send(user.getEmail(), ResetPasswordNotification.resetPasswordMail(user.getUsername(), token));
     }
 
     /**

@@ -19,8 +19,6 @@
                     <th>ID</th>
                     <th>E-Mail</th>
                     <th>Username</th>
-                    <th>Vorname</th>
-                    <th>Nachname</th>
                     <th>Rolle</th>
                     <th th:width="250px">Neue Rolle</th>
                     <th th:width="250px">Rolle löschen</th>
@@ -31,8 +29,6 @@
                     <td><input hidden th:field="*{users[__${itemStat.index}__].id}" th:text="${user.id}" /></td>
                     <td th:text="${user.email}"></td>
                     <td><input hidden th:field="*{users[__${itemStat.index}__].username}" th:text="${user.username}" /></td>
-                    <td th:text="${user.firstName}"></td>
-                    <td th:text="${user.lastName}"></td>
                     <td th:text="${user.roles}"></td>
                     <th:block>
                         <td>

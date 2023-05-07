@@ -2,7 +2,7 @@ package de.thb.kritis_elfe.mail.Templates.UserNotifications;
 
 public class UserChangeEnabledStatusNotification {
 
-    public static String changeBrancheMail(String userFirstname, String userLastname) {
+    public static String changeBrancheMail(String username) {
 
         String link = "https://kritis-elfe.th-brandenburg.de";
 
@@ -60,7 +60,7 @@ public class UserChangeEnabledStatusNotification {
                 "\n" +
                 "  <body>\n" +
                 "    <h2 style=\"background-color:black; color: white; padding: 20px 0; margin: 0 auto;\">Ihr Status auf KRITIS-ELFe wurde geändert</h2>\n" +
-                "    <p>Hallo " + userFirstname + " " + userLastname + ",</p>\n" +
+                "    <p>Hallo " + username + ",</p>\n" +
                 "    <p>Die KRITIS-ELFe-Geschäftsstelle hat Ihr Profil zur Nutzung freigeschaltet.</p>\n" +
                 "    <div class=\"tabledata\" style=\"display:flex;align-items:center; justify-content:center\">\n" +
                 "    <p>Sie können sich nun einloggen und die Plattform nutzen.</p>\n" +

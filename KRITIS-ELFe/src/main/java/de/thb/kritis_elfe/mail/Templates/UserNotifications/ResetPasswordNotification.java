@@ -2,9 +2,9 @@ package de.thb.kritis_elfe.mail.Templates.UserNotifications;
 
 public class ResetPasswordNotification {
 
-    public static String resetPasswordMail(String userFirstname, String userLastname, String token) {
+    public static String resetPasswordMail(String username, String token) {
 
-        String link = "https://kritis-elfe.th-brandenburg.de/reset_password?token=" + token;
+        String link = "http://localhost:8080/reset_password?token=" + token;
 
         return "<!DOCTYPE html>\n" +
                 "<html lang=\"de\" dir=\"ltr\">\n" +
@@ -60,7 +60,7 @@ public class ResetPasswordNotification {
                 "\n" +
                 "  <body>\n" +
                 "    <h2 style=\"background-color:black; color: white; padding: 20px 0; margin: 0 auto;\">KRITIS-ELFe: Ihr Passwort wurde zurückgesetzt</h2>\n" +
-                "    <p>Hallo " + userFirstname + " " + userLastname + ",</p>\n" +
+                "    <p>Hallo " + username + ",</p>\n" +
                 "    <p>Sie haben eine Zurücksetzung Ihres Passworts beantragt.</p>\n" +
                 "    <div class=\"tabledata\" style=\"display:flex;align-items:center; justify-content:center\">\n" +
                 "    </div>\n" +

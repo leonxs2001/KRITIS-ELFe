@@ -7,6 +7,10 @@ import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.thymeleaf.TemplateEngine;
+import org.thymeleaf.context.Context;
+import org.thymeleaf.templatemode.TemplateMode;
+import org.thymeleaf.templateresolver.ClassLoaderTemplateResolver;
 
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
@@ -37,4 +41,20 @@ public class EmailService implements EmailSender{
             throw new IllegalStateException("Failed to send mail");
         }
     }
+
+    public void sendMailFromTemplate(String template, Context context, String mailAddress){
+        new Thread(() -> {
+            ClassLoaderTemplateResolver templateResolver = new ClassLoaderTemplateResolver();
+            templateResolver.setSuffix(".html");
+            templateResolver.setTemplateMode(TemplateMode.HTML);
+
+            TemplateEngine templateEngine = new TemplateEngine();
+            templateEngine.setTemplateResolver(templateResolver);
+
+            String emailText = templateEngine.process("templates/" + template, context);
+            send(mailAddress, emailText);
+        }).start();
+
+    }
 }
+

@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+</head>
+<body>
+    <div style="text-align: center">
+        <h2>Neue Registrierung auf KRITIS-ELFe</h2>
+        <p th:text="${'Hallo ' + username + ','}"></p>
+        <p>Vielen Dank für die Registrierung. Bitte bestätigen Sie Ihre Email unter folgendem Link:</p>
+        <a th:href="${link}">Verifizieren</a>
+        <p>Der Link bleibt 3 Tage gültig.</p>
+    </div>
+</body>
+</html>

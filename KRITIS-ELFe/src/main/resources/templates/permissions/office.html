@@ -9,7 +9,7 @@
 <body>
 <div layout:fragment="content">
     <div class="container">
-        <h2>Geschäftsstelle Dashboard</h2><br>
+        <h2>Geschäftsstelle</h2><br>
         <div class="alert alert-primary" role="alert" th:text="${success}" th:if="${success}"></div>
 
         <form th:object="${form}" action="#" th:action="@{/office}" method="post">
@@ -18,8 +18,6 @@
                 <thead class="thead-dark">
                 <tr>
                     <th>ID</th>
-                    <th>Vorname</th>
-                    <th>Nachname</th>
                     <th>Username</th>
                     <th>Aktiviert</th>
                 </tr>
@@ -28,10 +26,6 @@
                 <tr th:each="user, itemStat: *{users}">
                     <td><input hidden th:text="*{users[__${itemStat.index}__].id}"
                                th:attr="name='${user[' + itemStat.index  + ']}'" th:value="${user.id}"/></td>
-                    <td><input hidden th:text="*{users[__${itemStat.index}__].firstName}"
-                               th:attr="name='${user[' + itemStat.index  + ']}'" th:value="${user.firstName}"/></td>
-                    <td><input hidden th:text="*{users[__${itemStat.index}__].lastName}"
-                               th:attr="name='${user[' + itemStat.index  + ']}'" th:value="${user.lastName}"/></td>
                     <td><input hidden th:text="*{users[__${itemStat.index}__].username}"
                                th:attr="name='${user[' + itemStat.index  + ']}'" th:value="${user.username}"/></td>
 

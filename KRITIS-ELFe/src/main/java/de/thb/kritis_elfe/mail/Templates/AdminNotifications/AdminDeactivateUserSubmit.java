@@ -2,7 +2,7 @@ package de.thb.kritis_elfe.mail.Templates.AdminNotifications;
 
 public class AdminDeactivateUserSubmit {
 
-    public static String changeEnabledStatus(String userFirstname, String userLastname, boolean enabled, String username) {
+    public static String changeEnabledStatus(String username, boolean enabled, String newUsername) {
 
         return "<!DOCTYPE html>\n" +
                 "<html lang=\"de\" dir=\"ltr\">\n" +
@@ -58,13 +58,13 @@ public class AdminDeactivateUserSubmit {
                 "\n" +
                 "  <body>\n" +
                 "    <h2 style=\"background-color:black; color: white; padding: 20px 0; margin: 0 auto;\">Änderung des Nutzerstatus auf KRITIS-ELFe</h2>\n" +
-                "    <p>Hallo " + userFirstname + " " + userLastname + ",</p>\n" +
+                "    <p>Hallo " + username + ",</p>\n" +
                 "    <p>Ein Mitglied der KRITIS-ELFe-Geschäftsstelle hat den Status von folgendem Nutzer geändert:</p>\n" +
                 "    <div class=\"tabledata\" style=\"display:flex;align-items:center; justify-content:center\">\n" +
                 "      <table style=\"\">\n" +
                 "          <tr>\n" +
                 "            <td>Nutzer: </td>\n" +
-                "            <td>" + username + "</td>\n" +
+                "            <td>" + newUsername + "</td>\n" +
                 "          </tr>\n" +
                 "          <tr>\n" +
                 "            <td>Neuer Status: </td>\n" +

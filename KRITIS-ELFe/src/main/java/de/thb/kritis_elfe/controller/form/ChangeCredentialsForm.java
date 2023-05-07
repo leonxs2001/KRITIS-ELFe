@@ -17,7 +17,5 @@ public class ChangeCredentialsForm {
     private String confirmNewPassword;
     private String oldEmail;
     private String newEmail;
-    private String newFirstname;
-    private String newLastname;
     private String newUsername;
 }

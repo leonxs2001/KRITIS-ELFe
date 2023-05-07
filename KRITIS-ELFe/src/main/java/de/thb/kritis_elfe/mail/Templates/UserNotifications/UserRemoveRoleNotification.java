@@ -4,7 +4,7 @@ import de.thb.kritis_elfe.entity.Role;
 
 public class UserRemoveRoleNotification {
 
-    public static String removeRoleMail(String userFirstname, String userLastname, Role role) {
+    public static String removeRoleMail(String username, Role role) {
 
         String link = "https://kritis-elfe.th-brandenburg.de/login";
 
@@ -62,7 +62,7 @@ public class UserRemoveRoleNotification {
                 "\n" +
                 "  <body>\n" +
                 "    <h2 style=\"background-color:black; color: white; padding: 20px 0; margin: 0 auto;\">KRITIS-ELFe: Ihre Rolle wurde geändert</h2>\n" +
-                "    <p>Hallo " + userFirstname + " " + userLastname + ",</p>\n" +
+                "    <p>Hallo " + username + ",</p>\n" +
                 "    <p>Der Superadmin hat eine Ihrer Rollen entfernt:</p>\n" +
                 "    <div class=\"tabledata\" style=\"display:flex;align-items:center; justify-content:center\">\n" +
                 "      <table style=\"\">\n" +

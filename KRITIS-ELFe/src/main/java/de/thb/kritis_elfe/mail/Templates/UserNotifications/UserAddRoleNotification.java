@@ -4,9 +4,9 @@ import de.thb.kritis_elfe.entity.Role;
 
 public class UserAddRoleNotification {
 
-    public static String changeRoleMail(String userFirstname, String userLastname, Role role) {
+    public static String changeRoleMail(String username, Role role) {
 
-        String link = "https://kritis-elfe.th-brandenburg.de/login";
+        String link = "http://localhost:8080/login";
 
         return "<!DOCTYPE html>\n" +
                 "<html lang=\"de\" dir=\"ltr\">\n" +
@@ -62,7 +62,7 @@ public class UserAddRoleNotification {
                 "\n" +
                 "  <body>\n" +
                 "    <h2 style=\"background-color:black; color: white; padding: 20px 0; margin: 0 auto;\">KRITIS-ELFe: Ihre Rolle wurde geändert</h2>\n" +
-                "    <p>Hallo " + userFirstname + " " + userLastname + ",</p>\n" +
+                "    <p>Hallo " + username + ",</p>\n" +
                 "    <p>Der Superadmin hat Ihnen eine weitere Rolle zugewiesen:</p>\n" +
                 "    <div class=\"tabledata\" style=\"display:flex;align-items:center; justify-content:center\">\n" +
                 "      <table style=\"\">\n" +

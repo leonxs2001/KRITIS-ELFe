@@ -20,14 +20,6 @@ import javax.validation.constraints.NotNull;
 @PasswordMatches
 public class UserRegisterFormModel {
 
-    @NotNull(message = "LastName not null")
-    @NotEmpty(message = "Nachname darf nicht leer sein")
-    private String lastname;
-
-    @NotNull(message = "firstName not null")
-    @NotEmpty(message = "Vorname darf nicht leer sein")
-    private String firstname;
-
     @NotNull(message = "password not null")
     @NotEmpty(message = "Passwort darf nicht leer sein")
     private String password;

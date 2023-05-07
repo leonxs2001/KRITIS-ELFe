@@ -87,7 +87,7 @@ public class UserController {
 
     @GetMapping(path = "/account/changeCredentials")
     public String showChangePassword(){
-        return "account/changeCredentials";
+        return "change_credentials";
     }
 
     @PostMapping(path = "account/changeCredentials")
@@ -103,13 +103,13 @@ public class UserController {
             userService.changeCredentials(form,user, model);
         } catch (PasswordNotMatchingException passEx) {
             model.addAttribute("passwordError", "Das eingegebene Password stimmt nicht mit Ihrem aktuellen Passwort überein.");
-            return "account/changeCredentials";
+            return "change_credentials";
         } catch (EmailNotMatchingException e){
             model.addAttribute("emailError", "Die eingegebene Email-Adresse stimmt nicht mit Ihrer aktuellen Email überein.");
-            return "account/changeCredentials";
+            return "change_credentials";
         }
 
-        return "account/changeCredentials";
+        return "change_credentials";
     }
 
     @GetMapping(value="/help", produces = MediaType.APPLICATION_PDF_VALUE)

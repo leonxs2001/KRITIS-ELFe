@@ -2,7 +2,7 @@ package de.thb.kritis_elfe.mail.Templates.UserNotifications;
 
 public class UserNotificationAfterUserConfirmation {
 
-    public static String mailAfterUserConfirm(String userFirstname, String userLastname) {
+    public static String mailAfterUserConfirm(String username) {
 
         String link = "https://kritis-elfe.th-brandenburg.de/login";
 
@@ -60,7 +60,7 @@ public class UserNotificationAfterUserConfirmation {
                 "\n" +
                 "  <body>\n" +
                 "    <h2 style=\"background-color:black; color: white; padding: 20px 0; margin: 0 auto;\">Rückmeldung zu Ihrem Status</h2>\n" +
-                "    <p>Hallo " + userFirstname + " " + userLastname + ",</p>\n" +
+                "    <p>Hallo " + username + ",</p>\n" +
                 "    <p>Sie haben Ihre Registrierung soeben erfolgreich bestätigt.</p>\n" +
                 "    <div class=\"tabledata\" style=\"display:flex;align-items:center; justify-content:center\">\n" +
                 "    <p>Sobald die Geschäftsstelle Ihr Profil freischaltet erhalten Sie eine E-Mail.</p>\n" +

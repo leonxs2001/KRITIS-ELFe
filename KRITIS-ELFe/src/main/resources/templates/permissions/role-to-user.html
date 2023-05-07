@@ -14,8 +14,6 @@
             <tr>
                 <th>ID</th>
                 <th>E-Mail</th>
-                <th>Vorname</th>
-                <th>Nachname</th>
                 <th>Rolle</th>
                 <th>Neue Rolle</th>
                 <th></th>
@@ -25,8 +23,6 @@
             <tr th:each="user: ${user}">
                 <td th:text="${user.id}">User ID</td>
                 <td th:text="${user.email}">E-mail</td>
-                <td th:text="${user.firstName}">Vorname</td>
-                <td th:text="${user.lastName}">Nachname</td>
                 <td th:text="${user.getRoles()}">Rollen</td>
                 <th:block>
                     <td><select id="showRisk" class="form-select" th:field="${listRoles}">

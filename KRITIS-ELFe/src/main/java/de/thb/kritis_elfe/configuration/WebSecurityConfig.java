@@ -47,7 +47,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers("/adjustHelp").access("hasAuthority('ROLE_BBK_ADMIN')")
                 .antMatchers("/help").access("isAuthenticated()")
                 .antMatchers("/account/user_details").access("isAuthenticated()")
-                .antMatchers("/confirmation/confirm/**").access("hasAuthority('ROLE_BBK_ADMIN')")
+                .antMatchers("/confirmation/confirm/**").access("hasAuthority('ROLE_GESCHÄFTSSTELLE')")
                 .and()
                 .formLogin()
                 .loginPage("/login")

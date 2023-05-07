@@ -22,6 +22,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.ui.Model;
+import org.thymeleaf.context.Context;
 
 import java.util.*;
 
@@ -103,8 +104,6 @@ public class UserService {
         } else {
 
             User user = User.builder().
-                    lastName(form.getLastname()).
-                    firstName(form.getFirstname()).
                     username(form.getUsername()).
                     email(form.getEmail()).
                     enabled(false).
@@ -120,15 +119,14 @@ public class UserService {
             String token = createToken(user); // To create the token of the user
 
 
-            String userLink = "https://kritis-elfe.th-brandenburg.de/confirmation/confirmByUser?token=" + token;
+            String userLink = "http://localhost:8080/confirmation/confirmByUser?token=" + token;
 
             userRepository.save(user);
 
-            /*Outsourcing Mail to thread for speed purposes*/
-            new Thread(() -> {
-                //Email to new registered user
-                emailSender.send(form.getEmail(), UserRegisterNotification.buildUserEmail(form.getFirstname(), form.getLastname(), userLink));
-            }).start();
+            Context registrationContext = new Context();
+            registrationContext.setVariable("username", user.getUsername());
+            registrationContext.setVariable("link", userLink);
+            emailSender.sendMailFromTemplate("/mail/user_registration", registrationContext, user.getEmail());
 
         }
     }
@@ -157,9 +155,10 @@ public class UserService {
             user.setEnabled(true);
             userRepository.save(user);
         }
-        new Thread(() -> {
-            emailSender.send(user.getEmail(), UserEnabledNotification.finalEnabledConfirmation(user.getFirstName(), user.getLastName()));
-        }).start();
+
+        Context enabledContext = new Context();
+        enabledContext.setVariable("username", user.getUsername());
+        emailSender.sendMailFromTemplate("/mail/user_enabled", enabledContext, user.getEmail());
 
     }
 
@@ -190,23 +189,24 @@ public class UserService {
                 userConfirmation(token);
 
                 //send link to admin
-                String adminLink = "https://kritis-elfe.th-brandenburg.de/confirmation/confirm?token=" + token;
+                String adminLink = "http://localhost:8080/confirmation/confirm?token=" + token;
                 User user = confirmationToken.getUser();
 
-                /* Outsourcing Mailsending to thread for speed purposes */
-                new Thread(() -> {
+                Context selfConfirmedContext = new Context();
+                selfConfirmedContext.setVariable("username", user.getUsername());
+                emailSender.sendMailFromTemplate("/mail/user_self_confirmed", selfConfirmedContext, user.getEmail());
 
-                    emailSender.send(user.getEmail(), UserNotificationAfterUserConfirmation.mailAfterUserConfirm(user.getFirstName(), user.getLastName()));
+                for (User officeUser : getUserByOfficeRole()) {
+                    //only send it to enabled users
+                    if(officeUser.isEnabled()) {
+                        Context officeEnableUserContext = new Context();
+                        officeEnableUserContext.setVariable("username", officeUser.getUsername());
+                        officeEnableUserContext.setVariable("newUser", user);
+                        officeEnableUserContext.setVariable("link", user);
 
-                    for (User officeUser : getUserByOfficeRole()) {
-                        //only send it to enabled users
-                        if(officeUser.isEnabled()) {
-                            emailSender.send(officeUser.getEmail(), AdminRegisterNotification.buildAdminEmail(officeUser.getFirstName(), adminLink,
-                                    user.getFirstName(), user.getLastName(),
-                                    user.getEmail(), user.getRoles()));
-                        }
+                        emailSender.sendMailFromTemplate("/mail/office_enable_user", officeEnableUserContext, officeUser.getEmail());
                     }
-                }).start();
+                }
             }
         }
     }
@@ -254,9 +254,7 @@ public class UserService {
                                         role, user.getUsername()));
                             }
                         }*/
-                        emailSender.send(user.getEmail(), UserAddRoleNotification.changeRoleMail(user.getFirstName(),
-                                user.getLastName(),
-                                role));
+                        emailSender.send(user.getEmail(), UserAddRoleNotification.changeRoleMail(user.getUsername(), role));
                     }).start();
                 }
             }
@@ -267,8 +265,7 @@ public class UserService {
 
                 /*Outsourcing Mail to thread for speed purposes*/
                 new Thread(() -> {
-                    emailSender.send(user.getEmail(), UserRemoveRoleNotification.removeRoleMail(user.getFirstName(),
-                            user.getLastName(),
+                    emailSender.send(user.getEmail(), UserRemoveRoleNotification.removeRoleMail(user.getUsername(),
                             roleDel));
 
                     /*for (User superAdmin : getUserByAdminrole()) {
@@ -316,15 +313,12 @@ public class UserService {
         new Thread(() -> {
             for (User user: changedUsers) {
 
-                emailSender.send(user.getEmail(), UserChangeEnabledStatusNotification.changeBrancheMail(user.getFirstName(), user.getLastName()));
+                emailSender.send(user.getEmail(), UserChangeEnabledStatusNotification.changeBrancheMail(user.getUsername()));
 
                 for (User officeAdmin : getUserByOfficeRole()) {
                     //only send it to enabled users
                     if(officeAdmin.isEnabled()) {
-                        emailSender.send(officeAdmin.getEmail(), AdminDeactivateUserSubmit.changeEnabledStatus(officeAdmin.getFirstName(),
-                                officeAdmin.getLastName(),
-                                user.isEnabled(),
-                                user.getUsername()));
+                        emailSender.send(officeAdmin.getEmail(), AdminDeactivateUserSubmit.changeEnabledStatus(officeAdmin.getUsername(), user.isEnabled(), user.getUsername()));
                     }
                 }
             }
@@ -357,20 +351,6 @@ public class UserService {
             else if (!form.getOldEmail().equals(form.getNewEmail())) {
                 user.setEmail(form.getNewEmail());
                 model.addAttribute("emailSuccess", "Ihre Email-Adresse wurde erfolgreich geändert.");
-            }
-        }
-
-        if (form.getNewFirstname() != null && !form.getNewFirstname().isEmpty()) {
-            if (!form.getNewFirstname().equals(user.getFirstName())) {
-                user.setFirstName(form.getNewFirstname());
-                model.addAttribute("firstnameSuccess", "Ihr Vorname wurde erfolgreich geändert.");
-            }
-        }
-
-        if (form.getNewLastname() != null && !form.getNewLastname().isEmpty()) {
-            if (!form.getNewLastname().equals(user.getLastName())) {
-                user.setLastName(form.getNewLastname());
-                model.addAttribute("lastnameSuccess", "Ihr Nachname wurde erfolgreich geändert.");
             }
         }
 

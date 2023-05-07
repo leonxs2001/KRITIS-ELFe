@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <style>
+    </style>
+</head>
+<body>
+    <div style="text-align: center">
+        <h2>Es hat sich ein neuer Nutzer registriert</h2>
+        <p th:text="${'Hallo ' + username + ','}"></p>
+        <p>Es hat sich ein neuer KRITIS-ELFe-Nutzer registriert. Infos zum Nutzer:</p>
+        <table style="margin: auto; width: 50%;text-align: left;border: 1px solid; padding: 1em;">
+            <tr>
+                <th>Nutzername:</th>
+                <td th:text="${newUser.getUsername()}"></td>
+            </tr>
+            <tr>
+                <th>Email:</th>
+                <td th:text="${newUser.getEmail()}"></td>
+            </tr>
+            <tr>
+                <th>Rolle:</th>
+                <td th:text="${newUser.getRoles()}"></td>
+            </tr>
+            <tr th:if="${newUser.getRessort()}">
+                <th>Ressort:</th>
+                <td th:text="${newUser.getRessort()}"></td>
+            </tr>
+            <tr th:if="${newUser.getFederalState()}">
+                <th>Bundesland:</th>
+                <td th:text="${newUser.getFederalState()}"></td>
+            </tr>
+        </table>
+        <p>Sie können den Account hier aktivieren:</p>
+        <a th:href="${link}">Aktivieren des Accounts</a>
+    </div>
+</body>
+</html>
