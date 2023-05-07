@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+</head>
+<body>
+    <div style="text-align: center">
+        <h2 th:if="${user.isEnabled()}">Aktivierung</h2>
+        <h2 th:unless="${user.isEnabled()}">Dektivierung</h2>
+        <p th:text="${'Hallo ' + username + ','}"></p>
+        <p>Ihr Aktivierungsstatus wurde geändert.</p>
+        <p>Ihr Konto ist jetzt
+            <span th:if="${user.isEnabled()}">aktiviert.</span>
+            <span th:unless="${user.isEnabled()}">deaktiviert.</span>
+        </p>
+    </div>
+</body>
+</html>

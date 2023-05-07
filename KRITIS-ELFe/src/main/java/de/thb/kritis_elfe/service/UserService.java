@@ -7,7 +7,6 @@ import de.thb.kritis_elfe.controller.form.UserToRoleFormModel;
 import de.thb.kritis_elfe.entity.Role;
 import de.thb.kritis_elfe.entity.User;
 import de.thb.kritis_elfe.mail.EmailSender;
-import de.thb.kritis_elfe.mail.Templates.AdminNotifications.*;
 import de.thb.kritis_elfe.mail.Templates.UserNotifications.*;
 import de.thb.kritis_elfe.entity.ConfirmationToken;
 import de.thb.kritis_elfe.repository.RoleRepository;
@@ -192,17 +191,13 @@ public class UserService {
                 String adminLink = "http://localhost:8080/confirmation/confirm?token=" + token;
                 User user = confirmationToken.getUser();
 
-                Context selfConfirmedContext = new Context();
-                selfConfirmedContext.setVariable("username", user.getUsername());
-                emailSender.sendMailFromTemplate("/mail/user_self_confirmed", selfConfirmedContext, user.getEmail());
-
                 for (User officeUser : getUserByOfficeRole()) {
                     //only send it to enabled users
                     if(officeUser.isEnabled()) {
                         Context officeEnableUserContext = new Context();
                         officeEnableUserContext.setVariable("username", officeUser.getUsername());
                         officeEnableUserContext.setVariable("newUser", user);
-                        officeEnableUserContext.setVariable("link", user);
+                        officeEnableUserContext.setVariable("link", adminLink);
 
                         emailSender.sendMailFromTemplate("/mail/office_enable_user", officeEnableUserContext, officeUser.getEmail());
                     }
@@ -217,76 +212,6 @@ public class UserService {
         u.setLastLogin(LocalDateTime.now());
         userRepository.save(u);
     }
-
-    /**
-     * USED IN SUPERADMIN DASHBOARD
-     * Superadmin can add Roles to specific Users
-     *
-     * @param userToRoleFormModel to get Userdata, especially roles from user
-     */
-    public void addAndDeleteRoles(UserToRoleFormModel userToRoleFormModel) {
-
-        for (int i = 0; i < userToRoleFormModel.getUsers().size(); i++) {
-
-            User user = getUserByUsername(userToRoleFormModel.getUsers().get(i).getUsername());
-
-            String roleString = userToRoleFormModel.getRole().get(i);
-            String roleDelString = userToRoleFormModel.getRoleDel().get(i);
-
-            if (!roleString.equals("none")) {
-                Role role = roleService.getRoleByName(roleString);
-                //only add a role to a person, if he not already has this role
-                if (!user.getRoles().contains(role)) {
-                    user.getRoles().add(role);
-
-                    //create new questionnaires for the user if he is now KRITIS_BETREIBER and hasnt already one
-                    if (role.getName().equals("ROLE_KRITIS_BETREIBER") /*&& !questionnaireService.existsByUserId(user.getId())*/) {
-                        questionnaireService.createQuestionnaireForUser(user);
-                    }
-
-                    /*Outsourcing Mail to thread for speed purposes*/
-                    new Thread(() -> {
-                        /*for (User superAdmin : getUserByAdminrole()) {
-                            //only send it to enabled users
-                            if(superAdmin.isEnabled()) {
-                                emailSender.send(superAdmin.getEmail(), AdminAddRoleNotification.changeRole(superAdmin.getFirstName(),
-                                        superAdmin.getLastName(),
-                                        role, user.getUsername()));
-                            }
-                        }*/
-                        emailSender.send(user.getEmail(), UserAddRoleNotification.changeRoleMail(user.getUsername(), role));
-                    }).start();
-                }
-            }
-
-            if (!roleDelString.equals("none")) {
-                Role roleDel = roleService.getRoleByName(roleDelString);
-                user.getRoles().remove(roleDel);
-
-                /*Outsourcing Mail to thread for speed purposes*/
-                new Thread(() -> {
-                    emailSender.send(user.getEmail(), UserRemoveRoleNotification.removeRoleMail(user.getUsername(),
-                            roleDel));
-
-                    /*for (User superAdmin : getUserByAdminrole()) {
-                        //only send it to enabled users
-                        if(superAdmin.isEnabled()) {
-                            emailSender.send(superAdmin.getEmail(), AdminRemoveRoleNotification.removeRole(superAdmin.getFirstName(),
-                                    superAdmin.getLastName(),
-                                    roleDel,
-                                    user.getUsername()));
-                        }
-                    }*/
-                }).start();
-            }
-
-            if (!roleDelString.equals("none") || !roleString.equals("none")) {
-                saveUser(user);
-            }
-
-        }
-    }
-
 
     /**
      * Enable/Disable user to give access to KRITIS-ELFe
@@ -307,22 +232,11 @@ public class UserService {
             }
         }
 
-        List<User> users1 = getUserByOfficeRole();
-
-        /*Outsourcing Mail to thread for speed purposes*/
-        new Thread(() -> {
-            for (User user: changedUsers) {
-
-                emailSender.send(user.getEmail(), UserChangeEnabledStatusNotification.changeBrancheMail(user.getUsername()));
-
-                for (User officeAdmin : getUserByOfficeRole()) {
-                    //only send it to enabled users
-                    if(officeAdmin.isEnabled()) {
-                        emailSender.send(officeAdmin.getEmail(), AdminDeactivateUserSubmit.changeEnabledStatus(officeAdmin.getUsername(), user.isEnabled(), user.getUsername()));
-                    }
-                }
-            }
-        }).start();
+        for (User user: changedUsers) {
+            Context changedEnabledContext = new Context();
+            changedEnabledContext.setVariable("user", user);
+            emailSender.sendMailFromTemplate("/mail/changed_enabled", changedEnabledContext, user.getEmail());
+        }
     }
 
     /**

@@ -11,6 +11,7 @@ import de.thb.kritis_elfe.service.Exceptions.PasswordResetTokenExpired;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.thymeleaf.context.Context;
 
 import java.time.Instant;
 import java.util.Date;
@@ -68,7 +69,12 @@ public class PasswordResetTokenService {
         PasswordResetToken myToken = new PasswordResetToken(user, token);
         passwordResetTokenRepository.save(myToken);
 
-        emailSender.send(user.getEmail(), ResetPasswordNotification.resetPasswordMail(user.getUsername(), token));
+        String link = "http://localhost:8080/reset_password?token=" + token;
+
+        Context passwordResetContext = new Context();
+        passwordResetContext.setVariable("username", user.getUsername());
+        passwordResetContext.setVariable("link", link);
+        emailSender.sendMailFromTemplate("/mail/reset_password", passwordResetContext, user.getEmail());
     }
 
     /**

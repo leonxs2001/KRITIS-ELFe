@@ -37,7 +37,6 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .authorizeRequests()
                 .antMatchers("/css/**", "/webjars/**", "/bootstrap/**", "/js/**", "/images/**", "/favicon.ico").permitAll()
                 .antMatchers("/", "/home", "/register/**", "/success_register", "/confirmation/confirmByUser/**", "datenschutz").permitAll()
-                .antMatchers("/admin").access("hasAuthority('ROLE_BBK_ADMIN')")
                 .antMatchers("/office").access("hasAuthority('ROLE_GESCHÄFTSSTELLE')")
                 .antMatchers("/situation/**").access("hasAnyAuthority('ROLE_LAND', 'ROLE_RESSORT', 'ROLE_BBK_ADMIN')")
                 .antMatchers("/report/**").access("hasAnyAuthority('ROLE_BBK_ADMIN','ROLE_BBK_VIEWER')")

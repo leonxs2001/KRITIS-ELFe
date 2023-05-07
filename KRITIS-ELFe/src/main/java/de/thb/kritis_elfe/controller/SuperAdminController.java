@@ -35,38 +35,6 @@ public class SuperAdminController implements Comparable {
     @Autowired
     HelpPathReader helpPathReader;
 
-    @GetMapping("/admin")
-    public String showAllUsers(Model model) {
-        final var users = userService.getAllUsers();
-        List<String> emptyUsers = Arrays.asList(new String[users.size()]);
-        UserToRoleFormModel formModel = UserToRoleFormModel.builder()
-                .users(users)
-                .role(emptyUsers)
-                .roleDel(emptyUsers)
-                .build();
-
-        model.addAttribute("roleForm", formModel);
-        final var roles = roleService.getAllRoles();
-        model.addAttribute("roles", roles);
-
-        return "permissions/admin";
-    }
-
-    @PostMapping("/admin")
-    public String addRoleToUser(@ModelAttribute("roleForm") @Valid UserToRoleFormModel userToRoleFormModel, Model model) {
-        System.out.println(userToRoleFormModel.toString());
-
-        userService.addAndDeleteRoles(userToRoleFormModel);
-
-        List<User> users = userService.getAllUsers();
-
-        model.addAttribute("roleForm", userToRoleFormModel);
-        final var roles = roleService.getAllRoles();
-        model.addAttribute("roles", roles);
-
-        return "redirect:admin";
-    }
-
     @GetMapping("/report-control")
     public String getReportControl(Model model) {
 
