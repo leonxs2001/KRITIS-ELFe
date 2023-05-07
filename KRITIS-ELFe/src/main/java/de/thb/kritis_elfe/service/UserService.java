@@ -7,7 +7,6 @@ import de.thb.kritis_elfe.controller.form.UserToRoleFormModel;
 import de.thb.kritis_elfe.entity.Role;
 import de.thb.kritis_elfe.entity.User;
 import de.thb.kritis_elfe.mail.EmailSender;
-import de.thb.kritis_elfe.mail.Templates.UserNotifications.*;
 import de.thb.kritis_elfe.entity.ConfirmationToken;
 import de.thb.kritis_elfe.repository.RoleRepository;
 import de.thb.kritis_elfe.repository.UserRepository;

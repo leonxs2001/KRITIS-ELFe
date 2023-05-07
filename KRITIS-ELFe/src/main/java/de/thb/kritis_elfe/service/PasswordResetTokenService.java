@@ -1,10 +1,10 @@
 package de.thb.kritis_elfe.service;
 
 import de.thb.kritis_elfe.controller.form.ResetPasswordForm;
+import de.thb.kritis_elfe.controller.form.ResetPasswordUserDataForm;
 import de.thb.kritis_elfe.entity.PasswordResetToken;
 import de.thb.kritis_elfe.entity.User;
 import de.thb.kritis_elfe.mail.EmailSender;
-import de.thb.kritis_elfe.mail.Templates.UserNotifications.ResetPasswordNotification;
 import de.thb.kritis_elfe.repository.PasswordResetTokenRepository;
 import de.thb.kritis_elfe.service.Exceptions.EmailNotMatchingException;
 import de.thb.kritis_elfe.service.Exceptions.PasswordResetTokenExpired;
@@ -69,7 +69,7 @@ public class PasswordResetTokenService {
         PasswordResetToken myToken = new PasswordResetToken(user, token);
         passwordResetTokenRepository.save(myToken);
 
-        String link = "http://localhost:8080/reset_password?token=" + token;
+        String link = "http://localhost:8080/reset-password?token=" + token;
 
         Context passwordResetContext = new Context();
         passwordResetContext.setVariable("username", user.getUsername());
@@ -87,21 +87,19 @@ public class PasswordResetTokenService {
      */
     public boolean resetUserPassword(String token, ResetPasswordForm form) throws PasswordResetTokenExpired {
         PasswordResetToken resetToken = getByToken(token);
-        User user = userService.getUserByUsername(resetToken.getUser().getUsername());
+        User user = resetToken.getUser();
         Date now = Date.from(Instant.now());
 
-        if (form.getUsername() != null && form.getEmail() != null){
-            if (form.getNewPassword().equals(form.getConfirmPassword()) && !resetToken.isConfirmed()) {
-                if (now.before(resetToken.getExpiryDate())) {
-                    user.setPassword(passwordEncoder.encode(form.getNewPassword()));
-                    resetToken.setConfirmed(true);
+        if (form.getNewPassword().equals(form.getConfirmPassword()) && !resetToken.isConfirmed()) {
+            if (now.before(resetToken.getExpiryDate())) {
+                user.setPassword(passwordEncoder.encode(form.getNewPassword()));
+                resetToken.setConfirmed(true);
 
-                    passwordResetTokenRepository.save(resetToken);
-                    userService.saveUser(user);
+                passwordResetTokenRepository.save(resetToken);
+                userService.saveUser(user);
 
-                    return true;
-                } else throw new PasswordResetTokenExpired("Token has been expired.");
-            }
+                return true;
+            } else throw new PasswordResetTokenExpired("Token has been expired.");
         }
         return false;
 

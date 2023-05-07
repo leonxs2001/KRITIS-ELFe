@@ -10,9 +10,8 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class ResetPasswordForm {
+public class ResetPasswordUserDataForm {
 
-    private String newPassword;
-    private String confirmPassword;
-    private String token;
+    private String email;
+    private String username;
 }

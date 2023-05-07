@@ -1,17 +1,17 @@
 package de.thb.kritis_elfe.controller;
 
-import de.thb.kritis_elfe.configuration.HelpPathReader;
 import de.thb.kritis_elfe.controller.form.ChangeCredentialsForm;
+import de.thb.kritis_elfe.controller.form.ResetPasswordForm;
+import de.thb.kritis_elfe.controller.form.ResetPasswordUserDataForm;
 import de.thb.kritis_elfe.controller.form.UserRegisterFormModel;
 import de.thb.kritis_elfe.entity.User;
 import de.thb.kritis_elfe.service.*;
 import de.thb.kritis_elfe.service.Exceptions.EmailNotMatchingException;
 import de.thb.kritis_elfe.service.Exceptions.PasswordNotMatchingException;
+import de.thb.kritis_elfe.service.Exceptions.PasswordResetTokenExpired;
 import de.thb.kritis_elfe.service.Exceptions.UserAlreadyExistsException;
 import lombok.AllArgsConstructor;
-import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.MediaType;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -19,9 +19,6 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
 import java.security.Principal;
 
 @Controller
@@ -31,13 +28,13 @@ public class UserController {
     @Autowired
     SectorService sectorService;
     @Autowired
-    HelpPathReader helpPathReader;
-    @Autowired
     FederalStateService federalStateService;
     @Autowired
     RessortService ressortService;
     @Autowired
     RoleService roleService;
+    @Autowired
+    PasswordResetTokenService passwordResetTokenService;
 
     @GetMapping("/register/user")
     public String showRegisterForm(Model model) {
@@ -112,10 +109,54 @@ public class UserController {
         return "change_credentials";
     }
 
-    @GetMapping(value="/help", produces = MediaType.APPLICATION_PDF_VALUE)
-    public @ResponseBody byte[] getHelp() throws IOException {
-        File file = new File(helpPathReader.getPath() + "help.pdf");
-        return IOUtils.toByteArray(new FileInputStream(file));
+    @GetMapping("/password-reset")
+    public String showPasswordReset() {
+        return "security/password_reset";
+    }
+
+    @PostMapping("/password-reset")
+    public String requestPasswordReset(@Valid ResetPasswordUserDataForm form, Model model) {
+
+        try {
+            model.addAttribute("form", form);
+            User user = userService.getUserByUsername(form.getUsername());
+            passwordResetTokenService.createPasswordResetToken(user);
+            model.addAttribute("success", "Eingabe erfolgreich. Sofern Ihre Email einem Nutzer zugeordnet werden kann erhalten Sie demnächst eine Benachrichtigung per Mail.");
+
+        } catch (EmailNotMatchingException e) {
+            model.addAttribute("error", "Bei der Eingabe ist ein Fehler aufgetreten. Bitte stellen Sie sicher, dass die eingegebene Email auch korrekt ist.");
+            return "security/password_reset";
+        }
+        return "security/password_reset";
+
+    }
+
+    @GetMapping(path = "/reset-password")
+    public String showResetPassword(@RequestParam("token") String token, Model model) {
+
+        if (passwordResetTokenService.getByToken(token) != null) {
+            ResetPasswordForm form = new ResetPasswordForm();
+            form.setToken(token);
+            model.addAttribute("form", form);
+            return "security/reset_password";
+        } else return "Token existiert nicht";
+    }
+
+    @PostMapping(path = "/reset-password")
+    public String resetUserPassword(@Valid ResetPasswordForm form, Model model) throws PasswordResetTokenExpired {
+
+        try {
+            model.addAttribute("form", form);
+            if (passwordResetTokenService.resetUserPassword(form.getToken(), form)) {
+                model.addAttribute("success", "Ihr Passwort wurde erfolgreich geändert.");
+            } else {
+                model.addAttribute("error", "Beim Zurücksetzen Ihres Passworts ist ein Fehler aufgetreten.");
+            }
+        } catch (PasswordResetTokenExpired passEx) {
+            model.addAttribute("error", "Ihr Token zum Zurücksetzen des Passworts ist abgelaufen. Bitte beantragen Sie ihn erneut unter \" Passwort vergessen\".");
+        }
+
+        return "security/reset_password";
     }
 
 }
