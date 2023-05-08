@@ -4,7 +4,6 @@ import de.thb.kritis_elfe.entity.Role;
 import de.thb.kritis_elfe.entity.User;
 import de.thb.kritis_elfe.repository.RoleRepository;
 import de.thb.kritis_elfe.repository.UserRepository;
-import de.thb.kritis_elfe.service.Exceptions.UserNotEnabledException;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;

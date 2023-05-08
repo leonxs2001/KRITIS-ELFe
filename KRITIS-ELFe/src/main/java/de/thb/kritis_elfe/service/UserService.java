@@ -34,7 +34,7 @@ import java.time.LocalDateTime;
 @Transactional
 @Slf4j
 public class UserService {
-    private UserRepository userRepository; ////initialize repository Object
+    private UserRepository userRepository;
     private RoleRepository roleRepository;
     private RoleService roleService;
     private PasswordEncoder passwordEncoder;
