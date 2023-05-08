@@ -38,7 +38,7 @@ public class SetupDataLoader implements
             return;
         }
 
-        FederalState brandenburg = createFederalStates();
+        List<FederalState> federalStates = createFederalStates();
         Ressort ressort3 = createRessorts(createAllSectorsAndBranches());
 
         Role bbkAdmin = createRoleIfNotFound("ROLE_BBK_ADMIN", "BBK Admin");
@@ -49,10 +49,12 @@ public class SetupDataLoader implements
 
         createUserIfNotFound("viewer", "leonschoenberg@gmx.de", "viewer1234", bbkViewer, null, null);
         createUserIfNotFound("admin", "leonschoenberg@gmx.de", "admin1234", bbkAdmin, null, null);
-        createUserIfNotFound("land", "leonschoenberg@gmx.de", "land1234", land, brandenburg, null);
         createUserIfNotFound("ressort", "leonschoenberg@gmx.de", "ressort1234", ressort, null, ressort3);
         createUserIfNotFound("office", "leonschoenberg@gmx.de", "office1234", office, null, null);
 
+        for(FederalState federalState: federalStates){
+            createUserIfNotFound(federalState.getName().toLowerCase(), "keineEchteMail@Spass.de",federalState.getName().toLowerCase(), land, federalState, null);
+        }
         createScenarios();
 
         alreadySetup = true;
@@ -96,25 +98,26 @@ public class SetupDataLoader implements
     }
 
     @Transactional
-    FederalState createFederalStates() {
-        FederalState result = createFederalStateIfNotFound("Brandenburg", "BB");
-        createFederalStateIfNotFound("Baden-Württemberg", "BW");
-        createFederalStateIfNotFound("Bayern", "BY");
-        createFederalStateIfNotFound("Berlin", "BE");
-        createFederalStateIfNotFound("Bremen", "HB");
-        createFederalStateIfNotFound("Hamburg", "HH");
-        createFederalStateIfNotFound("Hessen", "HE");
-        createFederalStateIfNotFound("Mecklenburg-Vorpommern", "MV");
-        createFederalStateIfNotFound("Niedersachsen", "NI");
-        createFederalStateIfNotFound("Nordrhein-Westfalen", "NW");
-        createFederalStateIfNotFound("Rheinland-Pfalz", "RP");
-        createFederalStateIfNotFound("Saarland", "SL");
-        createFederalStateIfNotFound("Sachsen", "SN");
-        createFederalStateIfNotFound("Sachsen-Anhalt", "ST");
-        createFederalStateIfNotFound("Schleswig-Holstein", "SH");
-        createFederalStateIfNotFound("Thüringen", "TH");
+    List<FederalState> createFederalStates() {
+        List<FederalState> federalStates = new ArrayList<>();
+        federalStates.add(createFederalStateIfNotFound("Brandenburg", "BB"));
+        federalStates.add(createFederalStateIfNotFound("Baden-Württemberg", "BW"));
+        federalStates.add(createFederalStateIfNotFound("Bayern", "BY"));
+        federalStates.add(createFederalStateIfNotFound("Berlin", "BE"));
+        federalStates.add(createFederalStateIfNotFound("Bremen", "HB"));
+        federalStates.add(createFederalStateIfNotFound("Hamburg", "HH"));
+        federalStates.add(createFederalStateIfNotFound("Hessen", "HE"));
+        federalStates.add(createFederalStateIfNotFound("Mecklenburg-Vorpommern", "MV"));
+        federalStates.add(createFederalStateIfNotFound("Niedersachsen", "NI"));
+        federalStates.add(createFederalStateIfNotFound("Nordrhein-Westfalen", "NW"));
+        federalStates.add(createFederalStateIfNotFound("Rheinland-Pfalz", "RP"));
+        federalStates.add(createFederalStateIfNotFound("Saarland", "SL"));
+        federalStates.add(createFederalStateIfNotFound("Sachsen", "SN"));
+        federalStates.add(createFederalStateIfNotFound("Sachsen-Anhalt", "ST"));
+        federalStates.add(createFederalStateIfNotFound("Schleswig-Holstein", "SH"));
+        federalStates.add(createFederalStateIfNotFound("Thüringen", "TH"));
 
-        return result;
+        return federalStates;
     }
 
     @Transactional

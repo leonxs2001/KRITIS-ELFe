@@ -24,7 +24,7 @@ public class MainController {
     private final UserService userService;
     private final KritisElfeReader kritisElfeReader;
 
-    @GetMapping("/")
+    @GetMapping(value={"/", "/home"})
     public String home() {
         return "home";
     }
