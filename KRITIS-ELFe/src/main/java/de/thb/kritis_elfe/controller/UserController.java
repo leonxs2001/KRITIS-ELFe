@@ -6,10 +6,7 @@ import de.thb.kritis_elfe.controller.form.ResetPasswordUserDataForm;
 import de.thb.kritis_elfe.controller.form.UserRegisterFormModel;
 import de.thb.kritis_elfe.entity.User;
 import de.thb.kritis_elfe.service.*;
-import de.thb.kritis_elfe.service.Exceptions.EmailNotMatchingException;
-import de.thb.kritis_elfe.service.Exceptions.PasswordNotMatchingException;
-import de.thb.kritis_elfe.service.Exceptions.PasswordResetTokenExpired;
-import de.thb.kritis_elfe.service.Exceptions.UserAlreadyExistsException;
+import de.thb.kritis_elfe.service.Exceptions.*;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
@@ -147,13 +144,14 @@ public class UserController {
 
         try {
             model.addAttribute("form", form);
-            if (passwordResetTokenService.resetUserPassword(form.getToken(), form)) {
+            passwordResetTokenService.resetUserPassword(form.getToken(), form);
                 model.addAttribute("success", "Ihr Passwort wurde erfolgreich geändert.");
-            } else {
-                model.addAttribute("error", "Beim Zurücksetzen Ihres Passworts ist ein Fehler aufgetreten.");
-            }
-        } catch (PasswordResetTokenExpired passEx) {
+        } catch (PasswordResetTokenExpired e) {
             model.addAttribute("error", "Ihr Token zum Zurücksetzen des Passworts ist abgelaufen. Bitte beantragen Sie ihn erneut unter \" Passwort vergessen\".");
+        } catch (PasswordNotMatchingException e){
+            model.addAttribute("error", "Die beiden Passwörter müssen gleich sein.");
+        } catch (TokenAlreadyConfirmedException e){
+            model.addAttribute("error", "Das Passwort wurde bereits zurückgesetzt.");
         }
 
         return "security/reset_password";

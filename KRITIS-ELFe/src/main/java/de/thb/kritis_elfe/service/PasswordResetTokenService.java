@@ -7,7 +7,9 @@ import de.thb.kritis_elfe.entity.User;
 import de.thb.kritis_elfe.mail.EmailSender;
 import de.thb.kritis_elfe.repository.PasswordResetTokenRepository;
 import de.thb.kritis_elfe.service.Exceptions.EmailNotMatchingException;
+import de.thb.kritis_elfe.service.Exceptions.PasswordNotMatchingException;
 import de.thb.kritis_elfe.service.Exceptions.PasswordResetTokenExpired;
+import de.thb.kritis_elfe.service.Exceptions.TokenAlreadyConfirmedException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -85,23 +87,27 @@ public class PasswordResetTokenService {
      * @return true if process successful or false if process did not succeed
      * @throws PasswordResetTokenExpired
      */
-    public boolean resetUserPassword(String token, ResetPasswordForm form) throws PasswordResetTokenExpired {
+    public void resetUserPassword(String token, ResetPasswordForm form) throws PasswordResetTokenExpired, PasswordNotMatchingException, TokenAlreadyConfirmedException {
         PasswordResetToken resetToken = getByToken(token);
         User user = resetToken.getUser();
         Date now = Date.from(Instant.now());
 
-        if (form.getNewPassword().equals(form.getConfirmPassword()) && !resetToken.isConfirmed()) {
-            if (now.before(resetToken.getExpiryDate())) {
-                user.setPassword(passwordEncoder.encode(form.getNewPassword()));
-                resetToken.setConfirmed(true);
-
-                passwordResetTokenRepository.save(resetToken);
-                userService.saveUser(user);
-
-                return true;
-            } else throw new PasswordResetTokenExpired("Token has been expired.");
+        if (!now.before(resetToken.getExpiryDate())) {
+            throw new PasswordResetTokenExpired("Token has been expired.");
         }
-        return false;
 
+        if(!form.getNewPassword().equals(form.getConfirmPassword())){
+            throw new PasswordNotMatchingException("Both passwords has to be equal");
+        }
+
+        if(resetToken.isConfirmed()){
+            throw new TokenAlreadyConfirmedException("The Token is already used.");
+        }
+
+        user.setPassword(passwordEncoder.encode(form.getNewPassword()));
+        resetToken.setConfirmed(true);
+
+        passwordResetTokenRepository.save(resetToken);
+        userService.saveUser(user);
     }
 }
