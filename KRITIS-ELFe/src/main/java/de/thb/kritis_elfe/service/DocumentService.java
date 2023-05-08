@@ -18,7 +18,6 @@ import java.util.function.BiConsumer;
 @Service
 public class DocumentService {
 
-
     public void createReportWordDocument(OutputStream outputStream, List<Sector> sectors, List<FederalState> federalStates,
                                          SectorReportValueAccessor sectorReportValueAccessor, Report report) throws IOException {
         XWPFDocument document = new XWPFDocument();

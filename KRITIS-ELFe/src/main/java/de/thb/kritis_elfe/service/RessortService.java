@@ -3,15 +3,16 @@ package de.thb.kritis_elfe.service;
 import de.thb.kritis_elfe.controller.form.RessortsForm;
 import de.thb.kritis_elfe.entity.Ressort;
 import de.thb.kritis_elfe.repository.RessortRepository;
+import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
+@AllArgsConstructor
 public class RessortService {
-    @Autowired
-    private RessortRepository ressortRepository;
+    private final RessortRepository ressortRepository;
 
     public List<Ressort> getAllRessorts(){return ressortRepository.findAll();}
 

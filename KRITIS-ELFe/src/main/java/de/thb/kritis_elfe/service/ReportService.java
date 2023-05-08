@@ -9,6 +9,7 @@ import de.thb.kritis_elfe.enums.ValueChangedType;
 import de.thb.kritis_elfe.repository.ReportRepository;
 import de.thb.kritis_elfe.service.helper.report.*;
 import de.thb.kritis_elfe.service.questionnaire.QuestionnaireService;
+import lombok.AllArgsConstructor;
 import org.apache.poi.xwpf.usermodel.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -20,13 +21,12 @@ import java.util.*;
 import java.util.function.BiConsumer;
 
 @Service
+@AllArgsConstructor
 public class ReportService {
 
-    @Autowired
-    private ReportRepository reportRepository;
+    private final ReportRepository reportRepository;
 
-    @Autowired
-    QuestionnaireService questionnaireService;
+    private final QuestionnaireService questionnaireService;
 
     public List<Report> getAllReports(){return reportRepository.findAll();}
 

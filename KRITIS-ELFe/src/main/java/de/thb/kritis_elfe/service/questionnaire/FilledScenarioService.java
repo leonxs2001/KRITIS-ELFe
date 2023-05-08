@@ -6,17 +6,17 @@ import de.thb.kritis_elfe.entity.questionnaire.FilledScenario;
 import de.thb.kritis_elfe.enums.ScenarioType;
 import de.thb.kritis_elfe.repository.questionnaire.FilledScenarioRepository;
 import de.thb.kritis_elfe.service.ScenarioService;
+import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
 
 @Service
+@AllArgsConstructor
 public class FilledScenarioService {
-    @Autowired
-    private FilledScenarioRepository filledScenarioRepository;
-    @Autowired
-    private ScenarioService scenarioService;
+    private final FilledScenarioRepository filledScenarioRepository;
+    private final ScenarioService scenarioService;
 
     public void saveAllFilledScenarios(List<FilledScenario> userScenarios){
         filledScenarioRepository.saveAll(userScenarios);}

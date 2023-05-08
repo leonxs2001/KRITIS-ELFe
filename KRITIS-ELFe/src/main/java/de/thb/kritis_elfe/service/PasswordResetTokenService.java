@@ -10,6 +10,7 @@ import de.thb.kritis_elfe.service.Exceptions.EmailNotMatchingException;
 import de.thb.kritis_elfe.service.Exceptions.PasswordNotMatchingException;
 import de.thb.kritis_elfe.service.Exceptions.PasswordResetTokenExpired;
 import de.thb.kritis_elfe.service.Exceptions.TokenAlreadyConfirmedException;
+import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -21,16 +22,13 @@ import java.util.UUID;
 import java.util.stream.Stream;
 
 @Service
+@AllArgsConstructor
 public class PasswordResetTokenService {
 
-    @Autowired
-    private UserService userService;
-    @Autowired
-    private PasswordResetTokenRepository passwordResetTokenRepository;
-    @Autowired
-    private EmailSender emailSender;
-    @Autowired
-    private PasswordEncoder passwordEncoder;
+    private final UserService userService;
+    private final PasswordResetTokenRepository passwordResetTokenRepository;
+    private final EmailSender emailSender;
+    private final PasswordEncoder passwordEncoder;
 
     public PasswordResetToken getByToken(String token) {
         return passwordResetTokenRepository.findByToken(token);

@@ -2,7 +2,6 @@ package de.thb.kritis_elfe.configuration;
 
 
 import de.thb.kritis_elfe.security.MyUserDetailsService;
-import de.thb.kritis_elfe.service.Exceptions.UserNotEnabledException;
 import lombok.AllArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -19,7 +18,6 @@ import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 @EnableWebSecurity
 @AllArgsConstructor
 @EnableGlobalMethodSecurity(prePostEnabled = true, securedEnabled = true, jsr250Enabled = true)
-//Used for @PreAuthorize in SuperAdminController.java
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
     private MyUserDetailsService userDetailsService;

@@ -9,6 +9,7 @@ import de.thb.kritis_elfe.service.SectorService;
 import de.thb.kritis_elfe.service.helper.report.SectorBranchReportValueAccessor;
 import de.thb.kritis_elfe.service.helper.report.SectorReportValueAccessor;
 import de.thb.kritis_elfe.service.ReportService;
+import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -18,20 +19,13 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Optional;
 
-//TODO - only report !!! nor reportfocus
 @Controller
+@AllArgsConstructor
 public class ReportController {
-    @Autowired
-    private ReportService reportService;
-
-    @Autowired
-    private SectorService sectorService;
-
-    @Autowired
-    private FederalStateService federalStateService;
-
-    @Autowired
-    private DocumentService documentService;
+    private final ReportService reportService;
+    private final SectorService sectorService;
+    private final FederalStateService federalStateService;
+    private final DocumentService documentService;
 
 
     @GetMapping("/report")

@@ -22,16 +22,11 @@ import java.security.Principal;
 @AllArgsConstructor
 public class UserController {
     private final UserService userService;
-    @Autowired
-    SectorService sectorService;
-    @Autowired
-    FederalStateService federalStateService;
-    @Autowired
-    RessortService ressortService;
-    @Autowired
-    RoleService roleService;
-    @Autowired
-    PasswordResetTokenService passwordResetTokenService;
+    private final SectorService sectorService;
+    private final FederalStateService federalStateService;
+    private final RessortService ressortService;
+    private final RoleService roleService;
+    private final PasswordResetTokenService passwordResetTokenService;
 
     @GetMapping("/register/user")
     public String showRegisterForm(Model model) {

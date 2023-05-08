@@ -17,10 +17,10 @@ import javax.validation.Valid;
 @SessionAttributes("form")
 public class OfficeController {
 
-    UserService userService;
-    UserRepository userRepository;
-    SectorService sectorService;
-    BranchService branchService;
+    private final UserService userService;
+    private final UserRepository userRepository;
+    private final SectorService sectorService;
+    private final BranchService branchService;
 
     @GetMapping("/office")
     public String showOfficePage(Model model){
@@ -32,7 +32,7 @@ public class OfficeController {
 
         model.addAttribute("form", form);
 
-        return "permissions/office";
+        return "office";
     }
 
     @PostMapping("/office")

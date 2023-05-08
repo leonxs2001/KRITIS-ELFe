@@ -14,8 +14,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 @AllArgsConstructor
 public class SecurityConfiguration {
 
-    private UserRepository userRepository;
-    private RoleRepository roleRepository;
+    private final UserRepository userRepository;
+    private final RoleRepository roleRepository;
     @Bean
     public MyUserDetailsService userDetailsService() {
         return new MyUserDetailsService(userRepository, roleRepository);

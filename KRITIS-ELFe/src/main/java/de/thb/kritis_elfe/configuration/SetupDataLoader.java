@@ -3,6 +3,7 @@ package de.thb.kritis_elfe.configuration;
 import de.thb.kritis_elfe.entity.*;
 import de.thb.kritis_elfe.enums.ScenarioType;
 import de.thb.kritis_elfe.service.*;
+import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
@@ -14,34 +15,20 @@ import java.util.*;
 import java.util.stream.Stream;
 
 @Component
+@AllArgsConstructor
 public class SetupDataLoader implements
         ApplicationListener<ContextRefreshedEvent> {
 
-    private boolean alreadySetup = false;
+    private static boolean alreadySetup = false;
 
-    @Autowired
-    private UserService userService;
-
-    @Autowired
-    private FederalStateService federalStateService;
-
-    @Autowired
-    private RessortService ressortService;
-
-    @Autowired
-    private RoleService roleService;
-
-    @Autowired
-    private PasswordEncoder passwordEncoder;
-
-    @Autowired
-    private BranchService branchService;
-
-    @Autowired
-    private SectorService sectorService;
-
-    @Autowired
-    private ScenarioService scenarioService;
+    private final UserService userService;
+    private final FederalStateService federalStateService;
+    private final RessortService ressortService;
+    private final RoleService roleService;
+    private final PasswordEncoder passwordEncoder;
+    private final BranchService branchService;
+    private final SectorService sectorService;
+    private final ScenarioService scenarioService;
 
     @Override
     @Transactional

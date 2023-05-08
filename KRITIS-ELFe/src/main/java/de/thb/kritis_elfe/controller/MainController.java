@@ -4,6 +4,7 @@ import de.thb.kritis_elfe.configuration.HelpPathReader;
 import de.thb.kritis_elfe.entity.User;
 import de.thb.kritis_elfe.security.authority.UserAuthority;
 import de.thb.kritis_elfe.service.UserService;
+import lombok.AllArgsConstructor;
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -18,11 +19,10 @@ import java.io.FileInputStream;
 import java.io.IOException;
 
 @Controller
+@AllArgsConstructor
 public class MainController {
-    @Autowired
-    private UserService userService;
-    @Autowired
-    HelpPathReader helpPathReader;
+    private final UserService userService;
+    private final HelpPathReader helpPathReader;
 
     @GetMapping("/")
     public String home() {
