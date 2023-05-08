@@ -12,10 +12,7 @@
             <form th:action="@{/login}" method="post" class="card-text needs-validation" novalidate>
                 <div th:if="${param.success}" class="alert alert-success" role="alert"></div>
                 <div th:if="${param.error}" class="alert alert-danger" role="alert">
-                    Benutzername oder Passwort ist falsch.
-                </div>
-                <div th:if="${param.notEnabled}" class="alert alert-danger" role="alert">
-                    Benutzer ist noch nicht freigeschaltet
+                    Der Benutzer ist noch nicht freigeschaltet oder die Anmeldedaten sind falsch.
                 </div>
 
                 <div class="form-group">

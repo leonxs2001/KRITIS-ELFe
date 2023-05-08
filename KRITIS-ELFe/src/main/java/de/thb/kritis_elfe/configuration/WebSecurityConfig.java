@@ -50,17 +50,6 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .and()
                 .formLogin()
                 .loginPage("/login")
-                .failureHandler((request, response, exception) -> {
-                    String redirectURL = "/login?";
-                    boolean has2Causes = exception.getCause() != null && exception.getCause().getCause() != null;
-                    if (has2Causes && exception.getCause().getCause() instanceof UserNotEnabledException){
-                        redirectURL += "notEnabled";
-                    }
-                    else{
-                        redirectURL += "error";
-                    }
-                    response.sendRedirect(redirectURL);
-                })
                 .usernameParameter("email")
                 .usernameParameter("username")
                 .permitAll()
