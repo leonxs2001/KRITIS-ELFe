@@ -1,8 +1,7 @@
 package de.thb.kritis_elfe.controller;
 
-import de.thb.kritis_elfe.configuration.HelpPathReader;
+import de.thb.kritis_elfe.configuration.KritisElfeReader;
 import de.thb.kritis_elfe.controller.form.RessortsForm;
-import de.thb.kritis_elfe.controller.form.UserToRoleFormModel;
 import de.thb.kritis_elfe.entity.*;
 import de.thb.kritis_elfe.service.*;
 import de.thb.kritis_elfe.service.questionnaire.QuestionnaireService;
@@ -13,12 +12,10 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.validation.Valid;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Arrays;
 import java.util.List;
 
 @Controller
@@ -31,9 +28,7 @@ public class SuperAdminController implements Comparable {
     private final RessortService ressortService;
     private final FederalStateService federalStateService;
     private final SectorService sectorService;
-
-    @Autowired
-    HelpPathReader helpPathReader;
+    private final KritisElfeReader kritisElfeReader;
 
     @GetMapping("/report-control")
     public String getReportControl(Model model) {
@@ -79,7 +74,7 @@ public class SuperAdminController implements Comparable {
         if(!file.isEmpty() && file.getContentType().equals("application/pdf")){
             try{
                 byte[] bytes = file.getBytes();
-                Path path = Paths.get(helpPathReader.getPath() + "help.pdf");
+                Path path = Paths.get(kritisElfeReader.getHelpPath() + "help.pdf");
                 Files.write(path, bytes);
                 return "redirect:adjustHelp?success";
             } catch (IOException exception){

@@ -1,7 +1,7 @@
 package de.thb.kritis_elfe.service;
 
+import de.thb.kritis_elfe.configuration.KritisElfeReader;
 import de.thb.kritis_elfe.controller.form.ResetPasswordForm;
-import de.thb.kritis_elfe.controller.form.ResetPasswordUserDataForm;
 import de.thb.kritis_elfe.entity.PasswordResetToken;
 import de.thb.kritis_elfe.entity.User;
 import de.thb.kritis_elfe.mail.EmailSender;
@@ -11,7 +11,6 @@ import de.thb.kritis_elfe.service.Exceptions.PasswordNotMatchingException;
 import de.thb.kritis_elfe.service.Exceptions.PasswordResetTokenExpired;
 import de.thb.kritis_elfe.service.Exceptions.TokenAlreadyConfirmedException;
 import lombok.AllArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.thymeleaf.context.Context;
@@ -29,6 +28,7 @@ public class PasswordResetTokenService {
     private final PasswordResetTokenRepository passwordResetTokenRepository;
     private final EmailSender emailSender;
     private final PasswordEncoder passwordEncoder;
+    private final KritisElfeReader kritisElfeReader;
 
     public PasswordResetToken getByToken(String token) {
         return passwordResetTokenRepository.findByToken(token);
@@ -69,7 +69,7 @@ public class PasswordResetTokenService {
         PasswordResetToken myToken = new PasswordResetToken(user, token);
         passwordResetTokenRepository.save(myToken);
 
-        String link = "http://localhost:8080/reset-password?token=" + token;
+        String link = kritisElfeReader.getUrl() + "reset-password?token=" + token;
 
         Context passwordResetContext = new Context();
         passwordResetContext.setVariable("username", user.getUsername());

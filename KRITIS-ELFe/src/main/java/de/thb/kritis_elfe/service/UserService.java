@@ -1,10 +1,9 @@
 package de.thb.kritis_elfe.service;
 
+import de.thb.kritis_elfe.configuration.KritisElfeReader;
 import de.thb.kritis_elfe.controller.form.ChangeCredentialsForm;
 import de.thb.kritis_elfe.controller.form.UserFormModel;
 import de.thb.kritis_elfe.controller.form.UserRegisterFormModel;
-import de.thb.kritis_elfe.controller.form.UserToRoleFormModel;
-import de.thb.kritis_elfe.entity.Role;
 import de.thb.kritis_elfe.entity.User;
 import de.thb.kritis_elfe.mail.EmailSender;
 import de.thb.kritis_elfe.entity.ConfirmationToken;
@@ -34,14 +33,15 @@ import java.time.LocalDateTime;
 @Transactional
 @Slf4j
 public class UserService {
-    private UserRepository userRepository;
-    private RoleRepository roleRepository;
-    private RoleService roleService;
-    private PasswordEncoder passwordEncoder;
-    private ConfirmationTokenService confirmationTokenService;
-    private EmailSender emailSender;
-    private BranchService branchService;
-    private QuestionnaireService questionnaireService;
+    private final UserRepository userRepository;
+    private final RoleRepository roleRepository;
+    private final RoleService roleService;
+    private final PasswordEncoder passwordEncoder;
+    private final ConfirmationTokenService confirmationTokenService;
+    private final EmailSender emailSender;
+    private final BranchService branchService;
+    private final QuestionnaireService questionnaireService;
+    private final KritisElfeReader kritisElfeReader;
 
     //Repo Methods --------------------------
     public List<User> getAllUsers() {
@@ -117,7 +117,7 @@ public class UserService {
         String token = createToken(user); // To create the token of the user
 
 
-        String userLink = "http://localhost:8080/confirmation/confirmByUser?token=" + token;
+        String userLink = kritisElfeReader.getUrl() + "confirmation/confirmByUser?token=" + token;
 
         userRepository.save(user);
 
@@ -156,6 +156,7 @@ public class UserService {
 
         Context enabledContext = new Context();
         enabledContext.setVariable("username", user.getUsername());
+        enabledContext.setVariable("link", kritisElfeReader.getUrl() + "login");
         emailSender.sendMailFromTemplate("/mail/user_enabled", enabledContext, user.getEmail());
 
     }
@@ -187,7 +188,7 @@ public class UserService {
                 userConfirmation(token);
 
                 //send link to admin
-                String adminLink = "http://localhost:8080/confirmation/confirm?token=" + token;
+                String adminLink = kritisElfeReader.getUrl() + "confirmation/confirm?token=" + token;
                 User user = confirmationToken.getUser();
 
                 for (User officeUser : getUserByOfficeRole()) {
