@@ -20,23 +20,13 @@ import java.io.IOException;
 @Controller
 @AllArgsConstructor
 public class MainController {
+
     private final UserService userService;
     private final KritisElfeReader kritisElfeReader;
 
     @GetMapping("/")
     public String home() {
         return "home";
-    }
-
-    @GetMapping("account")
-    public String securedAccountPage() {
-
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        String role = auth.getAuthorities().toString();
-
-        if (role.contains(UserAuthority.USER)) {
-            return "account/account_user";
-        } else return "home";
     }
 
 
@@ -47,8 +37,7 @@ public class MainController {
     }
 
     @GetMapping(value="/help", produces = MediaType.APPLICATION_PDF_VALUE)
-    public @ResponseBody
-    byte[] getHelp() throws IOException {
+    public @ResponseBody byte[] getHelp() throws IOException {
         File file = new File(kritisElfeReader.getHelpPath() + "help.pdf");
         return IOUtils.toByteArray(new FileInputStream(file));
     }

@@ -18,18 +18,13 @@ import javax.validation.Valid;
 public class OfficeController {
 
     private final UserService userService;
-    private final UserRepository userRepository;
-    private final SectorService sectorService;
-    private final BranchService branchService;
 
     @GetMapping("/office")
     public String showOfficePage(Model model){
         final var users = userService.getAllUsers();
 
         UserFormModel form = new UserFormModel();
-
         form.setUsers(users);
-
         model.addAttribute("form", form);
 
         return "office";
