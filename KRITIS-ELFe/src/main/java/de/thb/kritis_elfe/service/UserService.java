@@ -98,35 +98,35 @@ public class UserService {
      */
     public void registerNewUser(final UserRegisterFormModel form) throws UserAlreadyExistsException {
         if (usernameExists(form.getUsername())) {
-            throw new UserAlreadyExistsException("Es existiert bereits ein Account mit folgender Email-Adresse: " + form.getEmail());
-        } else {
-
-            User user = User.builder().
-                    username(form.getUsername()).
-                    email(form.getEmail()).
-                    enabled(false).
-                    password(passwordEncoder.encode(form.getPassword())).
-                    roles(Collections.singletonList(form.getRole())).build();
-
-            if(form.getRole().getName().equals("ROLE_LAND")){
-                user.setFederalState(form.getFederalState());
-            }else if(form.getRole().getName().equals("ROLE_RESSORT")){
-                user.setRessort(form.getRessort());
-            }
-
-            String token = createToken(user); // To create the token of the user
-
-
-            String userLink = "http://localhost:8080/confirmation/confirmByUser?token=" + token;
-
-            userRepository.save(user);
-
-            Context registrationContext = new Context();
-            registrationContext.setVariable("username", user.getUsername());
-            registrationContext.setVariable("link", userLink);
-            emailSender.sendMailFromTemplate("/mail/user_registration", registrationContext, user.getEmail());
-
+            throw new UserAlreadyExistsException("There already is a user with this username.");
         }
+
+        User user = User.builder().
+                username(form.getUsername()).
+                email(form.getEmail()).
+                enabled(false).
+                password(passwordEncoder.encode(form.getPassword())).
+                roles(Collections.singletonList(form.getRole())).build();
+
+        if(form.getRole().getName().equals("ROLE_LAND")){
+            user.setFederalState(form.getFederalState());
+        }else if(form.getRole().getName().equals("ROLE_RESSORT")){
+            user.setRessort(form.getRessort());
+        }
+
+        String token = createToken(user); // To create the token of the user
+
+
+        String userLink = "http://localhost:8080/confirmation/confirmByUser?token=" + token;
+
+        userRepository.save(user);
+
+        Context registrationContext = new Context();
+        registrationContext.setVariable("username", user.getUsername());
+        registrationContext.setVariable("link", userLink);
+        emailSender.sendMailFromTemplate("/mail/user_registration", registrationContext, user.getEmail());
+
+
     }
 
     /**

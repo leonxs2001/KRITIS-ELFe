@@ -53,6 +53,10 @@ public class UserController {
 
         } catch (UserAlreadyExistsException uaeEx) {
             model.addAttribute("usernameError", "Es existiert bereits ein Account mit diesem Nutzernamen.");
+            model.addAttribute("form", formModel);
+            model.addAttribute("federalStates", federalStateService.getAllFederalStates());
+            model.addAttribute("ressorts", ressortService.getAllRessorts());
+            model.addAttribute("roles", roleService.getAllRoles());
             return "register/user_registration";
         }
 
