@@ -14,9 +14,9 @@ public class EmailConfig {
     @Bean
     public JavaMailSender javaMailSender() {
         JavaMailSenderImpl mailSender = new JavaMailSenderImpl();
-        mailSender.setHost("mail.th-brandenburg.de");
+        mailSender.setHost("bbk.bund.de");
         mailSender.setPort(25);
-        mailSender.setUsername("noreply@th-brandenburg.de");
+        mailSender.setUsername("AG-KRITIS-ELFe@bbk.bund.de");
 
         Properties mailProperties = mailSender.getJavaMailProperties();
         mailProperties.put("mail.transport.protocol", "smtp");

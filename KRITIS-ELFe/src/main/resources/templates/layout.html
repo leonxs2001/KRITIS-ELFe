@@ -57,9 +57,6 @@
                     <li class="nav-item" sec:authorize="hasAnyAuthority('ROLE_BBK_ADMIN','ROLE_BBK_VIEWER')">
                         <a class="nav-link" href="/report">Lagebild-Report</a>
                     </li>
-                    <li class="nav-item" sec:authorize="isAuthenticated()">
-                        <a class="nav-link" href="/account/user_details">Konto</a>
-                    </li>
                     <li class="nav-item" sec:authorize="hasAuthority('ROLE_GESCHÄFTSSTELLE')">
                         <a class="nav-link" href="/office">Geschäftsstelle</a>
                     </li>
@@ -90,6 +87,9 @@
                 <ul class="nav navbar-nav ml-auto">
                     <li class="nav-item" sec:authorize="isAuthenticated()">
                         <a class="nav-link" href="/help" target="_blank">Hilfe</a>
+                    </li>
+                    <li class="nav-item" sec:authorize="isAuthenticated()">
+                        <a class="nav-link" href="/account/user_details">Konto</a>
                     </li>
                     <li class="nav-item" sec:authorize="isAuthenticated()">
                         <a class="nav-link" href="/logout"><i class="bi bi-box-arrow-right"></i> Abmelden</a>
