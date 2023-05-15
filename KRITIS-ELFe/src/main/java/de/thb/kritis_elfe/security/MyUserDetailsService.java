@@ -38,12 +38,17 @@ public class MyUserDetailsService implements UserDetailsService {
 
         return new org.springframework.security.core.userdetails.User(
                 user.getUsername(), user.getPassword(), user.isEnabled(), true, true,
-                true, getAuthorities(user.getRoles()));
+                true, createAuthoritiesFromRoles(user.getRoles()));
 
     }
 
-    private Collection<? extends GrantedAuthority> getAuthorities(final Collection<Role> roles) {
-        return getGrantedAuthorities(getRoleNames(roles));
+    private Collection<? extends GrantedAuthority> createAuthoritiesFromRoles(final Collection<Role> roles) {
+        List<String> privileges = getRoleNames(roles);
+        List<GrantedAuthority> authorities = new ArrayList<>();
+        for (String privilege : privileges) {
+            authorities.add(new SimpleGrantedAuthority(privilege));
+        }
+        return authorities;
     }
 
     private List<String> getRoleNames(Collection<Role> roles) {

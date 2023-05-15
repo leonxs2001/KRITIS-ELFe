@@ -7,7 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 
 public class CommentReportValue extends ReportValue{
-    HashMap<Scenario, FormattedComment> comments;
+    private HashMap<Scenario, FormattedComment> comments;
 
     public CommentReportValue(short value) {
         super(value);

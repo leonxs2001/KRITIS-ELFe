@@ -6,17 +6,14 @@ import de.thb.kritis_elfe.entity.Ressort;
 
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
-import java.util.function.BiConsumer;
-import java.util.function.Consumer;
 
-public class SectorBranchReportValueAccessor {
+public class BranchReportValueAccessor {
     private HashMap<Branch, HashMap<FederalState, CommentReportValue>> federalStateBranchCommentReportValueHashMap;
     private HashMap<Branch, RessortCommentsReportValue> branchRessortCommentsReportValue;
     private Set<Ressort> ressorts;
 
-    public SectorBranchReportValueAccessor(HashMap<Branch, HashMap<FederalState, CommentReportValue>> federalStateBranchCommentReportValueHashMap, HashMap<Branch, RessortCommentsReportValue> branchRessortCommentsReportValue) {
+    public BranchReportValueAccessor(HashMap<Branch, HashMap<FederalState, CommentReportValue>> federalStateBranchCommentReportValueHashMap, HashMap<Branch, RessortCommentsReportValue> branchRessortCommentsReportValue) {
         this.federalStateBranchCommentReportValueHashMap = federalStateBranchCommentReportValueHashMap;
         this.branchRessortCommentsReportValue = branchRessortCommentsReportValue;
         ressorts = new HashSet<>();

@@ -6,11 +6,10 @@ import de.thb.kritis_elfe.service.DocumentService;
 import de.thb.kritis_elfe.service.Exceptions.EntityDoesNotExistException;
 import de.thb.kritis_elfe.service.FederalStateService;
 import de.thb.kritis_elfe.service.SectorService;
-import de.thb.kritis_elfe.service.helper.report.SectorBranchReportValueAccessor;
+import de.thb.kritis_elfe.service.helper.report.BranchReportValueAccessor;
 import de.thb.kritis_elfe.service.helper.report.SectorReportValueAccessor;
 import de.thb.kritis_elfe.service.ReportService;
 import lombok.AllArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -89,13 +88,12 @@ public class ReportController {
 
         response.setContentType("application/vnd.openxmlformats-officedocument.wordprocessingml.document");
         String headerKey = "Content-Disposition";
-        String headerValue = "attachment; filename=Sektorreport für den Sektor " + sector.get() + "vom Rport " + report + ".docx";
+        String headerValue = "attachment; filename=Sektorreport für den Sektor " + sector.get() + " vom Report " + report + ".docx";
         response.setHeader(headerKey, headerValue);
-
-        SectorBranchReportValueAccessor sectorBranchReportValueAccessor = reportService.createSectorBranchReportValueAccessor(report, sector.get());
+        BranchReportValueAccessor branchReportValueAccessor = reportService.createSectorBranchReportValueAccessor(report, sector.get());
 
         documentService.createSectorReportWordDocument(response.getOutputStream(), sector.get(), federalStateService.getAllFederalStates(),
-                sectorBranchReportValueAccessor);
+                branchReportValueAccessor);
     }
 
 }

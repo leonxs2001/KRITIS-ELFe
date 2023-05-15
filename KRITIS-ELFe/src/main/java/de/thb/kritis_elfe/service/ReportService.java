@@ -10,15 +10,10 @@ import de.thb.kritis_elfe.repository.ReportRepository;
 import de.thb.kritis_elfe.service.helper.report.*;
 import de.thb.kritis_elfe.service.questionnaire.QuestionnaireService;
 import lombok.AllArgsConstructor;
-import org.apache.poi.xwpf.usermodel.*;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
-import java.io.OutputStream;
 import java.time.LocalDateTime;
 import java.util.*;
-import java.util.function.BiConsumer;
 
 @Service
 @AllArgsConstructor
@@ -36,20 +31,16 @@ public class ReportService {
 
     public Report getNewestReport(){return reportRepository.findTopByOrderByIdDesc();}
 
-    public boolean ExistsByName(String name){return reportRepository.existsSnapshotByName(name);}
-
     public void createReport(Report report){
-
-        // Perist Snapshot
+        // Perist Report
         report.setDate(LocalDateTime.now());
         reportRepository.save(report);
 
         questionnaireService.persistQuestionnairesForReport(report);
-
     }
 
 
-    public SectorBranchReportValueAccessor createSectorBranchReportValueAccessor(Report report, Sector sector){
+    public BranchReportValueAccessor createSectorBranchReportValueAccessor(Report report, Sector sector){
         if(report == null){
             return null;
         }
@@ -84,11 +75,11 @@ public class ReportService {
                     FormattedComment formattedComment = entry.getValue();
 
                     if(oldReport == null){
-                        formattedComment.formatCommentFromOldComment("");
+                        formattedComment.formatCommentWithoutOldComment();
                     }else{
                         FormattedComment oldFormattedComment = oldCommentReportValue.getComments().get(scenario);
                         if(oldFormattedComment == null){
-                            formattedComment.formatCommentFromOldComment("");
+                            formattedComment.formatCommentWithoutOldComment();
                         }else {
                             formattedComment.formatCommentFromOldComment(oldFormattedComment.getComment());
                         }
@@ -109,7 +100,7 @@ public class ReportService {
 
                 formattedComments.forEach((scenario, formattedComment) -> {
                     if(oldRessortCommentsReportValue == null){
-                        formattedComment.formatCommentFromOldComment("");
+                        formattedComment.formatCommentWithoutOldComment();
                     }else {
                         formattedComment.formatCommentFromOldComment(oldFormattedComments.get(scenario).getComment());
                     }
@@ -118,7 +109,7 @@ public class ReportService {
             setValueChangedTypeByOldValue(ressortCommentsReportValue, oldRessortCommentsReportValue);
         });
 
-        return new SectorBranchReportValueAccessor(federalStateBranchCommentReportValueHashMap, branchRessortCommentsReportValue);
+        return new BranchReportValueAccessor(federalStateBranchCommentReportValueHashMap, branchRessortCommentsReportValue);
     }
 
     //TODO many code duplicates make it simple

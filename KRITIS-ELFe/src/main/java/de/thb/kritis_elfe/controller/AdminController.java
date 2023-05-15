@@ -6,7 +6,6 @@ import de.thb.kritis_elfe.entity.*;
 import de.thb.kritis_elfe.service.*;
 import de.thb.kritis_elfe.service.questionnaire.QuestionnaireService;
 import lombok.AllArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -20,7 +19,7 @@ import java.util.List;
 
 @Controller
 @AllArgsConstructor
-public class SuperAdminController implements Comparable {
+public class AdminController implements Comparable {
     private final UserService userService;
     private final RoleService roleService;
     private final ReportService reportService;

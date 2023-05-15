@@ -389,16 +389,11 @@ public class QuestionnaireService {
             if(file.getContentType().equals("application/pdf")){
                 PDDocument document = PDDocument.load(file.getInputStream());
                 document.getClass();
-
                 if (!document.isEncrypted()) {
-
                     PDFTextStripperByArea stripper = new PDFTextStripperByArea();
                     stripper.setSortByPosition(true);
-
                     PDFTextStripper tStripper = new PDFTextStripper();
-
                     extractedText = tStripper.getText(document);
-
                 }
                 document.close();
             }else if(file.getContentType().equals("application/vnd.openxmlformats-officedocument.wordprocessingml.document")){

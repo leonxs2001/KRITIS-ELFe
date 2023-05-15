@@ -116,8 +116,8 @@ public class SituationController {
     }
 
     @PostMapping("/situation/{name}")
-    public String submitFilesFromForm(@RequestParam("files") MultipartFile[] files, @PathVariable String name,
-                                      Authentication authentication, Model model) throws AccessDeniedException {
+    public String submitFromFiles(@RequestParam("files") MultipartFile[] files, @PathVariable String name,
+                                  Authentication authentication, Model model) throws AccessDeniedException {
         FederalState federalState = federalStateService.getFederalStateByName(name);
         Ressort ressort = null;
         if(federalState == null){

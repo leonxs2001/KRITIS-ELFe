@@ -3,17 +3,13 @@ package de.thb.kritis_elfe.service;
 import de.thb.kritis_elfe.entity.*;
 import de.thb.kritis_elfe.service.helper.report.*;
 import org.apache.poi.xwpf.usermodel.*;
-import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTPPr;
-import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTSpacing;
 import org.openxmlformats.schemas.wordprocessingml.x2006.main.STHighlightColor;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.List;
-import java.util.function.BiConsumer;
 
 @Service
 public class DocumentService {
@@ -86,7 +82,7 @@ public class DocumentService {
 
     //TODO delete duplicates!!!!!!! Sind viele
     public void createSectorReportWordDocument(OutputStream outputStream, Sector sector, List<FederalState> federalStates,
-                                               SectorBranchReportValueAccessor sectorBranchReportValueAccessor) throws IOException {
+                                               BranchReportValueAccessor branchReportValueAccessor) throws IOException {
         XWPFDocument document = new XWPFDocument();
 
         XWPFParagraph title = document.createParagraph();
@@ -121,8 +117,8 @@ public class DocumentService {
             centerCellText(headRessortTableCell);
 
             String ressortHead = null;
-            for(Ressort ressort: sectorBranchReportValueAccessor.getRessorts()){
-                HashMap<Scenario, FormattedComment> comments = sectorBranchReportValueAccessor.getRessortCommentReportValue(branch).getComments(ressort);
+            for(Ressort ressort: branchReportValueAccessor.getRessorts()){
+                HashMap<Scenario, FormattedComment> comments = branchReportValueAccessor.getRessortCommentReportValue(branch).getComments(ressort);
                 createCommentRepresentationForComments(commentParagraph, ressort.getShortcut(), comments);
 
                 if(ressortHead == null){
@@ -142,11 +138,11 @@ public class DocumentService {
             XWPFTableRow branchTableRow = branchTable.getRow(1);
 
             XWPFTableCell branchRessortTableCell = branchTableRow.getCell(0);
-            setColorAndTextForCellFromSectorReportValue(branchRessortTableCell, sectorBranchReportValueAccessor.getRessortCommentReportValue(branch));
+            setColorAndTextForCellFromSectorReportValue(branchRessortTableCell, branchReportValueAccessor.getRessortCommentReportValue(branch));
 
             for(int i = 0; i < federalStates.size(); i++){
                 FederalState federalState = federalStates.get(i);
-                CommentReportValue commentReportValue = sectorBranchReportValueAccessor.getFederalStateBranchCommentReportValue(branch, federalState);
+                CommentReportValue commentReportValue = branchReportValueAccessor.getFederalStateBranchCommentReportValue(branch, federalState);
                 XWPFTableCell branchFederalStateTableCell = branchTableRow.getCell(1 + i);
                 setColorAndTextForCellFromSectorReportValue(branchFederalStateTableCell, commentReportValue);
 
