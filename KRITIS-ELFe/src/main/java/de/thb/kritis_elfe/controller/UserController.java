@@ -40,19 +40,14 @@ public class UserController {
 
     @PostMapping("/register/user")
     public String registerUser(
-            @ModelAttribute("user") @Valid UserRegisterFormModel formModel, BindingResult result,
-            Model model) {
-
+            @ModelAttribute("user") @Valid UserRegisterFormModel formModel, BindingResult result) {
+        if(result.hasErrors()){
+            return "redirect:/register/user?passwortUngleich";
+        }
         try {
             userService.registerNewUser(formModel);
-
         } catch (UserAlreadyExistsException uaeEx) {
-            model.addAttribute("usernameError", "Es existiert bereits ein Account mit diesem Nutzernamen.");
-            model.addAttribute("form", formModel);
-            model.addAttribute("federalStates", federalStateService.getAllFederalStates());
-            model.addAttribute("ressorts", ressortService.getAllRessorts());
-            model.addAttribute("roles", roleService.getAllRoles());
-            return "register/user_registration";
+            return "redirect:/register/user?usernameException";
         }
 
         return "register/success_register";
@@ -80,29 +75,22 @@ public class UserController {
 
     @GetMapping(path = "/account/changeCredentials")
     public String showChangePassword(){
-        return "change_credentials";
+        return "account/change_credentials";
     }
 
     @PostMapping(path = "account/changeCredentials")
-    public String changeCredentials(@Valid ChangeCredentialsForm form, Principal principal, Model model){
+    public String changeCredentials(@Valid ChangeCredentialsForm form, Authentication authentication){
 
         try {
-            String username = principal.getName();
-            User user = userService.getUserByUsername(username);
-
-            model.addAttribute("user", user);
-            model.addAttribute("form", form);
-
-            userService.changeCredentials(form,user, model);
-        } catch (PasswordNotMatchingException passEx) {
-            model.addAttribute("passwordError", "Das eingegebene Password stimmt nicht mit Ihrem aktuellen Passwort überein.");
-            return "change_credentials";
-        } catch (EmailNotMatchingException e){
-            model.addAttribute("emailError", "Die eingegebene Email-Adresse stimmt nicht mit Ihrer aktuellen Email überein.");
-            return "change_credentials";
+            User user = userService.getUserByUsername(authentication.getName());
+            userService.changeCredentials(form,user);
+        } catch (PasswordNotMatchingException e) {
+            return "redirect:/account/changeCredentials?passwordError";
+        } catch (EmailNotMatchingException e) {
+            return "redirect:/account/changeCredentials?emailError";
         }
 
-        return "change_credentials";
+        return "redirect:/account/changeCredentials?success";
     }
 
     @GetMapping("/password-reset")
@@ -110,20 +98,17 @@ public class UserController {
         return "security/password_reset";
     }
 
-    @PostMapping("/password-reset")
+    @PostMapping("/password-reset")//Hier
     public String requestPasswordReset(@Valid ResetPasswordUserDataForm form, Model model) {
 
         try {
             model.addAttribute("form", form);
             User user = userService.getUserByUsername(form.getUsername());
             passwordResetTokenService.createPasswordResetToken(user);
-            model.addAttribute("success", "Eingabe erfolgreich. Sofern Ihre Email einem Nutzer zugeordnet werden kann erhalten Sie demnächst eine Benachrichtigung per Mail.");
-
         } catch (EmailNotMatchingException e) {
-            model.addAttribute("error", "Bei der Eingabe ist ein Fehler aufgetreten. Bitte stellen Sie sicher, dass die eingegebene Email auch korrekt ist.");
-            return "security/password_reset";
+            return "redirect:/passwort-reset?emailError";
         }
-        return "security/password_reset";
+        return "redirect:/passwort-reset?success";
 
     }
 

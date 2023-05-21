@@ -4,7 +4,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
 /**
- * Class for defining path of help.pdf in the application.properties
+ * Class for defining all important data of the Webapplication KRITIS-ELFe
  */
 @Component("kritisElfeReader")
 @ConfigurationProperties("kritiselfe")

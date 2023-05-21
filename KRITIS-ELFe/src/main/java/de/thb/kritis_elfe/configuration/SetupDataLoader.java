@@ -51,7 +51,7 @@ public class SetupDataLoader implements
         createUserIfNotFound("admin", "leonschoenberg@gmx.de", "admin1234", bbkAdmin, null, null);
         createUserIfNotFound("ressort", "leonschoenberg@gmx.de", "ressort1234", ressort, null, ressort3);
         createUserIfNotFound("office", "leonschoenberg@gmx.de", "office1234", office, null, null);
-
+        // TODO delete creation of the users for real web app
         for(FederalState federalState: federalStates){
             createUserIfNotFound(federalState.getName().toLowerCase(), "keineEchteMail@Spass.de",federalState.getName().toLowerCase(), land, federalState, null);
         }

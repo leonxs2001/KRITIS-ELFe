@@ -5,7 +5,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-
+/**
+ * Form for the reset of the user password.
+ */
 @Getter
 @Setter
 @AllArgsConstructor

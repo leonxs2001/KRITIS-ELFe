@@ -29,13 +29,6 @@ public class MainController {
         return "home";
     }
 
-
-    @GetMapping("/setLogout")
-    public void logintime(Authentication authentication) {
-        User user = userService.getUserByEmail(authentication.getName());
-        userService.setCurrentLogin(user);
-    }
-
     @GetMapping(value="/help", produces = MediaType.APPLICATION_PDF_VALUE)
     public @ResponseBody byte[] getHelp() throws IOException {
         File file = new File(kritisElfeReader.getHelpPath() + "help.pdf");

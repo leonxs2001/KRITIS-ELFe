@@ -243,28 +243,25 @@ public class UserService {
      * Let user change the own credentials: password, firstname, lastname, email
      * @param form
      * @param user
-     * @param model
      * @throws PasswordNotMatchingException
      * @throws EmailNotMatchingException
      */
-    public void changeCredentials(ChangeCredentialsForm form, User user, Model model) throws PasswordNotMatchingException, EmailNotMatchingException {
+    public void changeCredentials(ChangeCredentialsForm form, User user) throws PasswordNotMatchingException, EmailNotMatchingException {
 
         if (form.getOldPassword() != null) {
-            if (!passwordEncoder.matches(form.getOldPassword(), user.getPassword())) {
-                throw new PasswordNotMatchingException("Das eingegebene Passwort stimmt nicht mit Ihrem aktuellen Passwort überein.");
+            if (!passwordEncoder.matches(form.getOldPassword(), user.getPassword()) || !form.getNewPassword().equals(form.getConfirmNewPassword())) {
+                throw new PasswordNotMatchingException("There is a password mismatch.");
             } else if (!form.getOldPassword().equals(form.getNewPassword()) && form.getNewPassword().equals(form.getConfirmNewPassword())) {
                 user.setPassword(passwordEncoder.encode(form.getNewPassword()));
-                model.addAttribute("passwordSuccess", "Ihr Passwort wurde erfolgreich geändert.");
             }
         }
 
         if (form.getOldEmail() != null) {
             if (!form.getOldEmail().equals(user.getEmail())) {
-                throw new EmailNotMatchingException("Die eingegebene Email-Adresse stimmt nicht mit Ihrer Email überein.");
+                throw new EmailNotMatchingException("The emails are not matching.");
             }
             else if (!form.getOldEmail().equals(form.getNewEmail())) {
                 user.setEmail(form.getNewEmail());
-                model.addAttribute("emailSuccess", "Ihre Email-Adresse wurde erfolgreich geändert.");
             }
         }
 

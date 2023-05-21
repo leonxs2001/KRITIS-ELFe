@@ -31,10 +31,11 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         // @formatter:off
-        http
+        http//TODO change all paths
                 .authorizeRequests()
                 .antMatchers("/css/**", "/webjars/**", "/bootstrap/**", "/js/**", "/images/**", "/favicon.ico").permitAll()
                 .antMatchers("/", "/home", "/register/**", "/success_register", "/confirmation/confirmByUser/**", "datenschutz").permitAll()
+                .antMatchers("/help", "/account/changeCredentials").access("isAuthenticated()")
                 .antMatchers("/office").access("hasAuthority('ROLE_GESCHÄFTSSTELLE')")
                 .antMatchers("/situation/**").access("hasAnyAuthority('ROLE_LAND', 'ROLE_RESSORT', 'ROLE_BBK_ADMIN')")
                 .antMatchers("/report/**").access("hasAnyAuthority('ROLE_BBK_ADMIN','ROLE_BBK_VIEWER')")
@@ -42,7 +43,6 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers("/report-details/**").access("hasAuthority('ROLE_BBK_ADMIN')")
                 .antMatchers("/ressorts").access("hasAuthority('ROLE_BBK_ADMIN')")
                 .antMatchers("/adjustHelp").access("hasAuthority('ROLE_BBK_ADMIN')")
-                .antMatchers("/help").access("isAuthenticated()")
                 .antMatchers("/account/user_details").access("isAuthenticated()")
                 .antMatchers("/confirmation/confirm/**").access("hasAuthority('ROLE_GESCHÄFTSSTELLE')")
                 .and()

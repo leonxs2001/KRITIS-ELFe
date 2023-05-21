@@ -13,7 +13,9 @@
             <a th:href="@{/help}" target="_blank">Klicke hier für das Ergebnis.</a> <br>
             Allerdings kann es einen kurzen Moment dauern, bis die Änderung angeziegt wird.
         </div>
-        <div th:if="${param.failure}" class="alert alert-danger" role="alert">Die Datei konnte leider nicht hochgeladen werden.</div>
+        <div th:if="${param.io_error}" class="alert alert-danger" role="alert">Die Datei konnte leider nicht hochgeladen werden.</div>
+        <div th:if="${param.empty_error}" class="alert alert-danger" role="alert">Leider ist die Datei leer und konnte nicht hochgeladen werden.</div>
+        <div th:if="${param.wrong_type_error}" class="alert alert-danger" role="alert">Leider ist die hochgeladene Datei keine PDF Datei.</div>
         <h2>Hilfeverwaltung</h2>
         <form method="POST" enctype="multipart/form-data">
             <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>

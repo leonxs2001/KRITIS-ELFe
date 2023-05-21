@@ -1,18 +1,36 @@
 package de.thb.kritis_elfe.service;
 
 import de.thb.kritis_elfe.entity.*;
+import de.thb.kritis_elfe.service.Exceptions.EmptyFileException;
+import de.thb.kritis_elfe.service.Exceptions.WrongContentTypeException;
 import de.thb.kritis_elfe.service.helper.report.*;
 import org.apache.poi.xwpf.usermodel.*;
 import org.openxmlformats.schemas.wordprocessingml.x2006.main.STHighlightColor;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.List;
 
 @Service
 public class DocumentService {
+
+    public void savePDFFile(MultipartFile file, String pathString) throws EmptyFileException, WrongContentTypeException, IOException {
+        if(file.isEmpty()){
+            throw new EmptyFileException("The file is empty.");
+        }
+        if(!file.getContentType().equals("application/pdf")){
+            throw new WrongContentTypeException("The File is not a pdf file.");
+        }
+        byte[] bytes = file.getBytes();
+        Path path = Paths.get(pathString);
+        Files.write(path, bytes);
+    }
 
     public void createReportWordDocument(OutputStream outputStream, List<Sector> sectors, List<FederalState> federalStates,
                                          SectorReportValueAccessor sectorReportValueAccessor, Report report) throws IOException {

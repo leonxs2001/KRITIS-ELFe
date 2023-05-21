@@ -6,26 +6,15 @@ import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 
 public class PasswordMatchesValidator
-        implements ConstraintValidator<PasswordMatches, Object> {
+        implements ConstraintValidator<PasswordMatches, UserRegisterFormModel> {
 
     @Override
     public void initialize(PasswordMatches constraintAnnotation) {
     }
 
     @Override
-    public boolean isValid(Object obj, ConstraintValidatorContext context) {
-        boolean isValid = false;
-
-        if (obj instanceof UserRegisterFormModel c) {
-            isValid = c.getPassword().equals(c.getConfirmPassword());
-        }
-
-        /* Weitere Entitaeten
-        if (obj instanceof ProviderRegisterFormModel p) {
-            isValid = p.getPassword().equals(p.getConfirmPassword());
-        }
-        */
-
+    public boolean isValid(UserRegisterFormModel userRegisterFormModel, ConstraintValidatorContext context) {
+        boolean isValid = userRegisterFormModel.getPassword().equals(userRegisterFormModel.getConfirmPassword());;
         if(!isValid){
             context.disableDefaultConstraintViolation();
             context.buildConstraintViolationWithTemplate(context.getDefaultConstraintMessageTemplate())

@@ -4,6 +4,8 @@ import de.thb.kritis_elfe.configuration.KritisElfeReader;
 import de.thb.kritis_elfe.controller.form.RessortsForm;
 import de.thb.kritis_elfe.entity.*;
 import de.thb.kritis_elfe.service.*;
+import de.thb.kritis_elfe.service.Exceptions.EmptyFileException;
+import de.thb.kritis_elfe.service.Exceptions.WrongContentTypeException;
 import de.thb.kritis_elfe.service.questionnaire.QuestionnaireService;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Controller;
@@ -12,21 +14,17 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.List;
 
 @Controller
 @AllArgsConstructor
-public class AdminController implements Comparable {
-    private final UserService userService;
-    private final RoleService roleService;
+public class AdminController { //implements Comparable
     private final ReportService reportService;
     private final QuestionnaireService questionnaireService;
     private final RessortService ressortService;
     private final FederalStateService federalStateService;
     private final SectorService sectorService;
+    private final DocumentService documentService;
     private final KritisElfeReader kritisElfeReader;
 
     @GetMapping("/report-control")
@@ -50,13 +48,8 @@ public class AdminController implements Comparable {
         return "redirect:report-control";
     }
 
-    @GetMapping("/confirmation/userDenied")
-    public String userDenied() {
-        return "confirmation/userDenied";
-    }
-
     @GetMapping("/report-details")
-    public String showSnapByID(@RequestParam("id") long reportId, Model model) {
+    public String showReportById(@RequestParam("id") long reportId, Model model) {
         Report report = reportService.getReportById(reportId);
         model.addAttribute("report", report);
 
@@ -70,19 +63,17 @@ public class AdminController implements Comparable {
 
     @PostMapping("/adjustHelp")
     public String uploadNewHelpDocument(@RequestParam("file") MultipartFile file){
-        if(!file.isEmpty() && file.getContentType().equals("application/pdf")){
-            try{
-                byte[] bytes = file.getBytes();
-                Path path = Paths.get(kritisElfeReader.getHelpPath() + "help.pdf");
-                Files.write(path, bytes);
-                return "redirect:adjustHelp?success";
-            } catch (IOException exception){
-                return "redirect:adjustHelp?failure";
-            }
-        }else{
-            return "redirect:adjustHelp?failure";
+        try {
+            documentService.savePDFFile(file, kritisElfeReader.getHelpPath() + "help.pdf");
+        }catch (IOException e){
+            return "redirect:adjustHelp?io_error";
+        }catch (EmptyFileException e){
+            return "redirect:adjustHelp?empty_error";
+        }catch (WrongContentTypeException e){
+            return "redirect:adjustHelp?wrong_type_error";
         }
 
+        return "redirect:adjustHelp?success";
     }
 
     @GetMapping("/ressorts")
@@ -98,11 +89,5 @@ public class AdminController implements Comparable {
     public String resetRessorts(@ModelAttribute RessortsForm ressortsForm){
         ressortService.resetRessortsByRessortsForm(ressortsForm);
         return "redirect:ressorts";
-    }
-
-
-    @Override
-    public int compareTo(Object o) {
-        return 0;
     }
 }
