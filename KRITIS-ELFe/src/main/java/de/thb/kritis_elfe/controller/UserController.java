@@ -98,7 +98,7 @@ public class UserController {
         return "security/password_reset";
     }
 
-    @PostMapping("/password-reset")//Hier
+    @PostMapping("/password-reset")//Hiers
     public String requestPasswordReset(@Valid ResetPasswordUserDataForm form, Model model) {
 
         try {
