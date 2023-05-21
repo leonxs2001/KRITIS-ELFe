@@ -2,14 +2,12 @@ package de.thb.kritis_elfe.service;
 
 import de.thb.kritis_elfe.configuration.KritisElfeReader;
 import de.thb.kritis_elfe.controller.form.ResetPasswordForm;
+import de.thb.kritis_elfe.controller.form.ResetPasswordUserDataForm;
 import de.thb.kritis_elfe.entity.PasswordResetToken;
 import de.thb.kritis_elfe.entity.User;
 import de.thb.kritis_elfe.mail.EmailSender;
 import de.thb.kritis_elfe.repository.PasswordResetTokenRepository;
-import de.thb.kritis_elfe.service.Exceptions.EmailNotMatchingException;
-import de.thb.kritis_elfe.service.Exceptions.PasswordNotMatchingException;
-import de.thb.kritis_elfe.service.Exceptions.PasswordResetTokenExpired;
-import de.thb.kritis_elfe.service.Exceptions.TokenAlreadyConfirmedException;
+import de.thb.kritis_elfe.service.Exceptions.*;
 import lombok.AllArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -59,22 +57,25 @@ public class PasswordResetTokenService {
     /**
      * Creates new random Password Reset Token if user forgot his password
      *
-     * @param user to link the right user
+     * @param form
      * @throws EmailNotMatchingException
      */
-    public void createPasswordResetToken(User user) throws EmailNotMatchingException {
+    public void createPasswordResetToken(ResetPasswordUserDataForm form) {
+        User user = userService.getUserByUsername(form.getUsername());
 
-        String token = UUID.randomUUID().toString();
+        if(user != null && user.getEmail().equals(form.getEmail())) {
+            String token = UUID.randomUUID().toString();
 
-        PasswordResetToken myToken = new PasswordResetToken(user, token);
-        passwordResetTokenRepository.save(myToken);
+            PasswordResetToken myToken = new PasswordResetToken(user, token);
+            passwordResetTokenRepository.save(myToken);
 
-        String link = kritisElfeReader.getUrl() + "reset-password?token=" + token;
+            String link = kritisElfeReader.getUrl() + "reset-password?token=" + token;
 
-        Context passwordResetContext = new Context();
-        passwordResetContext.setVariable("username", user.getUsername());
-        passwordResetContext.setVariable("link", link);
-        emailSender.sendMailFromTemplate("/mail/reset_password", passwordResetContext, user.getEmail());
+            Context passwordResetContext = new Context();
+            passwordResetContext.setVariable("username", user.getUsername());
+            passwordResetContext.setVariable("link", link);
+            emailSender.sendMailFromTemplate("/mail/reset_password", passwordResetContext, user.getEmail());
+        }
     }
 
     /**

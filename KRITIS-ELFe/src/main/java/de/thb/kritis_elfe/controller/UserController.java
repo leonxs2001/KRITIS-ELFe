@@ -99,46 +99,39 @@ public class UserController {
     }
 
     @PostMapping("/password-reset")//Hiers
-    public String requestPasswordReset(@Valid ResetPasswordUserDataForm form, Model model) {
-
-        try {
-            model.addAttribute("form", form);
-            User user = userService.getUserByUsername(form.getUsername());
-            passwordResetTokenService.createPasswordResetToken(user);
-        } catch (EmailNotMatchingException e) {
-            return "redirect:/passwort-reset?emailError";
-        }
-        return "redirect:/passwort-reset?success";
+    public String requestPasswordReset(@Valid ResetPasswordUserDataForm form) {
+        passwordResetTokenService.createPasswordResetToken(form);
+        return "redirect:/password-reset?success";
 
     }
 
     @GetMapping(path = "/reset-password")
-    public String showResetPassword(@RequestParam("token") String token, Model model) {
+    public String showResetPassword(@RequestParam("token") String token, Model model) throws TokenDoesNotExistException {
 
         if (passwordResetTokenService.getByToken(token) != null) {
             ResetPasswordForm form = new ResetPasswordForm();
             form.setToken(token);
             model.addAttribute("form", form);
             return "security/reset_password";
-        } else return "Token existiert nicht";
+        } else {
+            throw new TokenDoesNotExistException("The token does not exists.");
+        }
     }
 
     @PostMapping(path = "/reset-password")
     public String resetUserPassword(@Valid ResetPasswordForm form, Model model) throws PasswordResetTokenExpired {
-
         try {
             model.addAttribute("form", form);
             passwordResetTokenService.resetUserPassword(form.getToken(), form);
-                model.addAttribute("success", "Ihr Passwort wurde erfolgreich geändert.");
         } catch (PasswordResetTokenExpired e) {
-            model.addAttribute("error", "Ihr Token zum Zurücksetzen des Passworts ist abgelaufen. Bitte beantragen Sie ihn erneut unter \" Passwort vergessen\".");
+            return "redirect:/reset-password?tokenExpiredError&token="+form.getToken();
         } catch (PasswordNotMatchingException e){
-            model.addAttribute("error", "Die beiden Passwörter müssen gleich sein.");
+            return "redirect:/reset-password?notMatchingError&token="+form.getToken();
         } catch (TokenAlreadyConfirmedException e){
-            model.addAttribute("error", "Das Passwort wurde bereits zurückgesetzt.");
+            return "redirect:/reset-password?tokenConfirmedError&token="+form.getToken();
         }
 
-        return "security/reset_password";
+        return "redirect:/reset-password?success";
     }
 
 }
