@@ -7,12 +7,10 @@ import de.thb.kritis_elfe.entity.questionnaire.FilledScenario;
 import de.thb.kritis_elfe.enums.ScenarioType;
 import de.thb.kritis_elfe.repository.questionnaire.QuestionnaireRepository;
 import de.thb.kritis_elfe.repository.UserRepository;
-import de.thb.kritis_elfe.service.BranchService;
+import de.thb.kritis_elfe.service.*;
 import de.thb.kritis_elfe.service.Exceptions.AccessDeniedException;
 import de.thb.kritis_elfe.service.Exceptions.EntityDoesNotExistException;
-import de.thb.kritis_elfe.service.FederalStateService;
-import de.thb.kritis_elfe.service.RessortService;
-import de.thb.kritis_elfe.service.ScenarioService;
+import de.thb.kritis_elfe.service.helper.SectorChangeDetector;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import org.apache.pdfbox.pdmodel.PDDocument;
@@ -36,7 +34,6 @@ import java.util.regex.Pattern;
 @Builder
 public class QuestionnaireService {
     private final QuestionnaireRepository questionnaireRepository;
-    private final UserRepository userRepository;
 
     private final ScenarioService scenarioService;
     private final FilledScenarioService filledScenarioService;
@@ -44,6 +41,8 @@ public class QuestionnaireService {
     private final BranchQuestionnaireService branchQuestionnaireService;
     private final FederalStateService federalStateService;
     private final RessortService ressortService;
+    private final UserService userService;
+    private final RoleService roleService;
 
     public void save(Questionnaire questionnaire){questionnaireRepository.save(questionnaire);}
     public Questionnaire getQuestionnaire(long id) {return questionnaireRepository.findById(id);}
@@ -168,10 +167,22 @@ public class QuestionnaireService {
     }
 
     /**
-     * Create a new Questionnaire with the FilledScenarios from inside the form and save it
+     * Create a new Questionnaire with the FilledScenarios from inside the form and save it.
+     * @param questionnaire
+     * @param name
+     * @param user
+     * @throws EntityDoesNotExistException
+     * @throws AccessDeniedException
      */
     @Transactional
-    public void saveQuestionnaireFromForm(Questionnaire questionnaire, FederalState federalState, Ressort ressort) throws EntityDoesNotExistException {
+    public void saveQuestionnaireFromForm(Questionnaire questionnaire, String name, User user) throws EntityDoesNotExistException, AccessDeniedException {
+        FederalState federalState = federalStateService.getFederalStateByName(name);
+        Ressort ressort = null;
+        if(federalState == null){
+            ressort = ressortService.getRessortByName(name);
+        }
+
+        userService.checkAuthorizationOfUserForFederalStateOrRessort(user, federalState, ressort);
 
         if(federalState != null && !questionnaireRepository.existsByIdAndFederalState(questionnaire.getId(), federalState)) {
             throw new EntityDoesNotExistException("There is no questionnaire with the id " + questionnaire.getId() + " and the federal state " + federalState.getName() + ".");
@@ -191,7 +202,15 @@ public class QuestionnaireService {
     }
 
     @Transactional
-    public Questionnaire saveQuestionnaireFromFiles(MultipartFile[] files, FederalState federalState, Ressort ressort, Model model){
+    public Questionnaire saveQuestionnaireFromFiles(MultipartFile[] files, String name, User user, Model model) throws AccessDeniedException {
+        FederalState federalState = federalStateService.getFederalStateByName(name);
+        Ressort ressort = null;
+        if(federalState == null){
+            ressort = ressortService.getRessortByName(name);
+        }
+
+        userService.checkAuthorizationOfUserForFederalStateOrRessort(user, federalState, ressort);
+
         model.addAttribute("success", true);
         Questionnaire questionnaire;
         if(federalState != null) {
@@ -478,6 +497,29 @@ public class QuestionnaireService {
         return ressorts;
     }
 
+    /**
+     * Get the Questionnaire for the Ressort or FederalState with the given name.
+     * if the user is authorized to do that
+     * @param name
+     * @return Questionnaire for the FederalState or Ressort with the name
+     */
+    public Questionnaire getQuestionnaireFromName(String name, User user) throws EntityDoesNotExistException, AccessDeniedException {
+        FederalState federalState = federalStateService.getFederalStateByName(name);
+        Ressort ressort = null;
 
+        if (federalState == null) {
+            ressort = ressortService.getRessortByName(name);
+        }
+
+        userService.checkAuthorizationOfUserForFederalStateOrRessort(user, federalState, ressort);
+
+        if (federalState != null) {
+            return getQuestionnaireForFederalState(federalState);
+        } else if (ressort != null) {
+            return getQuestionnaireForRessort(ressort);
+        } else {
+            throw new EntityDoesNotExistException("The Ressort or Federal State does not exist.");
+        }
+    }
 
 }

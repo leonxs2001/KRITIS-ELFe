@@ -4,15 +4,14 @@ import de.thb.kritis_elfe.configuration.KritisElfeReader;
 import de.thb.kritis_elfe.controller.form.ChangeCredentialsForm;
 import de.thb.kritis_elfe.controller.form.UserFormModel;
 import de.thb.kritis_elfe.controller.form.UserRegisterFormModel;
-import de.thb.kritis_elfe.entity.User;
+import de.thb.kritis_elfe.entity.*;
 import de.thb.kritis_elfe.mail.EmailSender;
-import de.thb.kritis_elfe.entity.ConfirmationToken;
 import de.thb.kritis_elfe.repository.RoleRepository;
 import de.thb.kritis_elfe.repository.UserRepository;
+import de.thb.kritis_elfe.service.Exceptions.AccessDeniedException;
 import de.thb.kritis_elfe.service.Exceptions.EmailNotMatchingException;
 import de.thb.kritis_elfe.service.Exceptions.PasswordNotMatchingException;
 import de.thb.kritis_elfe.service.Exceptions.UserAlreadyExistsException;
-import de.thb.kritis_elfe.service.questionnaire.QuestionnaireService;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.extern.slf4j.Slf4j;
@@ -40,8 +39,8 @@ public class UserService {
     private final ConfirmationTokenService confirmationTokenService;
     private final EmailSender emailSender;
     private final BranchService branchService;
-    private final QuestionnaireService questionnaireService;
     private final KritisElfeReader kritisElfeReader;
+    private final FederalStateService federalStateService;
 
     //Repo Methods --------------------------
     public List<User> getAllUsers() {
@@ -266,5 +265,56 @@ public class UserService {
         }
 
         saveUser(user);
+    }
+
+    /**
+     * Get the Name of the FederalState or the Ressort of the User.
+     * It returns as default the FederalState "Brandenburg", if the user has no Ressort or FederalState.
+     * @param user
+     * @return name of the FederalState or Ressort
+     */
+    public String getRessortOrFederalStateName(User user){
+        String name;
+        Role landRole = roleService.getRoleByName("ROLE_LAND");
+        Role ressortRole = roleService.getRoleByName("ROLE_Ressort");
+
+        if(user.getRoles().contains(landRole)){
+            name = user.getFederalState().getName();
+        }else if(user.getRoles().contains(ressortRole)){
+            name = user.getRessort().getName();
+        }else{
+            name =  federalStateService.getFederalStateByName("Brandenburg").getName();
+        }
+
+        return name;
+    }
+
+    /**
+     * Checks the authorization of the user for the FederalState or Ressort.
+     * Throws an AccessDeniedException if the user does not have the authorization
+     * @param user
+     * @param federalState
+     * @param ressort
+     * @return
+     */
+    public void checkAuthorizationOfUserForFederalStateOrRessort(User user, FederalState federalState, Ressort ressort) throws AccessDeniedException {
+        Role adminRole = roleService.getRoleByName("ROLE_BBK_ADMIN");
+        if(user.getRoles().contains(adminRole)){
+            return;
+        }
+
+        Role landRole = roleService.getRoleByName("ROLE_LAND");
+        if(user.getRoles().contains(landRole) && user.getFederalState().equals(federalState)){
+            return;
+        }
+
+        Role ressortRole = roleService.getRoleByName("ROLE_RESSORT");
+        if(!(user.getRoles().contains(ressortRole) && user.getRessort().equals(ressort))){
+            if (federalState != null) {
+                throw new AccessDeniedException("The user doesnt have the permission to access the federal State.");
+            } else {
+                throw new AccessDeniedException("The user doesnt have the permission to access the ressort.");
+            }
+        }
     }
 }
