@@ -9,6 +9,7 @@ import org.openxmlformats.schemas.wordprocessingml.x2006.main.STHighlightColor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.file.Files;
@@ -239,5 +240,12 @@ public class DocumentService {
                 cellRun.setText(" ↓ ");
                 break;
         }
+    }
+
+    public void setWordResponseHeader(HttpServletResponse response, String filename){
+        response.setContentType("application/vnd.openxmlformats-officedocument.wordprocessingml.document");
+        String headerKey = "Content-Disposition";
+        String headerValue = "attachment; filename=" + filename;
+        response.setHeader(headerKey, headerValue);
     }
 }

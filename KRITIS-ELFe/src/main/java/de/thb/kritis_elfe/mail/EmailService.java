@@ -34,7 +34,7 @@ public class EmailService implements EmailSender{
             helper.setText(email, true);
             helper.setTo(to);
             helper.setSubject("Änderung auf KRITIS-ELFe");
-            helper.setFrom("noreply@th-brandenburg.de");
+            helper.setFrom("KRITIS-ELFe-noreply@proton.me");
             javaMailSender.send(mimeMessage);
         }catch (MessagingException e){
             LOGGER.error("Fehler beim Senden der Nachricht", e);

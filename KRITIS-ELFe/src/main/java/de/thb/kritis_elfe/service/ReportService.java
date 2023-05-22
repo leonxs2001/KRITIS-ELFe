@@ -84,7 +84,6 @@ public class ReportService {
                             formattedComment.formatCommentFromOldComment(oldFormattedComment.getComment());
                         }
                         }
-
                 }
 
                 setValueChangedTypeByOldValue(commentReportValue, oldCommentReportValue);
@@ -275,6 +274,14 @@ public class ReportService {
                 }
 
             }
+        }
+    }
+
+    public Report getReportFromIdWithDefault(Long id){
+        if(id == null){
+            return getNewestReport();
+        }else{
+            return getReportById(id);
         }
     }
 }

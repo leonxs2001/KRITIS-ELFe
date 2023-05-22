@@ -29,12 +29,7 @@ public class ReportController {
 
     @GetMapping("/report")
     public String showReport(@RequestParam(value = "id", required = false) Long reportId, Model model){
-        Report report;
-        if(reportId == null){
-            report = reportService.getNewestReport();
-        }else{
-            report = reportService.getReportById(reportId);
-        }
+        Report report = reportService.getReportFromIdWithDefault(reportId);
 
         model.addAttribute("sectors", sectorService.getAllSectors());
         model.addAttribute("federalStates", federalStateService.getAllFederalStates());
@@ -51,17 +46,9 @@ public class ReportController {
     @GetMapping("report/download")
     public void downloadReport(@RequestParam(value = "id", required = false) Long reportId,
                                HttpServletResponse response) throws IOException {
-        Report report;
-        if(reportId == null){
-            report = reportService.getNewestReport();
-        }else{
-            report = reportService.getReportById(reportId);
-        }
+        Report report = reportService.getReportFromIdWithDefault(reportId);
 
-        response.setContentType("application/vnd.openxmlformats-officedocument.wordprocessingml.document");
-        String headerKey = "Content-Disposition";
-        String headerValue = "attachment; filename=" + report + ".docx";
-        response.setHeader(headerKey, headerValue);
+        documentService.setWordResponseHeader(response, report + ".docx");
 
         SectorReportValueAccessor sectorReportValueAccessor = reportService.createSectorReportValueAccessor(report);
 
@@ -74,22 +61,14 @@ public class ReportController {
     public void downloadReport(@RequestParam(value = "reportId", required = false) Long reportId,
                                @RequestParam(value = "sectorId", required = false) Long sectorId,
                                HttpServletResponse response) throws IOException, EntityDoesNotExistException {
-        Report report;
-        if(reportId == null){
-            report = reportService.getNewestReport();
-        }else{
-            report = reportService.getReportById(reportId);
-        }
+        Report report = reportService.getReportFromIdWithDefault(reportId);
 
         Optional<Sector> sector = sectorService.getSectorById(sectorId);
         if(!sector.isPresent()){
             throw new EntityDoesNotExistException("The Sector does not exists.");
         }
 
-        response.setContentType("application/vnd.openxmlformats-officedocument.wordprocessingml.document");
-        String headerKey = "Content-Disposition";
-        String headerValue = "attachment; filename=Sektorreport für den Sektor " + sector.get() + " vom Report " + report + ".docx";
-        response.setHeader(headerKey, headerValue);
+        documentService.setWordResponseHeader(response, "Sektorreport für den Sektor " + sector.get() + " vom Report " + report + ".docx");
         BranchReportValueAccessor branchReportValueAccessor = reportService.createSectorBranchReportValueAccessor(report, sector.get());
 
         documentService.createSectorReportWordDocument(response.getOutputStream(), sector.get(), federalStateService.getAllFederalStates(),

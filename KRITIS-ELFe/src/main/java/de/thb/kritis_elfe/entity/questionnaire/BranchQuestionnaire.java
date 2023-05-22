@@ -31,7 +31,6 @@ public class BranchQuestionnaire {
     @OrderBy("scenario ASC")
     private List<FilledScenario> filledScenarios;
 
-    //EQUALS & HASHCODE
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
