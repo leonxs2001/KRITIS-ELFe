@@ -23,6 +23,10 @@ public class ReportService {
 
     private final QuestionnaireService questionnaireService;
 
+    private final SectorService sectorService;
+
+    private final BranchService branchService;
+
     public List<Report> getAllReports(){return reportRepository.findAll();}
 
     public List<Report> getAllReportsOrderByDESC(){return reportRepository.findAllByOrderByIdDesc();}
@@ -114,6 +118,10 @@ public class ReportService {
     //TODO many code duplicates make it simple
     private void fillReportValuesAndHashMapsFromReportForSector(Report report, Sector sector, HashMap<Branch, RessortCommentsReportValue> branchRessortCommentsReportValue,
                                                        HashMap<Branch, HashMap<FederalState, CommentReportValue>> federalStateBranchCommentReportValueHashMap){
+        //List of all Branches missing in all ressorts
+        //delete all existing in the ressort part of the for loop
+        List<Branch> missingRessortBranches = branchService.getAllBranches();
+
         for(Questionnaire questionnaire: report.getQuestionnaires()){
             for(BranchQuestionnaire branchQuestionnaire: questionnaire.getBranchQuestionnaires()){
 
@@ -143,7 +151,10 @@ public class ReportService {
                                 }
                             }
                         }
-                    } else {//is Ressort
+                    } else {//handling Ressort stuff
+                        //remove existing branch from the list for the missing branches
+                        missingRessortBranches.remove(branchQuestionnaire.getBranch());
+
                         RessortCommentsReportValue ressortCommentsReportValue = branchRessortCommentsReportValue.get(branchQuestionnaire.getBranch());
                         if(ressortCommentsReportValue == null){
                             ressortCommentsReportValue = new RessortCommentsReportValue();
@@ -171,6 +182,11 @@ public class ReportService {
                     }
                 }
             }
+        }
+
+        // add ReportValue for all empty branches
+        for(Branch missingBranch: missingRessortBranches){
+            branchRessortCommentsReportValue.put(missingBranch, new RessortCommentsReportValue());
         }
     }
 
@@ -230,9 +246,11 @@ public class ReportService {
         }
     }
 
-    private void fillSectorReportValueHashMapsFromReport(Report report, HashMap<Sector,
-            HashMap<FederalState, ReportValue>> federalStateSectorReportValuesHashMap,
-             HashMap<Sector, ReportValue> ressortSectorReportValueHashMap) {
+    private void fillSectorReportValueHashMapsFromReport(Report report, HashMap<Sector, HashMap<FederalState, ReportValue>> federalStateSectorReportValuesHashMap,
+                                                         HashMap<Sector, ReportValue> ressortSectorReportValueHashMap) {
+        //List of all Sectors missing in all ressorts
+        //delete all existing in the ressort part of the for loop
+        List<Sector> missingRessortSectors = sectorService.getAllSectors();
 
         for(Questionnaire questionnaire: report.getQuestionnaires()){
             for(BranchQuestionnaire branchQuestionnaire: questionnaire.getBranchQuestionnaires()){
@@ -255,6 +273,9 @@ public class ReportService {
                     }
 
                 }else{//handle stuff for the ressortQuestionnaires
+                    //remove existing sector from the list for the missing sectors
+                    missingRessortSectors.remove(branchQuestionnaire.getBranch().getSector());
+
                     sectorReportValue = ressortSectorReportValueHashMap.get(branchQuestionnaire.getBranch().getSector());
                     //add sectorReportValues to the hashMap if not exists
                     if (sectorReportValue == null) {
@@ -274,6 +295,11 @@ public class ReportService {
                 }
 
             }
+        }
+
+        // add ReportValue for all empty sectors
+        for(Sector missingSector: missingRessortSectors){
+            ressortSectorReportValueHashMap.put(missingSector, new ReportValue());
         }
     }
 

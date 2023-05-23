@@ -5,7 +5,7 @@ import javax.naming.AuthenticationException;
 public class PasswordNotMatchingException extends AuthenticationException {
 
     public PasswordNotMatchingException(){
-        super("User password and entered password do not match.");
+        super("The passwords do not match.");
     }
 
     public PasswordNotMatchingException(String message){

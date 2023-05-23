@@ -60,12 +60,4 @@ public class MyUserDetailsService implements UserDetailsService {
         return roleNames;
     }
 
-    private List<GrantedAuthority> getGrantedAuthorities(List<String> privileges) {
-        List<GrantedAuthority> authorities = new ArrayList<>();
-        for (String privilege : privileges) {
-            authorities.add(new SimpleGrantedAuthority(privilege));
-        }
-        return authorities;
-    }
-
 }

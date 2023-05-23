@@ -5,7 +5,7 @@ import javax.naming.AuthenticationException;
 public class EmailNotMatchingException extends AuthenticationException {
 
     public EmailNotMatchingException(){
-        super("Die eingegebene Email stimmt nicht mit Ihrer aktuellen Email-Adresse überein");
+        super("The emails do not match.");
     }
 
     public EmailNotMatchingException(String message){

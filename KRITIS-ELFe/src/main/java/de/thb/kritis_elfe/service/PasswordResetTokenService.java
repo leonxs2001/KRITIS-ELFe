@@ -92,15 +92,15 @@ public class PasswordResetTokenService {
         Date now = Date.from(Instant.now());
 
         if (!now.before(resetToken.getExpiryDate())) {
-            throw new PasswordResetTokenExpired("Token has been expired.");
+            throw new PasswordResetTokenExpired();
         }
 
         if(!form.getNewPassword().equals(form.getConfirmPassword())){
-            throw new PasswordNotMatchingException("Both passwords has to be equal");
+            throw new PasswordNotMatchingException();
         }
 
         if(resetToken.isConfirmed()){
-            throw new TokenAlreadyConfirmedException("The Token is already used.");
+            throw new TokenAlreadyConfirmedException();
         }
 
         user.setPassword(passwordEncoder.encode(form.getNewPassword()));

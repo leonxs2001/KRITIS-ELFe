@@ -6,11 +6,9 @@ import de.thb.kritis_elfe.entity.questionnaire.Questionnaire;
 import de.thb.kritis_elfe.entity.questionnaire.FilledScenario;
 import de.thb.kritis_elfe.enums.ScenarioType;
 import de.thb.kritis_elfe.repository.questionnaire.QuestionnaireRepository;
-import de.thb.kritis_elfe.repository.UserRepository;
 import de.thb.kritis_elfe.service.*;
 import de.thb.kritis_elfe.service.Exceptions.AccessDeniedException;
 import de.thb.kritis_elfe.service.Exceptions.EntityDoesNotExistException;
-import de.thb.kritis_elfe.service.helper.SectorChangeDetector;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import org.apache.pdfbox.pdmodel.PDDocument;
@@ -45,38 +43,45 @@ public class QuestionnaireService {
     private final RoleService roleService;
 
     public void save(Questionnaire questionnaire){questionnaireRepository.save(questionnaire);}
-    public Questionnaire getQuestionnaire(long id) {return questionnaireRepository.findById(id);}
-    public List<Questionnaire> getAllQuestionnaires(){
-        return questionnaireRepository.findAll();
-    }
 
+    /**
+     * Get the Questionnaire for the given federalstate.
+     * Creates a new one if not exist.
+     * @param federalState
+     * @return
+     */
     public Questionnaire getQuestionnaireForFederalState(FederalState federalState) {
         Questionnaire questionnaire = questionnaireRepository.findFirstByFederalStateOrderByIdDesc(federalState);
 
         if (questionnaire == null){
-            // TODO change from usr to federal state
             questionnaire = Questionnaire.builder().federalState(federalState).build();
 
             List<Branch> branches = branchService.getAllBranches();
-            fillNewQuestionnaireFromBranches(branches, questionnaire);
+            fillQuestionnaireFromBranches(branches, questionnaire);
         }
-
         return questionnaire;
     }
 
+    /**
+     * Get the Questionnaire for the given ressort,
+     * Checks if all branches are already included and include them if not.
+     * Checks if all branches in the questionnaire are contained in the ressort and delete if not.
+     * Creates a new one if not exist.
+     * @param ressort
+     * @return
+     */
     public Questionnaire getQuestionnaireForRessort(Ressort ressort) {
         Questionnaire questionnaire = questionnaireRepository.findFirstByRessortOrderByIdDesc(ressort);
         List<Branch> branches;
         if (questionnaire == null){
-            // TODO change from usr to federal state
             questionnaire = Questionnaire.builder().ressort(ressort).build();
 
              branches = ressort.getBranches();
 
 
-        }else{//TODO delte old branches
+        }else{
             branches = new ArrayList<>();
-            //check if every ressort is present
+            //check if every branch of the ressort is present and add if not
             for(Branch branch: ressort.getBranches()){
                 boolean containsBranch = false;
                 for(BranchQuestionnaire branchQuestionnaire: questionnaire.getBranchQuestionnaires()){
@@ -85,21 +90,20 @@ public class QuestionnaireService {
                         break;
                     }
                 }
-
                 if(!containsBranch){
                     branches.add(branch);
                 }
-
             }
 
+            //check if every branch inside the questionnaire exist also in th ressort and delete if not
+            questionnaire.getBranchQuestionnaires().removeIf( branchQuestionnaire -> !ressort.getBranches().contains(branchQuestionnaire.getBranch()));
         }
-
-        fillNewQuestionnaireFromBranches(branches, questionnaire);
+        fillQuestionnaireFromBranches(branches, questionnaire);
 
         return questionnaire;
     }
 
-    private void fillNewQuestionnaireFromBranches(List<Branch> branches, Questionnaire questionnaire) {
+    private void fillQuestionnaireFromBranches(List<Branch> branches, Questionnaire questionnaire) {
         List<Scenario> scenarios = scenarioService.getAllScenariosByActiveTrue();
         List<BranchQuestionnaire> branchQuestionnaires = new ArrayList<>();
         List<FilledScenario> allFilledScenarios = new ArrayList<>();

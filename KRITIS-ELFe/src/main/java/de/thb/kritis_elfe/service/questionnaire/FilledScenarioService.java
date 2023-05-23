@@ -28,22 +28,4 @@ public class FilledScenarioService {
         return filledScenarioRepository.save(userScenario);
     }
 
-
-    public List<FilledScenario> createFilledScenariosForQuestionnaire(Questionnaire questionnaire){
-        List<FilledScenario> filledScenarios = new ArrayList<>();
-        List<Scenario> scenarios = scenarioService.getAllScenariosByActiveTrue();
-        for(Scenario scenario: scenarios){
-            FilledScenario filledScenario = FilledScenario.builder().
-                    scenario(scenario).
-                    //questionnaire(questionnaire).
-                    comment("").build();
-            if(scenario.getScenarioType() == ScenarioType.AUSWAHL){
-                filledScenario.setValue((short)0);
-            }
-            filledScenarios.add(filledScenario);
-        }
-
-        return filledScenarios;
-    }
-
 }

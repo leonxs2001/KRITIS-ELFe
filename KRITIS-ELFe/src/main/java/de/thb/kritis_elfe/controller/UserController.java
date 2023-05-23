@@ -114,7 +114,7 @@ public class UserController {
             model.addAttribute("form", form);
             return "security/reset_password";
         } else {
-            throw new TokenDoesNotExistException("The token does not exists.");
+            throw new TokenDoesNotExistException();
         }
     }
 

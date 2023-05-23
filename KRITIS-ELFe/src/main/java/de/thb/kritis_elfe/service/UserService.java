@@ -97,7 +97,7 @@ public class UserService {
      */
     public void registerNewUser(final UserRegisterFormModel form) throws UserAlreadyExistsException {
         if (usernameExists(form.getUsername())) {
-            throw new UserAlreadyExistsException("There already is a user with this username.");
+            throw new UserAlreadyExistsException();
         }
 
         User user = User.builder().
@@ -249,7 +249,7 @@ public class UserService {
 
         if (form.getOldPassword() != null) {
             if (!passwordEncoder.matches(form.getOldPassword(), user.getPassword()) || !form.getNewPassword().equals(form.getConfirmNewPassword())) {
-                throw new PasswordNotMatchingException("There is a password mismatch.");
+                throw new PasswordNotMatchingException();
             } else if (!form.getOldPassword().equals(form.getNewPassword()) && form.getNewPassword().equals(form.getConfirmNewPassword())) {
                 user.setPassword(passwordEncoder.encode(form.getNewPassword()));
             }
@@ -257,7 +257,7 @@ public class UserService {
 
         if (form.getOldEmail() != null) {
             if (!form.getOldEmail().equals(user.getEmail())) {
-                throw new EmailNotMatchingException("The emails are not matching.");
+                throw new EmailNotMatchingException();
             }
             else if (!form.getOldEmail().equals(form.getNewEmail())) {
                 user.setEmail(form.getNewEmail());

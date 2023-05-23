@@ -17,16 +17,4 @@ public interface UserRepository extends CrudRepository<User, Long> {
     User findByUsername(String username);
 
     List<User> findByRoles_Name(String rolename);
-    boolean existsByIdAndRoles_Name(long id, String rolename);
-
-    @Transactional
-    @Modifying
-    @Query("UPDATE User a " +
-            "SET a.enabled = TRUE WHERE a.username = ?1")
-    int enableUser(String username);
-
-    @Transactional
-    @Modifying
-    @Query("Update User b " + "SET b.enabled = FALSE WHERE b.username = ?1")
-    int deactivateUser(String username);
 }

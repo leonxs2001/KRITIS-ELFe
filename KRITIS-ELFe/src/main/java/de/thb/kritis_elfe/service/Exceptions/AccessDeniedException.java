@@ -6,6 +6,6 @@ public class AccessDeniedException extends Exception{
     }
 
     public AccessDeniedException(){
-        super();
+        super("The access is denied.");
     }
 }

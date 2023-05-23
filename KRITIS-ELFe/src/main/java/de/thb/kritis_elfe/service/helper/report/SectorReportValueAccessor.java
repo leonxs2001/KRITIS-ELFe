@@ -20,6 +20,7 @@ public class SectorReportValueAccessor {
     }
 
     public ReportValue getSectorRessortReportValue(Sector sector){
-        return sectorRessortReportValues.get(sector);
+        ReportValue reportValue = sectorRessortReportValues.get(sector);
+        return reportValue;
     }
 }

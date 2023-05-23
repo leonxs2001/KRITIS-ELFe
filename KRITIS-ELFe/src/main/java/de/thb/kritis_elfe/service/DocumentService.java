@@ -135,16 +135,20 @@ public class DocumentService {
 
             centerCellText(headRessortTableCell);
 
-            String ressortHead = null;
+            String ressortHead = "";
             for(Ressort ressort: branchReportValueAccessor.getRessorts()){
                 HashMap<Scenario, FormattedComment> comments = branchReportValueAccessor.getRessortCommentReportValue(branch).getComments(ressort);
                 createCommentRepresentationForComments(commentParagraph, ressort.getShortcut(), comments);
 
-                if(ressortHead == null){
+                if(ressortHead.isEmpty()){
                     ressortHead = ressort.getName();
                 }else{
                     ressortHead += " / " + ressort.getName();
                 }
+            }
+
+            if (ressortHead.isEmpty()) {
+                ressortHead = "/";
             }
             headRessortTableCell.setText(" " + ressortHead + " ");
 

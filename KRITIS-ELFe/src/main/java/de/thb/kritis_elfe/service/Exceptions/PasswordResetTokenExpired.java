@@ -6,5 +6,5 @@ public class PasswordResetTokenExpired extends Exception {
         super(msg);
     }
 
-    public PasswordResetTokenExpired(){super();}
+    public PasswordResetTokenExpired(){super("The token is expired.");}
 }

@@ -21,4 +21,6 @@ public class BranchQuestionnaireService {
     public void saveBranchQuestionnaires(List<BranchQuestionnaire> branchQuestionnaires){
         branchQuestionnaireRepository.saveAll(branchQuestionnaires);
     }
+
+    public void deleteBranchQuestionnaire(BranchQuestionnaire branchQuestionnaire){branchQuestionnaireRepository.delete(branchQuestionnaire);}
 }

@@ -6,6 +6,6 @@ public class EntityDoesNotExistException extends Exception{
     }
 
     public EntityDoesNotExistException(){
-        super();
+        super("The entity does not exist.");
     }
 }

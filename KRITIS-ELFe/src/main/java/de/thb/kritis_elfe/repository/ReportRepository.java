@@ -13,7 +13,6 @@ public interface ReportRepository extends CrudRepository<Report, Long> {
     List<Report> findAll();
     List<Report> findAllByOrderByIdDesc();
     Report findTopByOrderByIdDesc();
-    boolean existsSnapshotByName(String name);
     Optional<Report> findById(Long id);
     Report findTopByIdLessThanOrderByIdDesc(long oldReportId);
 

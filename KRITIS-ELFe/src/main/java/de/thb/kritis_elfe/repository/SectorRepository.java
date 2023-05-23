@@ -9,7 +9,6 @@ import java.util.Optional;
 
 @RepositoryDefinition(domainClass = Sector.class, idClass = Long.class)
 public interface SectorRepository extends CrudRepository<Sector, Long> {
-    Sector findByBranches_name(String name);
     Sector findByName(String name);
     Optional<Sector> findById(Long id);
     @Override
