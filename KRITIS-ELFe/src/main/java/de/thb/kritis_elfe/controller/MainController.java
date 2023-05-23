@@ -29,7 +29,7 @@ public class MainController {
         return "home";
     }
 
-    @GetMapping(value="/help", produces = MediaType.APPLICATION_PDF_VALUE)
+    @GetMapping(value="/hilfe", produces = MediaType.APPLICATION_PDF_VALUE)
     public @ResponseBody byte[] getHelp() throws IOException {
         File file = new File(kritisElfeReader.getHelpPath() + "help.pdf");
         return IOUtils.toByteArray(new FileInputStream(file));

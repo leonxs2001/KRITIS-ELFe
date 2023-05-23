@@ -19,7 +19,7 @@ public class OfficeController {
 
     private final UserService userService;
 
-    @GetMapping("/office")
+    @GetMapping("/geschäftsstelle")
     public String showOfficePage(Model model){
         final var users = userService.getAllUsers();
 
@@ -30,12 +30,18 @@ public class OfficeController {
         return "office";
     }
 
-    @PostMapping("/office")
+    @PostMapping("/geschäftsstelle")
     public String deactivateUser(@ModelAttribute("form") @Valid UserFormModel form){
 
         userService.changeEnabledStatusFromForm(form);
 
-        return "redirect:office";
+        return "redirect:gesch%C3%A4ftsstelle";
+    }
+
+    @GetMapping(path = "/bestätigung/geschäftsstelle")
+    public String confirm(@RequestParam("token") String token) {
+        userService.confirmTokenByOffice(token);
+        return "confirmation/confirmed_by_office";
     }
 
 }

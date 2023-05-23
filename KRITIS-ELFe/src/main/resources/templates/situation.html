@@ -21,7 +21,7 @@
         Füllen Sie das Lagebild aus und tun Sie dies über den Button <a class="text-danger" href="#submit-button">"Bestätigen und speichern"</a>.
     </p>
 
-    <form id="situation-file-form" method="POST" th:action="${'/situation/'+name}" enctype="multipart/form-data">
+    <form id="situation-file-form" method="POST" th:action="${'/lagebericht/'+name}" enctype="multipart/form-data">
         <div th:if="${success == true}"
              class="alert alert-success success-error-message" role="alert">Die Dateien wurden erfolgreich hochgeladen und der Inhalt gespeichert.</div>
         <div th:if="${commentToLongFileNames}" class="success-error-message alert alert-danger" role="alert">
@@ -72,7 +72,7 @@
         <button class="btn btn-primary" type="submit">Hochladen</button>
     </form>
 
-    <form id="situation-form" th:action="${'/situation/form/'+name}" th:object="${questionnaire}" method="post">
+    <form id="situation-form" th:action="${'/lagebericht/form/'+name}" th:object="${questionnaire}" method="post">
         <input type="hidden" th:field="*{id}">
         <th:block th:each="branchQuestionnaire, iter1: *{branchQuestionnaires}"
                   th:with="isSectorChanged=${sectorChangeDetector.isSectorChanged(branchQuestionnaire.getBranch().getSector())},

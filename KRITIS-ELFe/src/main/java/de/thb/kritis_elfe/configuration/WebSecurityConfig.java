@@ -31,22 +31,17 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         // @formatter:off
-        http//TODO change all paths
+        http//TODO change all paths und ordnen(zusammenfügen)
                 .requiresChannel(channel ->
                         channel.anyRequest().requiresSecure())
                 .authorizeRequests()
                 .antMatchers("/css/**", "/webjars/**", "/bootstrap/**", "/js/**", "/images/**", "/favicon.ico").permitAll()
-                .antMatchers("/", "/home", "/register/**", "/success_register", "/confirmation/confirmByUser/**", "datenschutz").permitAll()
-                .antMatchers("/help", "/account/changeCredentials").access("isAuthenticated()")
-                .antMatchers("/office").access("hasAuthority('ROLE_GESCHÄFTSSTELLE')")
-                .antMatchers("/situation/**").access("hasAnyAuthority('ROLE_LAND', 'ROLE_RESSORT', 'ROLE_BBK_ADMIN')")
+                .antMatchers("/", "/home", "/registrierung", "/bestaetigung/nutzer", "datenschutz").permitAll()
+                .antMatchers("/hilfe", "/konto/**").access("isAuthenticated()")
+                .antMatchers("/geschäftsstelle", "/bestätigung/geschäftsstelle/**").access("hasAuthority('ROLE_GESCHÄFTSSTELLE')")
+                .antMatchers("/lagebericht/**").access("hasAnyAuthority('ROLE_LAND', 'ROLE_RESSORT', 'ROLE_BBK_ADMIN')")
                 .antMatchers("/report/**").access("hasAnyAuthority('ROLE_BBK_ADMIN','ROLE_BBK_VIEWER')")
-                .antMatchers("/report-control/**").access("hasAuthority('ROLE_BBK_ADMIN')")
-                .antMatchers("/report-details/**").access("hasAuthority('ROLE_BBK_ADMIN')")
-                .antMatchers("/ressorts").access("hasAuthority('ROLE_BBK_ADMIN')")
-                .antMatchers("/adjustHelp").access("hasAuthority('ROLE_BBK_ADMIN')")
-                .antMatchers("/account/user_details").access("isAuthenticated()")
-                .antMatchers("/confirmation/confirm/**").access("hasAuthority('ROLE_GESCHÄFTSSTELLE')")
+                .antMatchers("/report-kontrolle", "/report-details/**", "/ressorts", "/hilfe/bearbeiten").access("hasAuthority('ROLE_BBK_ADMIN')")
                 .and()
                 .formLogin()
                 .loginPage("/login")

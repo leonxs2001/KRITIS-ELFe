@@ -23,19 +23,16 @@ public class SituationController {
 
     private final QuestionnaireService questionnaireService;
     private final UserService userService;
-    private final FederalStateService federalStateService;
-    private final RoleService roleService;
-    private final RessortService ressortService;
 
-    @GetMapping("/situation")
+    @GetMapping("/lagebericht")
     public String showSomeQuestionnaireForm(Authentication authentication) throws UnsupportedEncodingException {
         User user = userService.getUserByUsername(authentication.getName());
         String name = userService.getRessortOrFederalStateName(user);
 
-        return "redirect:/situation/" + URLEncoder.encode(name, "UTF-8");
+        return "redirect:/lagebericht/" + URLEncoder.encode(name, "UTF-8");
     }
 
-    @GetMapping("/situation/{name}")
+    @GetMapping("/lagebericht/{name}")
     public String showQuestionnaireForm(@PathVariable String name, Authentication authentication, Model model) throws AccessDeniedException, EntityDoesNotExistException {
         Questionnaire questionnaire = questionnaireService.getQuestionnaireFromCreatorsName(name, userService.getUserByUsername(authentication.getName()));
 
@@ -46,14 +43,14 @@ public class SituationController {
         return "situation/situation";
     }
 
-    @PostMapping("/situation/form/{name}")
+    @PostMapping("/lagebericht/form/{name}")
     public String submitQuestionnaire(@ModelAttribute("questionnaire") Questionnaire questionnaire,
                                       @PathVariable String name, Authentication authentication) throws AccessDeniedException, EntityDoesNotExistException, UnsupportedEncodingException {
         questionnaireService.saveQuestionnaireFromForm(questionnaire, name, userService.getUserByUsername(authentication.getName()));
-        return "redirect:/situation/" + URLEncoder.encode(name, "UTF-8");
+        return "redirect:/lagebericht/" + URLEncoder.encode(name, "UTF-8");
     }
 
-    @PostMapping("/situation/{name}")
+    @PostMapping("/lagebericht/{name}")
     public String submitFromFiles(@RequestParam("files") MultipartFile[] files, @PathVariable String name,
                                   Authentication authentication, Model model) throws AccessDeniedException {
         Questionnaire questionnaire = questionnaireService.saveQuestionnaireFromFiles(files, name, userService.getUserByUsername(authentication.getName()), model);

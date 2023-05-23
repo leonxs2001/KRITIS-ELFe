@@ -17,7 +17,6 @@ import lombok.Builder;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.ui.Model;
 import org.thymeleaf.context.Context;
 
 import java.util.*;
@@ -109,7 +108,7 @@ public class UserService {
         String token = createToken(user); // To create the token of the user
 
 
-        String userLink = kritisElfeReader.getUrl() + "confirmation/confirmByUser?token=" + token;
+        String userLink = kritisElfeReader.getUrl() + "bestätigung/nutzer?token=" + token;
 
         userRepository.save(user);
 
@@ -128,7 +127,7 @@ public class UserService {
      * @throws IllegalStateException
      */
     @Transactional
-    public void confirmTokenByAdmin(String token) throws IllegalStateException {
+    public void confirmTokenByOffice(String token) throws IllegalStateException {
 
         ConfirmationToken confirmationToken = confirmationTokenService.getConfirmationToken(token);
         User user = confirmationToken.getUser();

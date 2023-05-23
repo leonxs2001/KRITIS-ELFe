@@ -52,13 +52,13 @@
                         <a class="nav-link" href="/">Home</a>
                     </li>
                     <li class="nav-item" sec:authorize="hasAnyAuthority('ROLE_LAND', 'ROLE_RESSORT')">
-                        <a th:href="@{/situation}" class="nav-link">Lagebild</a>
+                        <a th:href="@{/lagebericht}" class="nav-link">Lagebericht</a>
                     </li>
                     <li class="nav-item" sec:authorize="hasAnyAuthority('ROLE_BBK_ADMIN','ROLE_BBK_VIEWER')">
-                        <a class="nav-link" href="/report">Lagebild-Report</a>
+                        <a class="nav-link" href="/report">Report</a>
                     </li>
                     <li class="nav-item" sec:authorize="hasAuthority('ROLE_GESCHÄFTSSTELLE')">
-                        <a class="nav-link" href="/office">Geschäftsstelle</a>
+                        <a class="nav-link" href="/geschäftsstelle">Geschäftsstelle</a>
                     </li>
                 </ul>
                 <ul class="nav navbar-nav">
@@ -72,13 +72,13 @@
 
                             <ul class="dropdown-menu" id="dropdown-ul-admin">
                                 <li class="dropdown-li">
-                                    <a th:href="@{/report-control}" class="nav-link">Reportverwaltung</a>
+                                    <a th:href="@{/report-kontrolle}" class="nav-link">Reportverwaltung</a>
                                 </li>
                                 <li class="dropdown-li">
                                     <a th:href="@{/ressorts}" class="nav-link">Ressorts</a>
                                 </li>
                                 <li class="dropdown-li">
-                                    <a th:href="@{/adjustHelp}" class="nav-link">Hilfeverwaltung</a>
+                                    <a th:href="@{/hilfe/bearbeiten}" class="nav-link">Hilfeverwaltung</a>
                                 </li>
                             </ul>
                         </div>
@@ -86,16 +86,16 @@
                 </ul>
                 <ul class="nav navbar-nav ml-auto">
                     <li class="nav-item" sec:authorize="isAuthenticated()">
-                        <a class="nav-link" href="/help" target="_blank">Hilfe</a>
+                        <a class="nav-link" href="/hilfe" target="_blank">Hilfe</a>
                     </li>
                     <li class="nav-item" sec:authorize="isAuthenticated()">
-                        <a class="nav-link" href="/account/user_details">Konto</a>
+                        <a class="nav-link" href="/konto">Konto</a>
                     </li>
                     <li class="nav-item" sec:authorize="isAuthenticated()">
                         <a class="nav-link" href="/logout"><i class="bi bi-box-arrow-right"></i> Abmelden</a>
                     </li>
                     <li class="nav-item" sec:authorize="!isAuthenticated()">
-                        <a class="nav-link" href="/register/user">Registrieren</a>
+                        <a class="nav-link" href="/registrierung">Registrieren</a>
                     </li>
                 </ul>
             </div>

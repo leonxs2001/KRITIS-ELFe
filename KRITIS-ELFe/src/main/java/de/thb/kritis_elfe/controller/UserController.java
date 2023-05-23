@@ -8,7 +8,6 @@ import de.thb.kritis_elfe.entity.User;
 import de.thb.kritis_elfe.service.*;
 import de.thb.kritis_elfe.service.Exceptions.*;
 import lombok.AllArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -16,7 +15,6 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-import java.security.Principal;
 
 @Controller
 @AllArgsConstructor
@@ -28,7 +26,7 @@ public class UserController {
     private final RoleService roleService;
     private final PasswordResetTokenService passwordResetTokenService;
 
-    @GetMapping("/register/user")
+    @GetMapping("/registrierung")
     public String showRegisterForm(Model model) {
         UserRegisterFormModel formModel = new UserRegisterFormModel();
         model.addAttribute("form", formModel);
@@ -38,59 +36,53 @@ public class UserController {
         return "register/user_registration";
     }
 
-    @PostMapping("/register/user")
+    @PostMapping("/registrierung")
     public String registerUser(
             @ModelAttribute("user") @Valid UserRegisterFormModel formModel, BindingResult result) {
         if(result.hasErrors()){
-            return "redirect:/register/user?passwortUngleich";
+            return "redirect:/registrierung?passwortUngleich";
         }
         try {
             userService.registerNewUser(formModel);
         } catch (UserAlreadyExistsException uaeEx) {
-            return "redirect:/register/user?usernameException";
+            return "redirect:/registrierung?usernameException";
         }
 
         return "register/success_register";
     }
 
 
-    @GetMapping("/account/user_details")
+    @GetMapping("/konto")
     public String showUserData(Authentication authentication, Model model) {
         User user = userService.getUserByUsername(authentication.getName());
         model.addAttribute("user", user);
         return "account/user_details";
     }
 
-    @GetMapping(path = "/confirmation/confirmByUser")
+    @GetMapping(path = "/bestätigung/nutzer")
     public String userConfirmation(@RequestParam("token") String token) {
         userService.confirmUser(token);
-        return "confirmation/confirmedByUser";
+        return "confirmation/confirmed_by_user";
     }
 
-    @GetMapping(path = "/confirmation/confirm")
-    public String confirm(@RequestParam("token") String token) {
-        userService.confirmTokenByAdmin(token);
-        return "confirmation/confirm";
-    }
-
-    @GetMapping(path = "/account/changeCredentials")
+    @GetMapping(path = "/konto/ändere-daten")
     public String showChangePassword(){
         return "account/change_credentials";
     }
 
-    @PostMapping(path = "account/changeCredentials")
+    @PostMapping(path = "konto/ändere-daten")
     public String changeCredentials(@Valid ChangeCredentialsForm form, Authentication authentication){
 
         try {
             User user = userService.getUserByUsername(authentication.getName());
             userService.changeCredentials(form,user);
         } catch (PasswordNotMatchingException e) {
-            return "redirect:/account/changeCredentials?passwordError";
+            return "redirect:/konto/%C3%A4ndere-daten?passwordError";
         } catch (EmailNotMatchingException e) {
-            return "redirect:/account/changeCredentials?emailError";
+            return "redirect:/konto/%C3%A4ndere-daten?emailError";
         }
 
-        return "redirect:/account/changeCredentials?success";
+        return "redirect:/konto/%C3%A4ndere-daten?success";
     }
 
     @GetMapping("/password-reset")

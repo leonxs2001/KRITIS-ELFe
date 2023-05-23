@@ -11,7 +11,7 @@
         <div class="row">
             <div class="col-md-6 offset-md-3">
                 <div class="signup-form">
-                    <form th:object="${form}" th:action="@{/register/user}" method="post"
+                    <form th:object="${form}" th:action="@{/registrierung}" method="post"
                           class="mt-5 border p-4 bg-light shadow">
                         <div th:if="${param.passwortUngleich}" class="alert alert-danger alert-dismissible">
                             <p>Die Passwörter stimmen nicht überein.</p>

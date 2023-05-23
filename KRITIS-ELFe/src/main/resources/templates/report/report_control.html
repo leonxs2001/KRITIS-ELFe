@@ -4,7 +4,7 @@
 <head>
 
     <meta charset="UTF-8">
-    <title>Lagereportverwaltung</title>
+    <title>Reportverwaltung</title>
     <link th:href="@{/css/report_control_style.css}" rel="stylesheet">
     <script type="text/javascript" th:src="@{/js/report_control_script.js}"></script>
 </head>
@@ -42,7 +42,7 @@
                             <span aria-hidden="true">&times;</span>
                         </button>
                     </div>
-                    <form th:action="@{/report-control}" method="post" >
+                    <form th:action="@{/report-kontrolle}" method="post" >
                         <div class="modal-body">
                             <label for="sname">Name:</label><br>
                             <input class="form-control" required type="text" id="sname" th:field="${newReport.name}"><br>
@@ -76,7 +76,7 @@
                                 <option th:each="ressort: ${ressorts}" th:text="${ressort.getName()}" th:value="${ressort.getName()}"></option>
                             </optgroup>
                         </select>
-                        <a id="redirectToSituationLink" class="btn btn-primary" href="/situation/">Diesen Lagebericht öffnen</a>
+                        <a id="redirectToSituationLink" class="btn btn-primary" href="/lagebericht/">Diesen Lagebericht öffnen</a>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-primary" data-dismiss="modal">Schließen</button>
@@ -99,7 +99,7 @@
                         <th:block th:if="${federalStatesWithNotUpdatedQuest.size() > 0}">
                             Es fehlt etwas bei diesen Ländern: <br>
                             <th:block th:each="federalState, istat: ${federalStatesWithNotUpdatedQuest}">
-                                <a class="text-danger error-situation-link" th:text="${federalState.getName()}" th:href="${'/situation/'+federalState.getName()}"></a><th:block th:if="${istat.index < federalStatesWithNotUpdatedQuest.size() - 2}" th:text="${', '}"></th:block>
+                                <a class="text-danger error-situation-link" th:text="${federalState.getName()}" th:href="${'/lagebericht/'+federalState.getName()}"></a><th:block th:if="${istat.index < federalStatesWithNotUpdatedQuest.size() - 2}" th:text="${', '}"></th:block>
                                 <th:block th:if="${istat.index == federalStatesWithNotUpdatedQuest.size() - 2}" th:text="${' und '}"></th:block>
                             </th:block>
                         </th:block>
@@ -110,7 +110,7 @@
                         <th:block th:if="${ressortsWithNotUpdatedQuest.size() > 0}">
                             Es fehlt etwas bei den Ressorts:<br>
                             <th:block th:each="ressort, istat: ${ressortsWithNotUpdatedQuest}">
-                                <a class="text-danger error-situation-link" th:text="${ressort.getName()}" th:href="${'/situation/'+ressort.getName()}"></a><th:block th:if="${istat.index < ressortsWithNotUpdatedQuest.size() - 2}" th:text="${', '}"></th:block>
+                                <a class="text-danger error-situation-link" th:text="${ressort.getName()}" th:href="${'/lagebericht/'+ressort.getName()}"></a><th:block th:if="${istat.index < ressortsWithNotUpdatedQuest.size() - 2}" th:text="${', '}"></th:block>
                                 <th:block th:if="${istat.index == ressortsWithNotUpdatedQuest.size() - 2}" th:text="${' und '}"></th:block>
                             </th:block>
                         </th:block>

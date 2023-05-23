@@ -57,7 +57,7 @@ public class ReportController {
 
     }
 
-    @GetMapping("report/sector/download")
+    @GetMapping("report/sektor/download")
     public void downloadReport(@RequestParam(value = "reportId", required = false) Long reportId,
                                @RequestParam(value = "sectorId", required = false) Long sectorId,
                                HttpServletResponse response) throws IOException, EntityDoesNotExistException {

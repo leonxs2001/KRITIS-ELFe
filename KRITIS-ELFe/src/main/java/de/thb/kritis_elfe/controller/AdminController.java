@@ -18,7 +18,7 @@ import java.util.List;
 
 @Controller
 @AllArgsConstructor
-public class AdminController { //implements Comparable
+public class AdminController {
     private final ReportService reportService;
     private final QuestionnaireService questionnaireService;
     private final RessortService ressortService;
@@ -27,7 +27,7 @@ public class AdminController { //implements Comparable
     private final DocumentService documentService;
     private final KritisElfeReader kritisElfeReader;
 
-    @GetMapping("/report-control")
+    @GetMapping("/report-kontrolle")
     public String getReportControl(Model model) {
 
         List<Report> reports = reportService.getAllReportsOrderByDESC();
@@ -42,10 +42,10 @@ public class AdminController { //implements Comparable
         return "report/report_control";
     }
 
-    @PostMapping("/report-control")
+    @PostMapping("/report-kontrolle")
     public String postNewReport(@ModelAttribute("snapName") Report newReport) {
         reportService.createReport(newReport);
-        return "redirect:report-control";
+        return "redirect:/report-kontrolle";
     }
 
     @GetMapping("/report-details")
@@ -56,24 +56,24 @@ public class AdminController { //implements Comparable
         return "report/report_details";
     }
 
-    @GetMapping("/adjustHelp")
+    @GetMapping("/hilfe/bearbeiten")
     public String adjustHelp(){
         return "adjust_help";
     }
 
-    @PostMapping("/adjustHelp")
+    @PostMapping("/hilfe/bearbeiten")
     public String uploadNewHelpDocument(@RequestParam("file") MultipartFile file){
         try {
             documentService.savePDFFile(file, kritisElfeReader.getHelpPath() + "help.pdf");
         }catch (IOException e){
-            return "redirect:adjustHelp?io_error";
+            return "redirect:hilfe/bearbeiten?io_error";
         }catch (EmptyFileException e){
-            return "redirect:adjustHelp?empty_error";
+            return "redirect:hilfe/bearbeiten?empty_error";
         }catch (WrongContentTypeException e){
-            return "redirect:adjustHelp?wrong_type_error";
+            return "redirect:hilfe/bearbeiten?wrong_type_error";
         }
 
-        return "redirect:adjustHelp?success";
+        return "redirect:hilfe/bearbeiten?success";
     }
 
     @GetMapping("/ressorts")
