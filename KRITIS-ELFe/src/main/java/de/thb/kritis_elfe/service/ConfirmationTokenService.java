@@ -34,46 +34,6 @@ public class ConfirmationTokenService {
     }
 
     /**
-     * Showing when the confirmationtoken has been confirmed by User AND/OR Admin (Not sure how I`ll make it)
-     *
-     * @param token to be used for
-     * @return DB-entry at table == confirmation_token, column == created_at
-     */
-    public int setConfirmedAt(String token) {
-        return confirmationTokenRepository.setConfirmedAt(token, LocalDateTime.now());
-    }
-
-    /**
-     * Using relation between confirmationtoken and user in case it is needed
-     *
-     * @param id is the referenced userId
-     * @return matching user
-     */
-    public User getUserById(long id) {
-        return confirmationTokenRepository.getUserById(id);
-    }
-
-    /**
-     * Looking if user_confirmation is TRUE/FALSE in table confirmation_token
-     *
-     * @param token to look for
-     * @return a boolean value
-     */
-    public boolean confirmedByUser(String token) {
-        return confirmationTokenRepository.setConfirmedByUser(token) == 1;
-    }
-
-    /**
-     * Looking if admin_confirmation is TRUE/FALSE in table confirmation_token
-     *
-     * @param token to look for
-     * @return a boolean value
-     */
-    public boolean confirmedByAdmin(String token) {
-        return confirmationTokenRepository.setConfirmedByAdmin(token) == 1;
-    }
-
-    /**
      * Setting user_confirmation to TRUE
      *
      * @param token to be taken as
@@ -82,16 +42,5 @@ public class ConfirmationTokenService {
     public int setConfirmedByUser(String token) {
         return confirmationTokenRepository.setConfirmedByUser(token);
     }
-
-    /**
-     * Setting admin_confirmation to TRUE
-     *
-     * @param token to be taken as
-     * @return return boolean as INTEGER value in DB (0 = false, 1 = true)
-     */
-    public int setConfirmedByAdmin(String token) {
-        return confirmationTokenRepository.setConfirmedByAdmin(token);
-    }
-
 
 }

@@ -48,7 +48,7 @@ public class ReportController {
                                HttpServletResponse response) throws IOException {
         Report report = reportService.getReportFromIdWithDefault(reportId);
 
-        documentService.setWordResponseHeader(response, report + ".docx");
+        documentService.setWordDownloadResponseHeader(response, report + ".docx");
 
         SectorReportValueAccessor sectorReportValueAccessor = reportService.createSectorReportValueAccessor(report);
 
@@ -68,7 +68,7 @@ public class ReportController {
             throw new EntityDoesNotExistException("The Sector does not exists.");
         }
 
-        documentService.setWordResponseHeader(response, "Sektorreport für den Sektor " + sector.get() + " vom Report " + report + ".docx");
+        documentService.setWordDownloadResponseHeader(response, "Sektorreport für den Sektor " + sector.get() + " vom Report " + report + ".docx");
         BranchReportValueAccessor branchReportValueAccessor = reportService.createSectorBranchReportValueAccessor(report, sector.get());
 
         documentService.createSectorReportWordDocument(response.getOutputStream(), sector.get(), federalStateService.getAllFederalStates(),

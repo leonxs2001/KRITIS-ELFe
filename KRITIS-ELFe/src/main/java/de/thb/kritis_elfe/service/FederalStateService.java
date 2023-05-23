@@ -19,8 +19,6 @@ public class FederalStateService {
         return federalStateRepository.findByName(name);
     }
 
-    public FederalState getFederalStateByShortcut(String shortcut){return federalStateRepository.findByShortcut(shortcut);}
-
     public FederalState createFederalState(FederalState federalState){return federalStateRepository.save(federalState);}
 
 }

@@ -11,17 +11,11 @@ import de.thb.kritis_elfe.service.Exceptions.AccessDeniedException;
 import de.thb.kritis_elfe.service.Exceptions.EntityDoesNotExistException;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import org.apache.pdfbox.pdmodel.PDDocument;
-import org.apache.pdfbox.text.PDFTextStripper;
-import org.apache.pdfbox.text.PDFTextStripperByArea;
-import org.apache.poi.xwpf.extractor.XWPFWordExtractor;
-import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.springframework.stereotype.Service;
 import org.springframework.ui.Model;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.transaction.Transactional;
-import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.regex.Matcher;
@@ -41,6 +35,7 @@ public class QuestionnaireService {
     private final RessortService ressortService;
     private final UserService userService;
     private final RoleService roleService;
+    private final DocumentService documentService;
 
     public void save(Questionnaire questionnaire){questionnaireRepository.save(questionnaire);}
 
@@ -103,6 +98,12 @@ public class QuestionnaireService {
         return questionnaire;
     }
 
+    /**
+     * Fills the given Questionnaire with BranchQuestionnaires from given Branch and its FilledScenarios.
+     * Saves all of them afterwards
+     * @param branches
+     * @param questionnaire
+     */
     private void fillQuestionnaireFromBranches(List<Branch> branches, Questionnaire questionnaire) {
         List<Scenario> scenarios = scenarioService.getAllScenariosByActiveTrue();
         List<BranchQuestionnaire> branchQuestionnaires = new ArrayList<>();
@@ -141,37 +142,7 @@ public class QuestionnaireService {
     }
 
     /**
-     * @param user
-     * @return new questionnaire for the given user.
-     * Creates and save the new Questionnaire
-     */
-    public Questionnaire createQuestionnaireForUser(User user){
-        Questionnaire questionnaire = new Questionnaire();
-        questionnaire.setDate(LocalDateTime.now());
-        questionnaire.setFederalState(user.getFederalState());
-        questionnaireRepository.save(questionnaire);
-
-        //create a UserScenario for every active Scenario
-        List<Scenario> scenarios = scenarioService.getAllScenarios();
-        List<FilledScenario> filledScenarios = new LinkedList<>();
-        for(Scenario scenario : scenarios){
-            if(scenario.isActive()) {
-                /*UserScenario userScenario = UserScenario.builder().smallComment("")
-                        .scenario(scenario)
-                        .questionnaire(questionnaire)
-                        .impact(-1)
-                        .probability(-1).build();
-                */
-                //userScenarios.add(userScenario);
-            }
-        }
-        filledScenarioService.saveAllFilledScenarios(filledScenarios);
-
-        return questionnaire;
-    }
-
-    /**
-     * Create a new Questionnaire with the FilledScenarios from inside the form and save it.
+     * Save all the Questionnaire parts after getting it from form.
      * @param questionnaire
      * @param name
      * @param user
@@ -205,6 +176,15 @@ public class QuestionnaireService {
         }
     }
 
+    /**
+     * Save all the Questionnaire parts after extracting them from the files
+     * @param files
+     * @param name
+     * @param user
+     * @param model
+     * @return
+     * @throws AccessDeniedException
+     */
     @Transactional
     public Questionnaire saveQuestionnaireFromFiles(MultipartFile[] files, String name, User user, Model model) throws AccessDeniedException {
         FederalState federalState = federalStateService.getFederalStateByName(name);
@@ -230,9 +210,16 @@ public class QuestionnaireService {
         return questionnaire;
     }
 
+    /**
+     * Extract all the informations from the given File and save it.
+     * @param questionnaire
+     * @param file
+     * @param ressort
+     * @param model
+     */
     @Transactional
-    protected void saveFilledScenariosFromFile(Questionnaire questionnaire, MultipartFile file, Ressort ressort, Model model) {
-        String text = getTextFromFile(file);
+    protected void saveFilledScenariosFromFile(Questionnaire questionnaire, MultipartFile file, Ressort ressort, Model model) {//TODO mache übersichtlicher
+        String text = documentService.getTextFromFile(file);
         int indexOfAppearance = text.indexOf("Fachlage");
         if(indexOfAppearance < 0){
             indexOfAppearance = text.indexOf("Sektor ");
@@ -270,7 +257,7 @@ public class QuestionnaireService {
                 indexOfAppearance = text.indexOf("\n");
                 String branchNameFromFile = text.substring(combination.length(), indexOfAppearance);
                 branchNameFromFile = branchNameFromFile.replaceAll("\\s", "").toLowerCase();
-                boolean branchFound = false;//TODO ist auch noch false,wenn durch ressort nicht nutzbar siehe unten
+                boolean branchFound = false;
 
                 for (BranchQuestionnaire branchQuestionnaire : questionnaire.getBranchQuestionnaires()) {
                     if (ressort == null || ressort.getBranches().contains(branchQuestionnaire.getBranch())) {
@@ -287,7 +274,10 @@ public class QuestionnaireService {
                             branchFound = true;
                             for (FilledScenario filledScenario : branchQuestionnaire.getFilledScenarios()) {
                                 String scenarioDescription = filledScenario.getScenario().getDescription().replaceAll("\r", "").replaceAll("\\s{2,3}", " ");
-                                scenarioDescription = sliceEmptyStartAndEnd(scenarioDescription)
+
+                                //slice empty start and end
+                                scenarioDescription = scenarioDescription.replaceAll("(^\\s+)|(\\s+$)", "");
+                                scenarioDescription = scenarioDescription
                                         .replace("\\", "\\\\")
                                         .replaceAll("\\(", "\\\\(")
                                         .replaceAll("\\)", "\\\\)")
@@ -336,7 +326,9 @@ public class QuestionnaireService {
                                                 createModelListIfNotExistsAndInsertFilename(model, "noValuesGivenFileNames", file.getOriginalFilename());
                                             }
                                         }
-                                        String comment = sliceEmptyStartAndEnd(scenarioFilling);
+                                        //slice empty start and end
+                                        String comment = scenarioFilling.replaceAll("(^\\s+)|(\\s+$)", "");
+
                                         List<String> replaceables = new ArrayList<>();
                                         replaceables.add("\\s?keine\\s/\\s{1,2}gar\\s{1,2}nicht\\s{1,2}gering\\s{1,2}erheb(-\\s)?lic(\\s{0,3})h\\s{1,2}massiv\\sKonkretisierung\\s?");
                                         replaceables.add("\\s{0,3}Lageprognose\\s/\\slängerfristige\\sPerspektive\\s\\(bitte\\sZeithorizont\\sder\\sAussage\\sim\\sFreitextfeld\\sspezifizieren\\)\\s{0,3}");
@@ -390,6 +382,13 @@ public class QuestionnaireService {
 
     }
 
+    /**
+     * Creates a new List inside the Model with the given Name if not exist.
+     * And add the given filename to the list in every case.
+     * @param model
+     * @param attributeName
+     * @param filename
+     */
     private void createModelListIfNotExistsAndInsertFilename(Model model, String attributeName, String filename){
         List<String> branchNotMatchingFileNames = (List<String>) model.getAttribute(attributeName);
         if(branchNotMatchingFileNames == null){
@@ -402,37 +401,10 @@ public class QuestionnaireService {
         model.addAttribute("success", false);
     }
 
-    private String sliceEmptyStartAndEnd(String text){
-        return text.replaceAll("(^\\s+)|(\\s+$)", "");
-    }
-
-    private String getTextFromFile(MultipartFile file) {
-        String extractedText = null;
-        try{
-            if(file.getContentType().equals("application/pdf")){
-                PDDocument document = PDDocument.load(file.getInputStream());
-                document.getClass();
-                if (!document.isEncrypted()) {
-                    PDFTextStripperByArea stripper = new PDFTextStripperByArea();
-                    stripper.setSortByPosition(true);
-                    PDFTextStripper tStripper = new PDFTextStripper();
-                    extractedText = tStripper.getText(document);
-                }
-                document.close();
-            }else if(file.getContentType().equals("application/vnd.openxmlformats-officedocument.wordprocessingml.document")){
-                XWPFDocument doc = new XWPFDocument(file.getInputStream());
-                XWPFWordExtractor xwpfWordExtractor = new XWPFWordExtractor(doc);
-                extractedText = xwpfWordExtractor.getText();
-                doc.close();
-            }
-
-        } catch (IOException ioException){
-            System.err.println(ioException);
-        }
-
-        return extractedText.replaceAll(Character.toString((char)160), " ");
-    }
-
+    /**
+     * Go through all federalStates and ressorts copy all their questionnaires and assign the old ones to the report.
+     * @param report
+     */
     public void persistQuestionnairesForReport(Report report){
         List<Questionnaire> questionnaires = new ArrayList<>();
         for(FederalState federalState: federalStateService.getAllFederalStates()){
@@ -440,7 +412,7 @@ public class QuestionnaireService {
             questionnaire.setReport(report);
             questionnaires.add(questionnaire);
 
-            duplicateQuestionnaire(questionnaire);
+            cloneQuestionnaire(questionnaire);
         }
 
         for(Ressort ressort: ressortService.getAllRessorts()){
@@ -448,13 +420,17 @@ public class QuestionnaireService {
             questionnaire.setReport(report);
             questionnaires.add(questionnaire);
 
-            duplicateQuestionnaire(questionnaire);
+            cloneQuestionnaire(questionnaire);
         }
 
         questionnaireRepository.saveAll(questionnaires);
     }
 
-    private void duplicateQuestionnaire(Questionnaire questionnaire){
+    /**
+     * Copies and saves all parts of the questionnaire.
+     * @param questionnaire
+     */
+    private void cloneQuestionnaire(Questionnaire questionnaire){
         Questionnaire newQuestionnaire = Questionnaire.builder()
                 .federalState(questionnaire.getFederalState())
                 .ressort(questionnaire.getRessort())
@@ -480,6 +456,10 @@ public class QuestionnaireService {
         }
     }
 
+    /**
+     * Returns all FederalStates which didn't have filled all Scenarios for every Branch.
+     * @return
+     */
     public List<FederalState> getFederalStatesWithNotUpdatedQuestionnaire(){
         List<FederalState> federalStates = new ArrayList<>();
         for(FederalState federalState: federalStateService.getAllFederalStates()){
@@ -490,6 +470,10 @@ public class QuestionnaireService {
         return  federalStates;
     }
 
+    /**
+     * Returns all Ressorts which didn't have filled all Scenarios for every Branch.
+     * @return
+     */
     public List<Ressort> getRessortsWithNotUpdatedQuestionnaire(){
         List<Ressort> ressorts = new ArrayList<>();
         for(Ressort ressort: ressortService.getAllRessorts()){
@@ -507,7 +491,7 @@ public class QuestionnaireService {
      * @param name
      * @return Questionnaire for the FederalState or Ressort with the name
      */
-    public Questionnaire getQuestionnaireFromName(String name, User user) throws EntityDoesNotExistException, AccessDeniedException {
+    public Questionnaire getQuestionnaireFromCreatorsName(String name, User user) throws EntityDoesNotExistException, AccessDeniedException {
         FederalState federalState = federalStateService.getFederalStateByName(name);
         Ressort ressort = null;
 

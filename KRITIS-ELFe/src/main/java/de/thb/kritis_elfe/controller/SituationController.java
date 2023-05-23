@@ -1,8 +1,5 @@
 package de.thb.kritis_elfe.controller;
 
-import de.thb.kritis_elfe.entity.FederalState;
-import de.thb.kritis_elfe.entity.Ressort;
-import de.thb.kritis_elfe.entity.Role;
 import de.thb.kritis_elfe.entity.User;
 import de.thb.kritis_elfe.entity.questionnaire.Questionnaire;
 import de.thb.kritis_elfe.service.*;
@@ -40,7 +37,7 @@ public class SituationController {
 
     @GetMapping("/situation/{name}")
     public String showQuestionnaireForm(@PathVariable String name, Authentication authentication, Model model) throws AccessDeniedException, EntityDoesNotExistException {
-        Questionnaire questionnaire = questionnaireService.getQuestionnaireFromName(name, userService.getUserByUsername(authentication.getName()));
+        Questionnaire questionnaire = questionnaireService.getQuestionnaireFromCreatorsName(name, userService.getUserByUsername(authentication.getName()));
 
         model.addAttribute("questionnaire", questionnaire);
         model.addAttribute("sectorChangeDetector", new SectorChangeDetector());

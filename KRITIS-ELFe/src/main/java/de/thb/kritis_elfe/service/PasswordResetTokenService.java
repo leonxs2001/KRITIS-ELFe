@@ -32,28 +32,6 @@ public class PasswordResetTokenService {
         return passwordResetTokenRepository.findByToken(token);
     }
 
-    public PasswordResetToken getByUser(User user) {
-        return passwordResetTokenRepository.findByUser(user);
-    }
-
-    public void deleteByExpiryDate(Date now) {
-        passwordResetTokenRepository.deleteByExpiryDateLessThan(now);
-    }
-
-    public void deleteAllExpired(Date now) {
-        passwordResetTokenRepository.deleteAllExpiredSince(now);
-    }
-
-    /**
-     * Takes all Password reset token by expiry Date
-     *
-     * @param now as given Date
-     * @return Stream PasswordResetToken
-     */
-    public Stream<PasswordResetToken> getAllByExpiryDate(Date now) {
-        return passwordResetTokenRepository.findAllByExpiryDateLessThan(now);
-    }
-
     /**
      * Creates new random Password Reset Token if user forgot his password
      *

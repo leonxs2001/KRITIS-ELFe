@@ -4,6 +4,10 @@ import de.thb.kritis_elfe.entity.*;
 import de.thb.kritis_elfe.service.Exceptions.EmptyFileException;
 import de.thb.kritis_elfe.service.Exceptions.WrongContentTypeException;
 import de.thb.kritis_elfe.service.helper.report.*;
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.text.PDFTextStripper;
+import org.apache.pdfbox.text.PDFTextStripperByArea;
+import org.apache.poi.xwpf.extractor.XWPFWordExtractor;
 import org.apache.poi.xwpf.usermodel.*;
 import org.openxmlformats.schemas.wordprocessingml.x2006.main.STHighlightColor;
 import org.springframework.stereotype.Service;
@@ -20,7 +24,14 @@ import java.util.List;
 
 @Service
 public class DocumentService {
-
+    /**
+     * Saves a given File on the given path.
+     * @param file
+     * @param pathString
+     * @throws EmptyFileException
+     * @throws WrongContentTypeException
+     * @throws IOException
+     */
     public void savePDFFile(MultipartFile file, String pathString) throws EmptyFileException, WrongContentTypeException, IOException {
         if(file.isEmpty()){
             throw new EmptyFileException("The file is empty.");
@@ -33,6 +44,15 @@ public class DocumentService {
         Files.write(path, bytes);
     }
 
+    /**
+     * Creates the classical report as word document and write it in the given output stream.
+     * @param outputStream
+     * @param sectors
+     * @param federalStates
+     * @param sectorReportValueAccessor
+     * @param report
+     * @throws IOException
+     */
     public void createReportWordDocument(OutputStream outputStream, List<Sector> sectors, List<FederalState> federalStates,
                                          SectorReportValueAccessor sectorReportValueAccessor, Report report) throws IOException {
         XWPFDocument document = new XWPFDocument();
@@ -99,7 +119,15 @@ public class DocumentService {
 
     }
 
-    //TODO delete duplicates!!!!!!! Sind viele
+    //TODO delete duplicates!!!!!!! Sind viele und ordnen
+    /**
+     * Creates the sector report as word document and write it in the given output stream.
+     * @param outputStream
+     * @param sector
+     * @param federalStates
+     * @param branchReportValueAccessor
+     * @throws IOException
+     */
     public void createSectorReportWordDocument(OutputStream outputStream, Sector sector, List<FederalState> federalStates,
                                                BranchReportValueAccessor branchReportValueAccessor) throws IOException {
         XWPFDocument document = new XWPFDocument();
@@ -181,6 +209,10 @@ public class DocumentService {
         document.close();
     }
 
+    /**
+     * Centers the text in a given XWPFTableCell
+     * @param tableCell
+     */
     private void centerCellText(XWPFTableCell tableCell){
         tableCell.setVerticalAlignment(XWPFTableCell.XWPFVertAlign.CENTER);
         tableCell.getParagraphs().get(0).setAlignment(ParagraphAlignment.CENTER);
@@ -189,6 +221,12 @@ public class DocumentService {
         paragraph.setSpacingAfter(1);
     }
 
+    /**
+     * Adds the given comments to the given paragraph with assignment to the shortcut of the institution and all color information.
+     * @param commentParagraph
+     * @param shortcut
+     * @param comments
+     */
     private void createCommentRepresentationForComments(XWPFParagraph commentParagraph, String shortcut, HashMap<Scenario, FormattedComment> comments) {
         if(comments != null && comments.size() > 0) {
             XWPFRun commentRessortHeadRun = commentParagraph.createRun();
@@ -212,6 +250,12 @@ public class DocumentService {
         }
     }
 
+    /**
+     * Write the given Text in the given run and add all the "next lines".
+     * Otherwise their where ignored.
+     * @param run
+     * @param text
+     */
     private void writeTextInRunWithBreaks(XWPFRun run, String text){
         String[] singleTexts = text.split("\n");
         for(int i = 0; i < singleTexts.length; i++){
@@ -222,6 +266,11 @@ public class DocumentService {
         }
     }
 
+    /**
+     * Set the Text and color of the given cell from the given reportvalue.
+     * @param xwpfTableCell
+     * @param sectorReportValue
+     */
     private void setColorAndTextForCellFromSectorReportValue(XWPFTableCell xwpfTableCell, ReportValue sectorReportValue){
         //set color
         xwpfTableCell.setColor(sectorReportValue.getValueColorAsWordString());
@@ -246,10 +295,47 @@ public class DocumentService {
         }
     }
 
-    public void setWordResponseHeader(HttpServletResponse response, String filename){
+    /**
+     * Sets the response Header for the given response to immediately download the word document with the given filename.
+     * @param response
+     * @param filename
+     */
+    public void setWordDownloadResponseHeader(HttpServletResponse response, String filename){
         response.setContentType("application/vnd.openxmlformats-officedocument.wordprocessingml.document");
         String headerKey = "Content-Disposition";
         String headerValue = "attachment; filename=" + filename;
         response.setHeader(headerKey, headerValue);
+    }
+
+    /**
+     * Extract the text from the given file dependent on its content type.
+     * @param file
+     * @return
+     */
+    public String getTextFromFile(MultipartFile file) {
+        String extractedText = null;
+        try{
+            if(file.getContentType().equals("application/pdf")){
+                PDDocument document = PDDocument.load(file.getInputStream());
+                document.getClass();
+                if (!document.isEncrypted()) {
+                    PDFTextStripperByArea stripper = new PDFTextStripperByArea();
+                    stripper.setSortByPosition(true);
+                    PDFTextStripper tStripper = new PDFTextStripper();
+                    extractedText = tStripper.getText(document);
+                }
+                document.close();
+            }else if(file.getContentType().equals("application/vnd.openxmlformats-officedocument.wordprocessingml.document")){
+                XWPFDocument doc = new XWPFDocument(file.getInputStream());
+                XWPFWordExtractor xwpfWordExtractor = new XWPFWordExtractor(doc);
+                extractedText = xwpfWordExtractor.getText();
+                doc.close();
+            }
+
+        } catch (IOException ioException){
+            System.err.println(ioException);
+        }
+
+        return extractedText.replaceAll(Character.toString((char)160), " ");
     }
 }
