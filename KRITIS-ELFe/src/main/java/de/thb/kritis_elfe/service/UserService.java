@@ -47,11 +47,6 @@ public class UserService {
         return (List<User>) userRepository.findAll();
     }
 
-    public User getUserByEmail(String email) {
-        return userRepository.findByEmail(email);
-    }
-
-    public Optional<User> getById(long id){return userRepository.findById(id);}
     public User getUserByUsername(String username) {
         return userRepository.findByUsername(username);
     }
@@ -64,10 +59,6 @@ public class UserService {
         return userRepository.save(user);
     }
 
-    public List<User> getUserByAdminRole() {
-        return userRepository.findByRoles_Name("ROLE_BBK_ADMIN");
-    }
-
     public List<User> getUserByOfficeRole() {
         return userRepository.findByRoles_Name("ROLE_GESCHÄFTSSTELLE");
     }
@@ -77,8 +68,9 @@ public class UserService {
     }
 
     /**
-     * @param user is used to create new user -> forwarded to registerNewUser
-     * @return newly created token
+     * Creates the token for the given user and save it.
+     * @param user r
+     * @return newly created token as String
      */
     public String createToken(User user) {
 
@@ -92,8 +84,9 @@ public class UserService {
     }
 
     /**
-     * Registering new User with all parameters from User.java
-     * Using emailExists() to check whether user already exists
+     * Registering and creating a new User.
+     * @param form
+     * @throws UserAlreadyExistsException
      */
     public void registerNewUser(final UserRegisterFormModel form) throws UserAlreadyExistsException {
         if (usernameExists(form.getUsername())) {
@@ -205,13 +198,6 @@ public class UserService {
         }
     }
 
-
-
-    public void setCurrentLogin(User u) {
-        u.setLastLogin(LocalDateTime.now());
-        userRepository.save(u);
-    }
-
     /**
      * Enable/Disable user to give access to KRITIS-ELFe
      *
@@ -239,7 +225,7 @@ public class UserService {
     }
 
     /**
-     * Let user change the own credentials: password, firstname, lastname, email
+     * Let user change the own credentials: password, email
      * @param form
      * @param user
      * @throws PasswordNotMatchingException

@@ -22,13 +22,11 @@ public class RessortService {
 
     public Ressort createRessort(Ressort ressort){return ressortRepository.save(ressort);}
 
-    public Ressort getRessortByShortcut(String shortcut){
-        return ressortRepository.findByShortcut(shortcut);
-    }
-
+    /**
+     * Saves the ressort from given form and deletes all missing ressorts.
+     * @param ressortsForm
+     */
     public void resetRessortsByRessortsForm(RessortsForm ressortsForm){
-        //TODO better handling with user ressort
-        //ressortRepository.deleteAll();
         for(Ressort ressort: ressortRepository.findAll()){
             if(!ressortsForm.getRessorts().contains(ressort)){
                 ressortRepository.delete(ressort);

@@ -25,17 +25,4 @@ public class RoleService {
     public Role getRoleByName(String rolename){return roleRepository.findByName(rolename);}
 
     public Role createRole(Role role){return roleRepository.save(role);}
-
-    public Collection<Role> getRolesByUser(String email) {
-        User user = userRepository.findByEmail(email);
-
-        return user.getRoles();
-    }
-
-    public void addRoleToUser(String email, String roleName) {
-        User user = userRepository.findByEmail(email);
-        Role role = roleRepository.findByName(roleName);
-
-        user.getRoles().add(role);
-    }
 }
