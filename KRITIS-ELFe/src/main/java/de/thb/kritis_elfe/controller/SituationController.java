@@ -40,7 +40,7 @@ public class SituationController {
         model.addAttribute("sectorChangeDetector", new SectorChangeDetector());
         model.addAttribute("name", name);
 
-        return "situation/situation";
+        return "situation";
     }
 
     @PostMapping("/lagebericht/form/{name}")
@@ -57,7 +57,7 @@ public class SituationController {
         model.addAttribute("questionnaire", questionnaire);
         model.addAttribute("sectorChangeDetector", new SectorChangeDetector());
         model.addAttribute("name", name);
-        return "situation/situation";
+        return "situation";
     }
 
 }
