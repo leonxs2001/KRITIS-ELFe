@@ -47,7 +47,7 @@ public class PasswordResetTokenService {
             PasswordResetToken myToken = new PasswordResetToken(user, token);
             passwordResetTokenRepository.save(myToken);
 
-            String link = kritisElfeReader.getUrl() + "reset-password?token=" + token;
+            String link = kritisElfeReader.getUrl() + "reset-passwort?token=" + token;
 
             Context passwordResetContext = new Context();
             passwordResetContext.setVariable("username", user.getUsername());

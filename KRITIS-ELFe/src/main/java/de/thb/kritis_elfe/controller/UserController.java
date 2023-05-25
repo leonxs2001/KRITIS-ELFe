@@ -5,6 +5,7 @@ import de.thb.kritis_elfe.controller.form.ResetPasswordForm;
 import de.thb.kritis_elfe.controller.form.ResetPasswordUserDataForm;
 import de.thb.kritis_elfe.controller.form.UserRegisterFormModel;
 import de.thb.kritis_elfe.entity.User;
+import de.thb.kritis_elfe.mail.EmailSender;
 import de.thb.kritis_elfe.service.*;
 import de.thb.kritis_elfe.service.Exceptions.*;
 import lombok.AllArgsConstructor;
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import org.thymeleaf.context.Context;
 
 import javax.validation.Valid;
 
@@ -20,7 +22,6 @@ import javax.validation.Valid;
 @AllArgsConstructor
 public class UserController {
     private final UserService userService;
-    private final SectorService sectorService;
     private final FederalStateService federalStateService;
     private final RessortService ressortService;
     private final RoleService roleService;
@@ -85,19 +86,19 @@ public class UserController {
         return "redirect:/konto/%C3%A4ndere-daten?success";
     }
 
-    @GetMapping("/password-reset")
+    @GetMapping("/passwort-reset")
     public String showPasswordReset() {
         return "security/password_reset";
     }
 
-    @PostMapping("/password-reset")
+    @PostMapping("/passwort-reset")
     public String requestPasswordReset(@Valid ResetPasswordUserDataForm form) {
         passwordResetTokenService.createPasswordResetToken(form);
-        return "redirect:/password-reset?success";
+        return "redirect:/passwort-reset?success";
 
     }
 
-    @GetMapping(path = "/reset-password")
+    @GetMapping(path = "/reset-passwort")
     public String showResetPassword(@RequestParam("token") String token, Model model) throws TokenDoesNotExistException {
 
         if (passwordResetTokenService.getByToken(token) != null) {
@@ -110,20 +111,20 @@ public class UserController {
         }
     }
 
-    @PostMapping(path = "/reset-password")
+    @PostMapping(path = "/reset-passwort")
     public String resetUserPassword(@Valid ResetPasswordForm form, Model model) throws PasswordResetTokenExpired {
         try {
             model.addAttribute("form", form);
             passwordResetTokenService.resetUserPassword(form.getToken(), form);
         } catch (PasswordResetTokenExpired e) {
-            return "redirect:/reset-password?tokenExpiredError&token="+form.getToken();
+            return "redirect:/reset-passwort?tokenExpiredError&token="+form.getToken();
         } catch (PasswordNotMatchingException e){
-            return "redirect:/reset-password?notMatchingError&token="+form.getToken();
+            return "redirect:/reset-passwort?notMatchingError&token="+form.getToken();
         } catch (TokenAlreadyConfirmedException e){
-            return "redirect:/reset-password?tokenConfirmedError&token="+form.getToken();
+            return "redirect:/reset-passwort?tokenConfirmedError&token="+form.getToken();
         }
 
-        return "redirect:/reset-password?success";
+        return "redirect:/reset-passwort?success";
     }
 
 }

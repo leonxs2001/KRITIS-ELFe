@@ -32,8 +32,6 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     protected void configure(HttpSecurity http) throws Exception {
         // @formatter:off
         http//TODO change all paths und ordnen(zusammenfügen)
-                .requiresChannel(channel ->
-                        channel.anyRequest().requiresSecure())
                 .authorizeRequests()
                 .antMatchers("/css/**", "/webjars/**", "/bootstrap/**", "/js/**", "/images/**", "/favicon.ico").permitAll()
                 .antMatchers("/", "/home", "/registrierung", "/bestaetigung/nutzer", "datenschutz").permitAll()

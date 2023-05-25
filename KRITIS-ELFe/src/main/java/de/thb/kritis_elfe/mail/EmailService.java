@@ -3,6 +3,7 @@ package de.thb.kritis_elfe.mail;
 import lombok.AllArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.core.env.Environment;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
@@ -23,6 +24,8 @@ public class EmailService implements EmailSender{
 
     private final JavaMailSender javaMailSender;
 
+    private final Environment env;
+
     @Override
     @Async
     public void send(String to, String email) {
@@ -34,7 +37,7 @@ public class EmailService implements EmailSender{
             helper.setText(email, true);
             helper.setTo(to);
             helper.setSubject("Änderung auf KRITIS-ELFe");
-            helper.setFrom("KRITIS-ELFe-noreply@proton.me");
+            helper.setFrom(env.getProperty("spring.mail.username"));
             javaMailSender.send(mimeMessage);
         }catch (MessagingException e){
             LOGGER.error("Fehler beim Senden der Nachricht", e);
