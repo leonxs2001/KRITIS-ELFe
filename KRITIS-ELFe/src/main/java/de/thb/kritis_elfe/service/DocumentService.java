@@ -79,21 +79,11 @@ public class DocumentService {
 
         //add Ressort head
         XWPFTableCell ressortTableCell = federalStateTableRow.getCell(1);
-
         ressortTableCell.setText("Bund");
-        ressortTableCell.getParagraphs().get(0).setSpacingBefore(1);
-        ressortTableCell.getParagraphs().get(0).setSpacingAfter(1);
-        //Center shortcuts
         centerCellText(ressortTableCell);
 
         //create all federalStates
-        for(int i = 0; i < federalStates.size(); i++){
-            XWPFTableCell federalStateTableCell = federalStateTableRow.getCell(2 + i);
-            //Center shortcuts
-            centerCellText(federalStateTableCell);
-
-            federalStateTableCell.setText(federalStates.get(i).getShortcut() );
-        }
+        fillRowWithFederalStatesFromIndex(federalStates, federalStateTableRow, 2, false);
 
         for(int i = 0; i < sectors.size(); i++){
             XWPFTableRow xwpfTableRow = reportTable.getRow(1 + i);
@@ -178,13 +168,10 @@ public class DocumentService {
             if (ressortHead.isEmpty()) {
                 ressortHead = "/";
             }
+
             headRessortTableCell.setText(" " + ressortHead + " ");
 
-            for(int i = 0; i < federalStates.size(); i++){
-                XWPFTableCell headFederalStateTableCell = headTableRow.getCell(1 + i);
-                centerCellText(headFederalStateTableCell);
-                headFederalStateTableCell.setText(" " + federalStates.get(i).getShortcut() + " ");
-            }
+            fillRowWithFederalStatesFromIndex(federalStates, headTableRow, 1, true);
 
             XWPFTableRow branchTableRow = branchTable.getRow(1);
 
@@ -207,6 +194,24 @@ public class DocumentService {
 
         document.write(outputStream);
         document.close();
+    }
+
+    /**
+     * Fills the row with all given federalstates shortcuts from the given index
+     * @param federalStates
+     * @param headTableRow
+     * @param startIndex
+     */
+    private void fillRowWithFederalStatesFromIndex(List<FederalState> federalStates, XWPFTableRow headTableRow, int startIndex, boolean fillLeftAndRight) {
+        for(int i = 0; i < federalStates.size(); i++){
+            XWPFTableCell headFederalStateTableCell = headTableRow.getCell(i + startIndex);
+            centerCellText(headFederalStateTableCell);
+            String text = federalStates.get(i).getShortcut();
+            if(fillLeftAndRight){
+                text = " " + text + " ";
+            }
+            headFederalStateTableCell.setText(text);
+        }
     }
 
     /**
