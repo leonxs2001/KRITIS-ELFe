@@ -31,7 +31,12 @@ public class MainController {
 
     @GetMapping(value="/hilfe", produces = MediaType.APPLICATION_PDF_VALUE)
     public @ResponseBody byte[] getHelp() throws IOException {
-        File file = new File(kritisElfeReader.getHelpPath() + "help.pdf");
+        String path = kritisElfeReader.getHelpPath();
+        char lastChar = path.charAt(path.length() - 1);
+        if(lastChar != '/'){
+            path += "/";
+        }
+        File file = new File(path + "help.pdf");
         return IOUtils.toByteArray(new FileInputStream(file));
     }
 
