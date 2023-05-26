@@ -108,9 +108,19 @@ Und folgende Konfiguration eingefügt:
 ```console
 server {
     listen 80 default_server;
-    listen [::]:80 default_server;
 
     server_name _ your_domain;
+
+    return 301 https://$host$request_uri;
+}
+
+server {
+    listen 443 ssl;
+
+    server_name _ your_domain;
+
+    ssl_certificate <certificate location>;
+    ssl_certificate_key <certificate_key location>;
 
     location / {
             proxy_pass http://localhost:8080;
@@ -122,6 +132,7 @@ server {
             proxy_cache_bypass $http_upgrade;
     }
 }
+
 ```
 ### Service erstellen
 Um einen Service zu erstellen muss erste eine Servicedatei eruegt werden:
