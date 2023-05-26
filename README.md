@@ -122,4 +122,66 @@ server {
             proxy_cache_bypass $http_upgrade;
     }
 }
-``
+```
+### Service erstellen
+Um einen Service zu erstellen muss erste eine Servicedatei eruegt werden:
+```console:
+sudo nano /etc/systemd/system/kritis-elfe.service
+```
+Dort muss die Konfiguratiun des Services eingefügt werden:
+```service
+[Unit]
+Description=Start of the KRITIS-ELFe.
+
+[Service]
+Type=simple
+ExecStart=java -jar /var/KRITIS-ELFe/KRITIS-ELFe.jar --spring.config.location="/var/KRITIS-ELFe/application.properties"
+Restart=no
+
+[Install]
+WantedBy=multi-user.target
+```
+Wieder bestätigen mit Strg X.<br/>
+Um den Service zu Nutzen muss das Ganze neu geladen werden:
+```console
+sudo systemctl daemon-reload 
+```
+Danach kann der Service so gestartet:
+```console
+sudo systemctl start kritis-elfe
+```
+, so gestoppt:
+```console
+sudo systemctl stop kritis-elfe
+```
+, so neu gestartet:
+```console
+sudo systemctl restart kritis-elfe
+```
+und so der Status abgefragt werden:
+```console
+sudo systemctl status kritis-elfe
+```
+Wenn der Service nun gestartet wird, sollte nach ca. 2 Minuten die Webanwendung erreichbar sein.
+
+### Delpoy Skript
+Um das Aufnehmen von Änderungen von GitHub einfacher zu gestalten, sollte ein deploy Skript erzeugt werden:
+```console
+sudo nano /var/KRITIS-ELFe/deploy.sh
+```
+In diesem Skript wird der Service gestoppt, die alte JAR gelöscht, die JAR neu heruntergeladen und der Service wieder gestartet:
+```bash
+systemctl stop kritis-elfe
+rm /var/KRITIS-ELFe/KRITIS-ELFe.jar
+wget -O /var/KRITIS-ELFe/KRITIS-ELFe.jar https://github.com/leonxs2001/KRITIS-ELFe/raw/master/KRITIS-ELFe/target/KRITIS_ELFe-0.0.1-SNAPSHOT.jar
+systemctl start kritis-elfe
+```
+Und das Ganze bestätigen mit Strg X.
+Ausführrechte geben:
+```console 
+sudo chmod ugo+x /var/KRITIS-ELFe/deploy.sh
+```
+Ausgeführt werden kann diese Datei dann mit:
+```console
+sudo /var/KRITIS-ELFe/deploy.sh
+```
