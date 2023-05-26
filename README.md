@@ -77,6 +77,7 @@ server.port=8080
 kritiselfe.helpPath = /var/KRITIS-ELFe/help
 
 #set domainname
+# should end with /
 kritiselfe.url = <url>
 
 #mail
@@ -88,5 +89,110 @@ spring.mail.properties.mail.smtp.auth=<true, wenn mit passwort>
 spring.mail.properties.mail.smtp.starttls.enable=true
 ```
 Bestätigt werden kann das ganze mit Strg X (und dann noch zustimmen).<br/>
-Tets
+Um die Anwendung testweise zu starten wird der folgende Befehl ausgeführt:
+```console
+java -jar /var/KRITIS-ELFe/KRITIS-ELFe.jar --spring.config.location="/var/KRITIS-ELFe/application.properties"
+```
+Wenn die JAR-Datei ohne Fehler ausgeführt werden kann, dann ist die Datenbank und die application.properties richtig konfiguriert. Die Anwendung kann dann erst einmal mit Strg C geschlossen werden.
+### NGINX konfiguration
+Um die Anwendung von außen erreichbar zu machen muss jede HTTP Anfrage witergeleitet werden an die Anwendung über nginx. <br/>
+Zu erst muss nginx installiert werden:
+```console
+sudo apt-get install nginx
+```
+Dann muss das weiterleiten konfiguriert werden. Dafür wird die Konfigurationsdatei aufgerufen:
+```console
+sudo nano /etc/nginx/sites-available/default
+```
+Und folgende Konfiguration eingefügt:
+```console
+server {
+    listen 80 default_server;
 
+    server_name _ your_domain;
+
+    return 301 https://$host$request_uri;
+}
+
+server {
+    listen 443 ssl;
+
+    server_name _ your_domain;
+
+    ssl_certificate <certificate location>;
+    ssl_certificate_key <certificate_key location>;
+
+    location / {
+            proxy_pass http://localhost:8080;
+            proxy_http_version 1.1;
+            proxy_set_header Upgrade $http_upgrade;
+            proxy_set_header Connection 'upgrade';
+            proxy_set_header Host $host;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_cache_bypass $http_upgrade;
+    }
+}
+```
+Wenn es noch kein SSL Zertifikat gibt, dann muss eines generiert werden. Nähere Infos dazu gibt es unter folgendem Link: https://www.digitalocean.com/community/tutorials/how-to-secure-nginx-with-let-s-encrypt-on-ubuntu-20-04.
+### Service erstellen
+Um einen Service zu erstellen muss erste eine Servicedatei eruegt werden:
+```console:
+sudo nano /etc/systemd/system/kritis-elfe.service
+```
+Dort muss die Konfiguratiun des Services eingefügt werden:
+```service
+[Unit]
+Description=Start of the KRITIS-ELFe.
+
+[Service]
+Type=simple
+ExecStart=java -jar /var/KRITIS-ELFe/KRITIS-ELFe.jar --spring.config.location="/var/KRITIS-ELFe/application.properties"
+Restart=no
+
+[Install]
+WantedBy=multi-user.target
+```
+Wieder bestätigen mit Strg X.<br/>
+Um den Service zu Nutzen muss das Ganze neu geladen werden:
+```console
+sudo systemctl daemon-reload 
+```
+Danach kann der Service so gestartet:
+```console
+sudo systemctl start kritis-elfe
+```
+, so gestoppt:
+```console
+sudo systemctl stop kritis-elfe
+```
+, so neu gestartet:
+```console
+sudo systemctl restart kritis-elfe
+```
+und so der Status abgefragt werden:
+```console
+sudo systemctl status kritis-elfe
+```
+Wenn der Service nun gestartet wird, sollte nach ca. 2 Minuten die Webanwendung erreichbar sein.
+
+### Delpoy Skript
+Um das Aufnehmen von Änderungen von GitHub einfacher zu gestalten, sollte ein deploy Skript erzeugt werden:
+```console
+sudo nano /var/KRITIS-ELFe/deploy.sh
+```
+In diesem Skript wird der Service gestoppt, die alte JAR gelöscht, die JAR neu heruntergeladen und der Service wieder gestartet:
+```bash
+systemctl stop kritis-elfe
+rm /var/KRITIS-ELFe/KRITIS-ELFe.jar
+wget -O /var/KRITIS-ELFe/KRITIS-ELFe.jar https://github.com/leonxs2001/KRITIS-ELFe/raw/master/KRITIS-ELFe/target/KRITIS_ELFe-0.0.1-SNAPSHOT.jar
+systemctl start kritis-elfe
+```
+Und das Ganze bestätigen mit Strg X.
+Ausführrechte geben:
+```console 
+sudo chmod ugo+x /var/KRITIS-ELFe/deploy.sh
+```
+Ausgeführt werden kann diese Datei dann mit:
+```console
+sudo /var/KRITIS-ELFe/deploy.sh
+```
