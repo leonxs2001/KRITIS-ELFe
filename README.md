@@ -74,11 +74,11 @@ server.error.whitelabel.enabled = false
 server.port=8080
 
 #set path for help pdf
-kritiselfe.helpPath = /var/KRITIS-ELFe/help
+kritiselfe.helpPath=/var/KRITIS-ELFe/help
 
 #set domainname
 # should end with /
-kritiselfe.url = <url>
+kritiselfe.url=<url>
 
 #mail
 spring.mail.host=<host>
