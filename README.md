@@ -77,6 +77,7 @@ server.port=8080
 kritiselfe.helpPath = /var/KRITIS-ELFe/help
 
 #set domainname
+# should end with /
 kritiselfe.url = <url>
 
 #mail
@@ -88,5 +89,37 @@ spring.mail.properties.mail.smtp.auth=<true, wenn mit passwort>
 spring.mail.properties.mail.smtp.starttls.enable=true
 ```
 Bestätigt werden kann das ganze mit Strg X (und dann noch zustimmen).<br/>
-Tets
+Um die Anwendung testweise zu starten wird der folgende Befehl ausgeführt:
+```console
+java -jar /var/KRITIS-ELFe/KRITIS-ELFe.jar --spring.config.location="/var/KRITIS-ELFe/application.properties"
+```
+Wenn die JAR-Datei ohne Fehler ausgeführt werden kann, dann ist die Datenbank und die application.properties richtig konfiguriert. Die Anwendung kann dann erst einmal mit Strg C geschlossen werden.
+### NGINX konfiguration
+Um die Anwendung von außen erreichbar zu machen muss jede HTTP Anfrage witergeleitet werden an die Anwendung über nginx. <br/>
+Zu erst muss nginx installiert werden:
+```console
+sudo apt-get install nginx
+```
+Dann muss das weiterleiten konfiguriert werden. Dafür wird die Konfigurationsdatei aufgerufen:
+```console
+sudo nano /etc/nginx/sites-available/default
+```
+Und folgende Konfiguration eingefügt:
+```console
+server {
+    listen 80 default_server;
+    listen [::]:80 default_server;
 
+    server_name _ your_domain;
+
+    location / {
+            proxy_pass http://localhost:8080;
+            proxy_http_version 1.1;
+            proxy_set_header Upgrade $http_upgrade;
+            proxy_set_header Connection 'upgrade';
+            proxy_set_header Host $host;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_cache_bypass $http_upgrade;
+    }
+}
+``
