@@ -64,16 +64,20 @@ public class AdminController {
     @PostMapping("/hilfe/bearbeiten")
     public String uploadNewHelpDocument(@RequestParam("file") MultipartFile file){
         try {
-            documentService.savePDFFile(file, kritisElfeReader.getHelpPath() + "help.pdf");
+            String path = kritisElfeReader.getHelpPath();
+            if(path.charAt(path.length() - 1) != '/'){
+                path += "/";
+            }
+            documentService.savePDFFile(file, path + "help.pdf");
         }catch (IOException e){
-            return "redirect:hilfe/bearbeiten?io_error";
+            return "redirect:/hilfe/bearbeiten?io_error";
         }catch (EmptyFileException e){
-            return "redirect:hilfe/bearbeiten?empty_error";
+            return "redirect:/hilfe/bearbeiten?empty_error";
         }catch (WrongContentTypeException e){
-            return "redirect:hilfe/bearbeiten?wrong_type_error";
+            return "redirect:/hilfe/bearbeiten?wrong_type_error";
         }
 
-        return "redirect:hilfe/bearbeiten?success";
+        return "redirect:/hilfe/bearbeiten?success";
     }
 
     @GetMapping("/ressorts")

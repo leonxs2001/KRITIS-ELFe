@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
+import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.file.Files;
@@ -40,6 +41,8 @@ public class DocumentService {
             throw new WrongContentTypeException("The File is not a pdf file.");
         }
         byte[] bytes = file.getBytes();
+        File yourFile = new File(pathString);
+        yourFile.createNewFile();
         Path path = Paths.get(pathString);
         Files.write(path, bytes);
     }
