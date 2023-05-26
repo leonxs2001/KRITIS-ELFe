@@ -132,8 +132,8 @@ server {
             proxy_cache_bypass $http_upgrade;
     }
 }
-
 ```
+Wenn es noch kein SSL Zertifikat gibt, dann muss eines generiert werden. Nähere Infos dazu gibt es unter folgendem Link: https://www.digitalocean.com/community/tutorials/how-to-secure-nginx-with-let-s-encrypt-on-ubuntu-20-04.
 ### Service erstellen
 Um einen Service zu erstellen muss erste eine Servicedatei eruegt werden:
 ```console:
