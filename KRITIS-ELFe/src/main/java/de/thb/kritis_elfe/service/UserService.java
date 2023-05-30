@@ -179,7 +179,7 @@ public class UserService {
                 userConfirmation(token);
 
                 //send link to admin
-                String adminLink = kritisElfeReader.getUrl() + "/bestätigung/geschäftsstelle?token=" + token;
+                String adminLink = kritisElfeReader.getUrl() + "bestätigung/geschäftsstelle?token=" + token;
                 User user = confirmationToken.getUser();
 
                 for (User officeUser : getUserByOfficeRole()) {
