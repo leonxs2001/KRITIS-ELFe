@@ -47,7 +47,7 @@ public class SituationController {
     public String submitQuestionnaire(@ModelAttribute("questionnaire") Questionnaire questionnaire,
                                       @PathVariable String name, Authentication authentication) throws AccessDeniedException, EntityDoesNotExistException, UnsupportedEncodingException {
         questionnaireService.saveQuestionnaireFromForm(questionnaire, name, userService.getUserByUsername(authentication.getName()));
-        return "redirect:/lagebericht/" + URLEncoder.encode(name, "UTF-8");
+        return "redirect:/lagebericht/" + URLEncoder.encode(name, "UTF-8") + "?success";
     }
 
     @PostMapping("/lagebericht/{name}")

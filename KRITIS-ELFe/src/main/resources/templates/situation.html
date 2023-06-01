@@ -73,6 +73,8 @@
     </form>
 
     <form id="situation-form" th:action="${'/lagebericht/form/'+name}" th:object="${questionnaire}" method="post">
+        <div th:if="${param.success}"
+             class="alert alert-success success-error-message" role="alert">Ihre Eingabe wurde erfolgreich hochgeladen und gespeichert.</div>
         <input type="hidden" th:field="*{id}">
         <th:block th:each="branchQuestionnaire, iter1: *{branchQuestionnaires}"
                   th:with="isSectorChanged=${sectorChangeDetector.isSectorChanged(branchQuestionnaire.getBranch().getSector())},
